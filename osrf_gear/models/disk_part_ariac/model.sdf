@@ -39,13 +39,13 @@
          <geometry>
            <mesh>
              <scale>0.4 0.4 0.4</scale>
-             <uri>model://disk_part/meshes/disk.dae</uri>
+             <uri>model://disk_part_ariac/meshes/disk.dae</uri>
            </mesh>
          </geometry>
         <material>
           <script>
-            <uri>model://arm_part/materials/scripts</uri>
-            <uri>model://arm_part/materials/textures</uri>
+            <uri>model://arm_part_ariac/materials/scripts</uri>
+            <uri>model://arm_part_ariac/materials/textures</uri>
             <name>ArmPart/Diffuse</name>
           </script>
         </material>
