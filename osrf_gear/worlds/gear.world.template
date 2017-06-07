@@ -48,7 +48,7 @@
 
     <!-- the workcell -->
     <include>
-      <uri>model://workcell</uri>
+      <uri>model://workcell_ariac</uri>
       <pose>0 0 0 0 0 1.57</pose>
     </include>
 
