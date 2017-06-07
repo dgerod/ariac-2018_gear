@@ -55,6 +55,9 @@ namespace gazebo
 
     /// \brief Pose where the object will be teleported.
     protected: math::Pose disposalPose;
+
+    /// \brief How many models have been removed.
+    protected: int numRemovedModels = 0;
   };
 }
 #endif
