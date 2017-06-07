@@ -596,7 +596,7 @@
 
     <!-- Plane under the workcell on which 'removed' models can be placed -->
     <model name="under_workcell_plane">
-      <pose>0 0 -2 0 0 0</pose>
+      <pose>0 0 -1.1 0 0 0</pose>
       <static>true</static>
       <link name="link">
         <collision name="collision">
