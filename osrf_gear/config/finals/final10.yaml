@@ -1,3 +1,9 @@
+# In this scenario:
+# - there is one order consisting of two parts that are in both the bins and the
+#   belt.
+# - parts will drop over the bins.
+# - re-using dropped parts over the bins means parts from the belt don't need to be used.
+
 # Competition configuration options
 options:
   insert_models_over_bins: true     # Whether or not to insert the models that are specified in models_over_bins

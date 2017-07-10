@@ -1,8 +1,9 @@
 # In this scenario:
-# - the conveyor belt is used
+# - the conveyor belt is used.
 # - there is one order consisting of two parts that are in both the bins and the
-#   belt. While taking the parts from the bins, they'll drop but still they
-#   should be easier to grab compared with the same parts from the belt.
+#   belt.
+# - parts will drop over the bins.
+# - re-using dropped parts over the bins means parts from the belt don't need to be used.
 
 options:
   insert_models_over_bins: true

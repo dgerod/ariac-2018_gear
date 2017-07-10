@@ -1,3 +1,7 @@
+# In this scenario:
+# - there is one order of two kits.
+# - an unreachale drop makes the order impossible to complete.
+
 # Competition configuration options
 options:
   insert_models_over_bins: true     # Whether or not to insert the models that are specified in models_over_bins

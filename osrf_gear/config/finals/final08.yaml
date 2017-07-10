@@ -1,3 +1,9 @@
+# In this scenario:
+# - there is one order of two kits.
+# - a part in the bins gets dropped.
+# - a part dropped over AGV1 must be re-positioned in the tray for full points.
+# - a part dropped off AGV2 must be replaced for full points.
+
 # Competition configuration options
 options:
   insert_models_over_bins: true     # Whether or not to insert the models that are specified in models_over_bins

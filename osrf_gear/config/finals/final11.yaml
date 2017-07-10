@@ -1,7 +1,6 @@
 # In this scenario:
 # - There are two orders of one tray each:
-#   - The second will interrupt the first at a time that is convenient for the second order.
-#   - Teams can choose to re-purpose the parts in the tray for the new order.
+#   - The second will interrupt the first at a time that is inconvenient for the second order.
 #   - After the second order is complete, the first order is to be resumed.
 # - The first order contains parts that are close to AGV1.
 # - The second order contains parts that are close to AGV2.

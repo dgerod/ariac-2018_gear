@@ -1,9 +1,9 @@
 # In this scenario:
 # - There are two orders of one tray each:
 #   - The second will interrupt the first at a time that is convenient for the second order.
+#   - The second order contains mostly parts that can be reused from the first order.
 #   - Teams can choose to re-purpose the parts in the tray for the new order.
 #   - After the second order is complete, the first order is to be resumed.
-# - The second order contains parts that can be reused from the first order.
 # - There are no faulty parts.
 # - The belt is not used.
 # - There's no need to flip any part.

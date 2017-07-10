@@ -1,8 +1,8 @@
 # In this scenario:
-# - There is one order of two kits:
-# - There are faulty parts.
-# - The belt is used and objects appear faster than usual.
-# - There's need to flip some part.
+# - there is one order of two kits.
+# - there are faulty parts.
+# - the belt is used and objects appear faster than usual.
+# - there's need to flip some part.
 
 options:
   insert_models_over_bins: true
