@@ -1,4 +1,9 @@
 <launch>
+  <arg name="no_gui" default="false" />
+  <arg unless="$(arg no_gui)" name="gui_args" value="" />
+  <arg     if="$(arg no_gui)" name="gui_args" value="--no-gui" />
+
   <node name="ariac_sim" pkg="osrf_gear" type="gear.py"
-        args="--development-mode -f $(find osrf_gear)/config/sample.yaml" output="screen"/>
+        args="--development-mode $(arg gui_args) -f $(find osrf_gear)/config/sample.yaml" output="screen" />
+
 </launch>
