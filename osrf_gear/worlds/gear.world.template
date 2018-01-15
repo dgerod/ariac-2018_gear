@@ -48,7 +48,7 @@
 
     <!-- the workcell -->
     <include>
-      <uri>model://workcell</uri>
+      <uri>model://workcell_ariac</uri>
       <pose>0 0 0 0 0 1.57</pose>
     </include>
 
@@ -301,16 +301,18 @@
 @{belt_parts_loop = True}@
 @{belt_population_cycles = options['belt_population_cycles'] if belt_parts_loop else 1}
 
+@{obj_type_index = 0}@
 @[for obj_type, spawn_times in belt_parts.items()]@
     <!-- Pool of @(obj_type) objects -->
 @[  for index in range(belt_population_cycles * len(spawn_times))]@
     <include>
       <uri>model://@(obj_type)_ariac</uri>
       <name>populate_conveyor|@(obj_type)_clone_@(index)</name>
-      <pose>-16.5 @(-3 + 0.2 * index) 2.1 0 0 0</pose>
+      <pose>@(7.5 + 0.25 * obj_type_index) @(-9.8 + 0.25 * index) 2.1 0 0 0</pose>
     </include>
 
 @[  end for]@
+@{obj_type_index += 1}@
 @[end for]@
 
 @[if options['insert_agvs']]@
@@ -591,6 +593,30 @@
       </material_locations>
 
     </plugin>
+
+    <!-- Plane under the workcell on which 'removed' models can be placed -->
+    <model name="under_workcell_plane">
+      <pose>0 0 -1.1 0 0 0</pose>
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>20 20</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>50</mu2>
+              </ode>
+            </friction>
+          </surface>
+        </collision>
+      </link>
+    </model>
 
 @[if options['fill_demo_tray'] and orders]@
 @{
