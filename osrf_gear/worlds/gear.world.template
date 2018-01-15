@@ -303,21 +303,14 @@
 
 @[for obj_type, spawn_times in belt_parts.items()]@
     <!-- Pool of @(obj_type) objects -->
-    <population name="@(obj_type)_population">
-      <model name="populate_conveyor|@(obj_type)">
-        <include>
-          <uri>model://@(obj_type)_ariac</uri>
-        </include>
-      </model>
-      <pose>-16.5 -3 2.1 0 0 0</pose>
-      <distribution>
-        <type>grid</type>
-        <rows>@(belt_population_cycles * len(spawn_times))</rows>
-        <cols>1</cols>
-        <step>0.2 0.2 0</step>
-      </distribution>
-    </population>
+@[  for index in range(belt_population_cycles * len(spawn_times))]@
+    <include>
+      <uri>model://@(obj_type)_ariac</uri>
+      <name>populate_conveyor|@(obj_type)_clone_@(index)</name>
+      <pose>-16.5 @(-3 + 0.2 * index) 2.1 0 0 0</pose>
+    </include>
 
+@[  end for]@
 @[end for]@
 
 @[if options['insert_agvs']]@
