@@ -10,12 +10,12 @@ orders:
     announcement_condition_value: 0.0
     parts:
       part_0:
-        type: piston_rod_part
+        type: part4
         pose:
           xyz: [0.1, 0, 0]
           rpy: [0, 0, 0]
       part_1:
-        type: piston_rod_part
+        type: part4
         pose:
           xyz: [-0.1, 0, 0]
           rpy: [0, 0, 'pi']
