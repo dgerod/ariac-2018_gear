@@ -319,7 +319,7 @@
       </include>
 
     <!-- add a link that is sensing collisions (the bottom of the box) -->
-    <link name="bottom_link">
+    <link name="box_base">
       <pose frame=''>0 0 0.01 0 0 0</pose>
       <gravity>false</gravity>
       <collision name="box_collision">
@@ -357,8 +357,8 @@
     </link>
 
     <!-- create a joint to the link that is the one sensing collisions -->
-    <joint name="joint_link_bottom_link" type="fixed">
-      <parent>bottom_link</parent>
+    <joint name="joint_link_box_base" type="fixed">
+      <parent>box_base</parent>
       <child>box_@(str(index))::link</child>
     </joint>
 
@@ -388,10 +388,10 @@
 @[end for]@
 
 @[if options['insert_agvs']]@
-@[for agv_id in [1,2]]@
+@[for agv_id in [1]]@
     <!-- AGV@(str(agv_id)) -->
     <model name="agv@(str(agv_id))">
-      <pose>0.3 @(3.3 if agv_id == 1 else -3.3) 0 0 0 @(3.14159 if agv_id == 1 else 0)</pose>
+      <pose>-1.4 -9.4 4.3 0 0 1.5707</pose>
       <include>
         <name>agv@(str(agv_id))</name>
         <uri>model://drone</uri>
