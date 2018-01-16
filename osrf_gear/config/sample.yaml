@@ -6,7 +6,7 @@ options:
   belt_population_cycles: 4
 
 belt_parts:
-  open_box:
+  shipping_box:
     9.0:
       pose:
         xyz: [0.0, 0.0, 0.1]
