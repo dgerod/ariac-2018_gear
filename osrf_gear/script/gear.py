@@ -61,18 +61,20 @@ default_belt_parts = {
        }
      },
 }
-default_bin_origins = {
-    'bin1': [-1.0, -1.33, 0],
-    'bin2': [-1.0, -0.535, 0],
-    'bin3': [-1.0, 0.23, 0],
-    'bin4': [-1.0, 0.995, 0],
-    'bin5': [-0.3, -1.33, 0],
-    'bin6': [-0.3, -0.535, 0],
-    'bin7': [-0.3, 0.23, 0],
-    'bin8': [-0.3, 0.995, 0],
-}
-bin_width = 0.6
+n_bins = 10
+bin1_x = 2.2
+bin1_y = -2.3
+binN_x = 2.2
+binN_y = 2.3
+bin_width = 0.15
 bin_height = 0.72
+bin_angle = -0.25
+default_bin_origins = {
+'bin{0}'.format(n): [
+   bin1_x + (binN_x - bin1_x)/n_bins*n,
+   bin1_y + (binN_y - bin1_y)/n_bins*n,
+   bin_height] for n in range(1, n_bins+1)}
+
 configurable_options = {
     'insert_agvs': True,
     'insert_models_over_bins': False,
@@ -386,7 +388,7 @@ def create_faulty_parts_info(faulty_parts_dict):
 def create_bin_infos():
     bin_infos = {}
     for bin_name, xyz in default_bin_origins.items():
-        bin_infos[bin_name] = PoseInfo(xyz, [0, 0, 1.5708])
+        bin_infos[bin_name] = PoseInfo(xyz, [0, bin_angle, 0])
     return bin_infos
 
 
