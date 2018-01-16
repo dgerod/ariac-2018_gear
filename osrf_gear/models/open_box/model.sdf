@@ -1,8 +1,12 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
   <model name="open_box">
-    <static>true</static>
+    <static>false</static>
     <link name="link">
+      <gravity>true</gravity>
+<inertial>
+      <mass>100</mass>
+</inertial>
       <collision name="collision">
         <geometry>
           <mesh>

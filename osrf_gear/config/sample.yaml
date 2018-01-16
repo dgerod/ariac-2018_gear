@@ -3,15 +3,11 @@
 options:
   insert_models_over_bins: true
   fill_demo_tray: false
+  belt_population_cycles: 4
 
 belt_parts:
-  piston_rod_part:
-    3.0:
-      pose:
-        xyz: [0.0, 0.0, 0.1]
-        rpy: [0, 0, 'pi/2']
-  part4:
-    6.0:
+  open_box:
+    9.0:
       pose:
         xyz: [0.0, 0.0, 0.1]
         rpy: [0, 0, 'pi/2']
@@ -39,8 +35,8 @@ models_over_bins:
         xyz_start: [0.1, 0.1, 0.0]
         xyz_end: [0.5, 0.5, 0.0]
         rpy: [0, 0, 'pi/4']
-        num_models_x: 3
-        num_models_y: 4
+        num_models_x: 1
+        num_models_y: 1
 
 faulty_parts:
   - piston_rod_part_5  # this part gets spawned manually in the tutorial
