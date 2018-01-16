@@ -74,6 +74,8 @@ namespace gazebo
     protected: void PublishKitMsg();
 
     /// \brief Service for locking the models to the tray and disabling updates
+    protected: bool HandleLockModelsService(
+      ros::ServiceEvent<std_srvs::Trigger::Request, std_srvs::Trigger::Response>& event);
     protected: void HandleLockModelsRequest(ConstGzStringPtr &_msg);
 
     /// \brief Service for clearing the tray

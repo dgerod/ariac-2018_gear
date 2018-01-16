@@ -98,6 +98,9 @@ void KitTrayPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     lockModelsServiceName = _sdf->Get<std::string>("lock_models_service_name");
   this->lockModelsSub = this->gzNode->Subscribe(
     lockModelsServiceName, &KitTrayPlugin::HandleLockModelsRequest, this);
+  // ROS service for locking the tray
+  this->lockModelsServer =
+    this->rosNode->advertiseService(lockModelsServiceName, &KitTrayPlugin::HandleLockModelsService, this);
 }
 
 /////////////////////////////////////////////////
@@ -264,6 +267,31 @@ void KitTrayPlugin::LockContactingModels()
   this->fixedJoints.push_back(fixedJoint);
   model->SetAutoDisable(true);
   }
+}
+
+/////////////////////////////////////////////////
+bool KitTrayPlugin::HandleLockModelsService(
+  ros::ServiceEvent<std_srvs::Trigger::Request, std_srvs::Trigger::Response>& event)
+{
+  std_srvs::Trigger::Response& res = event.getResponse();
+
+  const std::string& callerName = event.getCallerName();
+  gzdbg << this->trayID << ": Handle lock models service called by: " << callerName << std::endl;
+
+  // During the competition, this environment variable will be set.
+  auto compRunning = std::getenv("ARIAC_COMPETITION");
+  if (compRunning && callerName.compare("/gazebo") != 0)
+  {
+    std::string errStr = "Competition is running so this service is not enabled.";
+    gzerr << errStr << std::endl;
+    ROS_ERROR_STREAM(errStr);
+    res.success = false;
+    return true;
+  }
+
+  this->LockContactingModels();
+  res.success = true;
+  return true;
 }
 
 /////////////////////////////////////////////////
