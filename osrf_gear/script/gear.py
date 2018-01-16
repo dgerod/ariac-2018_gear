@@ -52,6 +52,15 @@ sensor_configs = {
     'logical_camera': None,
     'laser_profiler': None,
 }
+default_belt_parts = {
+    'shipping_box': {
+      5.0: {
+        'pose': {
+           'xyz': [0.0, 0.0, 0.1]
+         }
+       }
+     },
+}
 default_bin_origins = {
     'bin1': [-1.0, -1.33, 0],
     'bin2': [-1.0, -0.535, 0],
@@ -69,7 +78,7 @@ configurable_options = {
     'insert_models_over_bins': False,
     'disable_shadows': False,
     'fill_demo_tray': False,
-    'belt_population_cycles': 1,
+    'belt_population_cycles': 5,
     'gazebo_state_logging': False,
     'spawn_extra_models': False,
     'unthrottled_physics_update': False,
@@ -416,7 +425,7 @@ def prepare_template_data(config_dict, args):
         'sensors': {},
         'models_to_insert': {},
         'models_to_spawn': {},
-        'belt_parts': {},
+        'belt_parts': create_belt_part_infos(default_belt_parts),
         'faulty_parts': {},
         'drops': {},
         'orders': {},

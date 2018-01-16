@@ -3,14 +3,6 @@
 options:
   insert_models_over_bins: true
   fill_demo_tray: false
-  belt_population_cycles: 4
-
-belt_parts:
-  shipping_box:
-    9.0:
-      pose:
-        xyz: [0.0, 0.0, 0.1]
-        rpy: [0, 0, 'pi/2']
 
 orders:
   order_0:
