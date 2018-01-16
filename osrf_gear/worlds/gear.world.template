@@ -4,7 +4,7 @@
     <!-- Set the initial camera pose to be looking at the workspace. -->
     <gui>
       <camera name="user_camera">
-        <pose>-4.33 1.88 6.11 0 0.9 -0.27</pose>
+        <pose>10.0 -5.3 9.6 0 0.72 2.64</pose>
       </camera>
     </gui>
 

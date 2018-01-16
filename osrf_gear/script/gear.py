@@ -62,9 +62,9 @@ default_belt_parts = {
      },
 }
 n_bins = 10
-bin1_x = 2.2
+bin1_x = -1.2
 bin1_y = -2.3
-binN_x = 2.2
+binN_x = -1.2
 binN_y = 2.3
 bin_width = 0.15
 bin_height = 0.72
@@ -388,7 +388,7 @@ def create_faulty_parts_info(faulty_parts_dict):
 def create_bin_infos():
     bin_infos = {}
     for bin_name, xyz in default_bin_origins.items():
-        bin_infos[bin_name] = PoseInfo(xyz, [0, bin_angle, 0])
+        bin_infos[bin_name] = PoseInfo(xyz, [0, bin_angle, 3.14159])
     return bin_infos
 
 
