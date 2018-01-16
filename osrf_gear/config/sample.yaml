@@ -23,7 +23,7 @@ orders:
 models_over_bins:
   bin7:
     models:
-      piston_rod_part:
+      part4:
         xyz_start: [0.1, 0.1, 0.0]
         xyz_end: [0.5, 0.5, 0.0]
         rpy: [0, 0, 'pi/4']
