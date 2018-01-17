@@ -26,6 +26,12 @@
       <uri>model://sun</uri>
     </include>
 
+    <!-- Placeholder for out chute for boxes at the end of the conveyor -->
+    <include>
+      <uri>model://out_chute</uri>
+      <pose>1.15 -5.2 -0.25 0 0 0</pose>
+    </include>
+
     <!-- A directed light source -->
     <light name="camera_spot_light" type='spot'>
       <pose>-10 10 10 0 -1 -0.8</pose>
