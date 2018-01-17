@@ -60,8 +60,8 @@ namespace gazebo
     /// \brief Transportation node.
     public: transport::NodePtr gzNode;
 
-    /// \brief Gazebo publish for locking parts to this AGV's tray
-    public: transport::PublisherPtr lockTrayModelsPub;
+    /// \brief Gazebo publish for toggling box visual visibility.
+    public: transport::PublisherPtr toggleBoxVisualPub;
 
     /// \brief Client for clearing this AGV's tray
     public: ros::ServiceClient rosClearTrayClient;
@@ -174,8 +174,8 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   // Initialize Gazebo transport
   this->dataPtr->gzNode = transport::NodePtr(new transport::Node());
   this->dataPtr->gzNode->Init();
-  this->dataPtr->lockTrayModelsPub =
-    this->dataPtr->gzNode->Advertise<msgs::GzString>(lockTrayServiceName);
+  this->dataPtr->toggleBoxVisualPub =
+    this->dataPtr->gzNode->Advertise<msgs::GzString>("~/drone_box_visual_toggle");
 
   double speedFactor = 0.8;
   this->dataPtr->collectTrayAnimation.reset(
@@ -259,11 +259,6 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
     if (currentSimTime - this->dataPtr->deliveryTriggerTime > 0.75)
     {
 /*
-      // Make a request to lock the models to the tray
-      gazebo::msgs::GzString lock_msg;
-      lock_msg.set_data("lock");
-      this->dataPtr->lockTrayModelsPub->Publish(lock_msg);
-
       // Make a service call to submit the tray for inspection.
       // Do this before animating and clearing the AGV in case the assigned
       // goal changes as the AGV is moving.
@@ -309,6 +304,11 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
   }
   if (this->dataPtr->currentState == "collected")
   {
+      // Toggle the box visual.
+      gazebo::msgs::GzString msg;
+      msg.set_data("");
+      this->dataPtr->toggleBoxVisualPub->Publish(msg);
+
 /*
     // Report the result of the previously-performed tray inspection.
     if (this->dataPtr->inspectionResult < 0)
@@ -351,8 +351,16 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
     if (returnAnimationDone)
     {
       gzdbg << "Return animation finished." << std::endl;
-      this->dataPtr->currentState = "ready_to_collect";
+      this->dataPtr->currentState = "returned";
     }
+  }
+  if (this->dataPtr->currentState == "returned")
+  {
+      // Toggle the box visual.
+      gazebo::msgs::GzString msg;
+      msg.set_data("");
+      this->dataPtr->toggleBoxVisualPub->Publish(msg);
+      this->dataPtr->currentState = "ready_to_collect";
   }
   std_msgs::String stateMsg;
   stateMsg.data = this->dataPtr->currentState;
