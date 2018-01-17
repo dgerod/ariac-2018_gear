@@ -602,6 +602,7 @@
       <rate_modifier_topic>/ariac/population/rate_modifier</rate_modifier_topic>
       <control_topic>/ariac/population/control</control_topic>
       <state_topic>/ariac/population/state</state_topic>
+      <start_index>1</start_index>
       <loop_forever>@("true" if belt_parts_loop else "false")</loop_forever>
       <frame>conveyor_belt::conveyor_belt_fixed</frame>
       <object_sequence>
