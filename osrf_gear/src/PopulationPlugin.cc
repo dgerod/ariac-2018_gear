@@ -354,7 +354,7 @@ void PopulationPlugin::OnUpdate()
     int index = this->dataPtr->objectCounter[obj.type];
 
     // Get a unique name for the object.
-    modelName += "_clone_" + std::to_string(index);
+    modelName += "_" + std::to_string(index);
     auto modelPtr = this->dataPtr->world->GetModel(modelName);
     if (modelPtr)
     {
