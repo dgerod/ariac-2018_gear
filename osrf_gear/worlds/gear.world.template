@@ -769,10 +769,11 @@ order_name, order = orders.items()[0]
 count = {}
 }@
     <!-- Populate kit tray with order parts -->
-    <plugin filename="libPopulationPlugin.so" name="populate_kit_tray_1">
+    <plugin filename="libPopulationPlugin.so" name="populate_box_0">
       <activation_topic>/ariac/populate_belt</activation_topic>
       <loop_forever>false</loop_forever>
-      <frame>agv1::kit_tray_1::kit_tray_1::tray</frame>
+      <prefix_object_names>true</prefix_object_names>
+      <frame>shipping_box_0::box_base</frame>
       <object_sequence>
 @[for part in order['parts']]@
         <object>
@@ -793,7 +794,7 @@ except:
     id = 0
 }@
     <include>
-      <name>populate_kit_tray_1|@(part.type)_@(id)</name>
+      <name>populate_box_0|@(part.type)_@(id)</name>
       <uri>model://@(part.type)_ariac</uri>
       <pose>-7.5 -3 2.1 0 0 0</pose>
     </include>
