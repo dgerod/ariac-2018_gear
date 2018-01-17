@@ -295,6 +295,7 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
   }
   if (this->dataPtr->currentState == "collecting")
   {
+/*
     // Wait until AGV is away from potential user interference
     if (!this->dataPtr->gravityDisabled && this->dataPtr->collectTrayAnimation->GetTime() >= 0.5)
     {
@@ -303,6 +304,7 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
       this->dataPtr->model->SetGravityMode(false);
       this->dataPtr->gravityDisabled = true;
     }
+*/
     bool collectTrayAnimationDone = this->dataPtr->collectTrayAnimation->GetTime() >= \
       this->dataPtr->collectTrayAnimation->GetLength();
     if (collectTrayAnimationDone)
@@ -313,6 +315,11 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
   }
   if (this->dataPtr->currentState == "collected")
   {
+      // Disable the deletion pad again so new boxes arriving don't get deleted.
+      gazebo::msgs::GzString activateMsg;
+      activateMsg.set_data("deactivate");
+      this->dataPtr->clearBoxesPub->Publish(activateMsg);
+
       // Toggle the box visual.
       gazebo::msgs::GzString msg;
       msg.set_data("");
