@@ -298,13 +298,6 @@
 @[end if]@
 @[end for]@
 
-    <!-- a wall to delete objects at the end of the belt -->
-    <include>
-      <uri>model://deletion_wall</uri>
-      <pose>1.2 -4.1 1.51 0 0 0</pose>
-    </include>
-
-
     <!-- start with a box on the belt -->
     <model name="shipping_box_0">
       <pose>1.21 5 0.95 0 0 0</pose>
