@@ -314,7 +314,7 @@
       <static>false</static>
       <!-- include box with contact sensor -->
       <include>
-        <name>box_@(str(index))</name>
+        <name>shipping_box</name>
         <uri>model://open_box</uri>
       </include>
 
@@ -359,7 +359,7 @@
     <!-- create a joint to the link that is the one sensing collisions -->
     <joint name="joint_link_box_base" type="fixed">
       <parent>box_base</parent>
-      <child>box_@(str(index))::link</child>
+      <child>shipping_box::link</child>
     </joint>
 
     <!-- plugin for processing contact sensor output -->
