@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="drone">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://drone/meshes/drone.obj</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://drone/meshes/drone.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name="box_visual">
+        <pose>0 0 -0.1 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1.0 1.0 0.25</scale>
+            <uri>model://closed_box/meshes/closed_box.obj</uri>
+          </mesh>
+        </geometry>
+        <plugin name="toggle" filename="libToggleVisualPlugin.so">
+          <initially_visible>false</initially_visible>
+          <topic>~/drone_box_visual_toggle</topic>
+        </plugin>
+      </visual>
+    </link>
+  </model>
+</sdf>

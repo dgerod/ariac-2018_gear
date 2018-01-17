@@ -109,6 +109,19 @@ install(TARGETS ${ros_vacuum_gripper_plugin_name}
   RUNTIME DESTINATION bin)
 
 
+# Create the libToggleVisualPlugin.so library.
+set(toggle_visual_plugin_name ToggleVisualPlugin)
+add_library(${toggle_visual_plugin_name} src/ToggleVisualPlugin.cc)
+target_link_libraries(${toggle_visual_plugin_name}
+  ${GAZEBO_LIBRARIES}
+)
+install(TARGETS ${toggle_visual_plugin_name}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+
 # Create the libSideContactPlugin.so library.
 set(side_contact_plugin_name SideContactPlugin)
 add_library(${side_contact_plugin_name} src/SideContactPlugin.cc)

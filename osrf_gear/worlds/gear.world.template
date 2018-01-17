@@ -394,7 +394,7 @@
       <pose>-1.4 -9.4 4.3 0 0 1.5707</pose>
       <include>
         <name>agv@(str(agv_id))</name>
-        <uri>model://drone</uri>
+        <uri>model://drone_with_box</uri>
       </include>
       <plugin name="agv_plugin" filename="libROSAGVPlugin.so">
         <submit_tray_service_name>/ariac/submit_tray</submit_tray_service_name>
