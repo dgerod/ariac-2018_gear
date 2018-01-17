@@ -283,19 +283,6 @@ install(TARGETS ${object_disposal_plugin_name}
   RUNTIME DESTINATION bin
 )
 
-# Create the libLockModelsTriggerPlugin.so library.
-set(lock_models_trigger_plugin_name LockModelsTriggerPlugin)
-add_library(${lock_models_trigger_plugin_name} src/LockModelsTriggerPlugin.cc)
-target_link_libraries(${lock_models_trigger_plugin_name}
-  ${GAZEBO_LIBRARIES}
-  ${side_contact_plugin_name}
-)
-install(TARGETS ${lock_models_trigger_plugin_name}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-
 # Create the libROSAriacKitTrayPlugin.so library.
 set(kit_tray_plugin_name ROSAriacKitTrayPlugin)
 add_library(${kit_tray_plugin_name} src/ROSAriacKitTrayPlugin.cc)

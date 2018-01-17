@@ -298,9 +298,9 @@
 @[end if]@
 @[end for]@
 
-    <!-- a wall to trigger that boxes lock their models before going down the chute-->
+    <!-- a wall to delete objects at the end of the belt -->
     <include>
-      <uri>model://lock_models_trigger</uri>
+      <uri>model://deletion_wall</uri>
       <pose>1.2 -4.1 1.51 0 0 0</pose>
     </include>
 
