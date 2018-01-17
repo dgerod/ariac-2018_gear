@@ -26,6 +26,13 @@
       <uri>model://sun</uri>
     </include>
 
+    <!-- Pad to delete boxes at the end of the belt -->
+    <include>
+      <name>deletion_pad</name>
+      <uri>model://deletion_wall</uri>
+      <pose>1.15 -5.4 0.58 0 1.5707 0</pose>
+    </include>
+
     <!-- Placeholder for out chute for boxes at the end of the conveyor -->
     <include>
       <uri>model://out_chute</uri>

@@ -60,8 +60,11 @@ namespace gazebo
     /// \brief Transportation node.
     public: transport::NodePtr gzNode;
 
-    /// \brief Gazebo publish for toggling box visual visibility.
+    /// \brief Gazebo publisher for toggling box visual visibility.
     public: transport::PublisherPtr toggleBoxVisualPub;
+
+    /// \brief Gazebo publisher for removing boxes.
+    public: transport::PublisherPtr clearBoxesPub;
 
     /// \brief Client for clearing this AGV's tray
     public: ros::ServiceClient rosClearTrayClient;
@@ -148,8 +151,8 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   }
 
   this->dataPtr->agvName = std::string("agv") + index;
-  this->dataPtr->trayLinkName =
-    this->dataPtr->agvName + "::kit_tray_" + index + "::kit_tray_" + index + "::tray";
+  this->dataPtr->trayLinkName = "shipping_box_0::box_base";
+    //this->dataPtr->agvName + "::kit_tray_" + index + "::kit_tray_" + index + "::tray";
 
   std::string agvControlTopic = "/ariac/" + this->dataPtr->agvName;
   ROS_DEBUG_STREAM("Using AGV control service topic: " << agvControlTopic);
@@ -176,6 +179,8 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->dataPtr->gzNode->Init();
   this->dataPtr->toggleBoxVisualPub =
     this->dataPtr->gzNode->Advertise<msgs::GzString>("~/drone_box_visual_toggle");
+  this->dataPtr->clearBoxesPub =
+    this->dataPtr->gzNode->Advertise<msgs::GzString>("/ariac/deletion_pad/activate");
 
   double speedFactor = 0.8;
   this->dataPtr->collectTrayAnimation.reset(
@@ -256,13 +261,10 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
   if (this->dataPtr->currentState == "preparing_to_collect")
   {
       // Toggle the box visual.
-      gazebo::msgs::GzString msg;
-      msg.set_data("");
-      this->dataPtr->toggleBoxVisualPub->Publish(msg);
-/*
-    // Wait a bit to ensure the models have been detected by the kit tray's plugin
-    if (currentSimTime - this->dataPtr->deliveryTriggerTime > 0.75)
-    {
+      gazebo::msgs::GzString toggleMsg;
+      toggleMsg.set_data("");
+      this->dataPtr->toggleBoxVisualPub->Publish(toggleMsg);
+
       // Make a service call to submit the tray for inspection.
       // Do this before animating and clearing the AGV in case the assigned
       // goal changes as the AGV is moving.
@@ -279,8 +281,11 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
       {
         this->dataPtr->inspectionResult = submit_srv.response.inspection_result;
       }
-    }
-*/
+      
+      // Dispose of the real box in favour of a dummy one.
+      gazebo::msgs::GzString activateMsg;
+      activateMsg.set_data("activate");
+      this->dataPtr->clearBoxesPub->Publish(activateMsg);
 
       // Trigger the tray delivery animation
       this->dataPtr->collectTrayAnimation->SetTime(0);
@@ -313,7 +318,6 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
       msg.set_data("");
       this->dataPtr->toggleBoxVisualPub->Publish(msg);
 
-/*
     // Report the result of the previously-performed tray inspection.
     if (this->dataPtr->inspectionResult < 0)
     {
@@ -324,6 +328,7 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
       ROS_INFO_STREAM("Result of inspection: " << this->dataPtr->inspectionResult);
     }
 
+/*
     // Make a service call to clear the tray.
     if (!this->dataPtr->rosClearTrayClient.exists())
     {
