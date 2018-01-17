@@ -301,7 +301,7 @@
 
     <!-- start with a box on the belt -->
     <model name="shipping_box_0">
-      <pose>1.21 5 0.8126 0 0 -1.57079</pose>
+      <pose>1.21 5 0.95 0 0 0</pose>
       <allow_auto_disable>0</allow_auto_disable>
       <static>false</static>
       <!-- include box with contact sensor -->

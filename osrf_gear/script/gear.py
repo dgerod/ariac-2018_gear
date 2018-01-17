@@ -54,9 +54,10 @@ sensor_configs = {
 }
 default_belt_parts = {
     'shipping_box': {
-      5.0: {
+      10.0: {
         'pose': {
-           'xyz': [0.0, 0.0, 0.1]
+           'xyz': [0.0, 0.0, 0.1],
+           'rpy': [0.0, 0.0, 1.5708]
          }
        }
      },
