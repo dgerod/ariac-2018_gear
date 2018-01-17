@@ -308,7 +308,7 @@
     <!-- Pool of @(obj_type) objects -->
 @[  for index in range(belt_population_cycles * len(spawn_times))]@
 @[    if obj_type is 'shipping_box']@
-    <model name="populate_conveyor|@(obj_type)_@(index)">
+    <model name="@(obj_type)_@(index)">
       <pose>@(7.5 + 1.25 * obj_type_index) @(-9.8 + 1.25 * index) 2.1 0 0 0</pose>
       <allow_auto_disable>0</allow_auto_disable>
       <static>false</static>
@@ -378,7 +378,7 @@
 @[    else]@
     <include>
       <uri>model://@(obj_type)_ariac</uri>
-      <name>populate_conveyor|@(obj_type)_@(index)</name>
+      <name>@(obj_type)_@(index)</name>
       <pose>@(7.5 + 0.25 * obj_type_index) @(-9.8 + 0.25 * index) 2.1 0 0 0</pose>
     </include>
 @[    end if]@
@@ -603,6 +603,7 @@
       <control_topic>/ariac/population/control</control_topic>
       <state_topic>/ariac/population/state</state_topic>
       <start_index>1</start_index>
+      <prefix_object_names>false</prefix_object_names>
       <loop_forever>@("true" if belt_parts_loop else "false")</loop_forever>
       <frame>conveyor_belt::conveyor_belt_fixed</frame>
       <object_sequence>

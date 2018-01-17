@@ -127,6 +127,9 @@ namespace gazebo
     /// other values will scale the populating frequency.
     public: double rateModifier = 1.0;
 
+    /// \brief Object names will be prefixed by plugin name if True.
+    public: bool prefixObjectNames = true;
+
     /// \brief Id of first object to teleport.
     public: int startIndex = 0;
 
@@ -175,6 +178,11 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
   if (_sdf->HasElement("start_index"))
   {
     this->dataPtr->startIndex = _sdf->Get<int>("start_index");
+  }
+
+  if (_sdf->HasElement("prefix_object_names"))
+  {
+    this->dataPtr->prefixObjectNames = _sdf->Get<bool>("prefix_object_names");
   }
 
   if (_sdf->HasElement("frame"))
@@ -347,8 +355,12 @@ void PopulationPlugin::OnUpdate()
       ignition::math::Matrix4d pose_local(obj.pose.Ign());
       obj.pose = (transMat * pose_local).Pose();
     }
-    std::string modelName = this->GetHandle() + "|" + obj.type;
-    //std::string modelName = obj.type;
+
+    std::string modelName = obj.type;
+    if (this->dataPtr->prefixObjectNames)
+    {
+      modelName = this->GetHandle() + "|" + modelName;
+    }
 
     // Get a new index for the object.
     if (this->dataPtr->objectCounter.find(obj.type) ==
