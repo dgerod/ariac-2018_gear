@@ -3,6 +3,7 @@
   <model name="closed_box">
     <static>true</static>
     <link name="link">
+<!--
       <collision name="collision">
         <geometry>
           <mesh>
@@ -11,6 +12,7 @@
           </mesh>
         </geometry>
       </collision>
+-->
       <visual name="visual">
         <geometry>
           <mesh>
@@ -18,6 +20,10 @@
             <uri>model://closed_box/meshes/closed_box.obj</uri>
           </mesh>
         </geometry>
+        <plugin name="toggle" filename="libToggleVisualPlugin.so">
+          <initially_visible>false</initially_visible>
+          <topic>~/drone_box_visual_toggle</topic>
+        </plugin>
       </visual>
     </link>
   </model>

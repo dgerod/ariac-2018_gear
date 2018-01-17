@@ -255,10 +255,14 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
   }
   if (this->dataPtr->currentState == "preparing_to_collect")
   {
+      // Toggle the box visual.
+      gazebo::msgs::GzString msg;
+      msg.set_data("");
+      this->dataPtr->toggleBoxVisualPub->Publish(msg);
+/*
     // Wait a bit to ensure the models have been detected by the kit tray's plugin
     if (currentSimTime - this->dataPtr->deliveryTriggerTime > 0.75)
     {
-/*
       // Make a service call to submit the tray for inspection.
       // Do this before animating and clearing the AGV in case the assigned
       // goal changes as the AGV is moving.
@@ -275,6 +279,7 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
       {
         this->dataPtr->inspectionResult = submit_srv.response.inspection_result;
       }
+    }
 */
 
       // Trigger the tray delivery animation
@@ -282,7 +287,6 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
       this->dataPtr->model->SetAnimation(this->dataPtr->collectTrayAnimation);
       ROS_INFO_STREAM("AGV successfully triggered.");
       this->dataPtr->currentState = "collecting";
-    }
   }
   if (this->dataPtr->currentState == "collecting")
   {
@@ -356,11 +360,7 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
   }
   if (this->dataPtr->currentState == "returned")
   {
-      // Toggle the box visual.
-      gazebo::msgs::GzString msg;
-      msg.set_data("");
-      this->dataPtr->toggleBoxVisualPub->Publish(msg);
-      this->dataPtr->currentState = "ready_to_collect";
+    this->dataPtr->currentState = "ready_to_collect";
   }
   std_msgs::String stateMsg;
   stateMsg.data = this->dataPtr->currentState;
