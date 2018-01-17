@@ -1,6 +1,6 @@
 models_to_spawn:
   # Spawn some models on the agv tray on startup
-  agv1::kit_tray_1::kit_tray_1::tray:
+  shipping_box_0::box_base:
     models:
       part_0:
         type: order_part1
