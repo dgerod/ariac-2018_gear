@@ -43,6 +43,11 @@ void KitTrayPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   SideContactPlugin::Load(_model, _sdf);
 
+  if (_sdf->HasElement("nested_animation"))
+  {
+    this->nestedAnimation = _sdf->Get<bool>("nested_animation");
+  }
+
   if (_sdf->HasElement("faulty_parts"))
   {
     this->faultyPartNames.clear();
@@ -240,11 +245,6 @@ void KitTrayPlugin::LockContactingModels()
   gzdbg << "Creating fixed joint: " << jointName << std::endl;
   fixedJoint->SetName(jointName);
 
-  model->SetGravityMode(false);
-
-  // Lift the part slightly because it will fall through the tray if the tray is animated
-  model->SetWorldPose(model->GetWorldPose() + math::Pose(0,0,0.01,0,0,0));
-
   auto modelName = model->GetName();
   auto linkName = modelName + "::link";
   auto link = model->GetLink(linkName);
@@ -260,7 +260,15 @@ void KitTrayPlugin::LockContactingModels()
       continue;
     }
   }
-  link->SetGravityMode(false);
+  if (this->nestedAnimation)
+  {
+    model->SetGravityMode(false);
+    link->SetGravityMode(false);
+
+    // Lift the part slightly because it will fall through the tray if the tray is animated
+    model->SetWorldPose(model->GetWorldPose() + math::Pose(0,0,0.01,0,0,0));
+  }
+
   fixedJoint->Load(link, this->parentLink, math::Pose());
   fixedJoint->Attach(this->parentLink, link);
   fixedJoint->Init();

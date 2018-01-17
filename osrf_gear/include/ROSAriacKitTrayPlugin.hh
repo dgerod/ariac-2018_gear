@@ -104,6 +104,9 @@ namespace gazebo
     /// If unpermitted subscribers connect during the competition, publishing is disabled
     protected: bool publishingEnabled;
 
+    /// \brief Whether or not the Kit will be used as part of a nested animation (requires workarounds).
+    protected: bool nestedAnimation = false;
+
     /// \brief Service that locks models to the tray
     public: ros::ServiceServer lockModelsServer;
 
