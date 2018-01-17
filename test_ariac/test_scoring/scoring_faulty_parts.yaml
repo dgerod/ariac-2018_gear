@@ -3,7 +3,7 @@ faulty_parts:
   - piston_rod_part_1
 models_to_spawn:
   # Spawn some models on the agv tray on startup
-  shipping_box_0::box_base:
+  shipping_box_0::box::box_base:
     models:
       part_0:
         type: order_part1

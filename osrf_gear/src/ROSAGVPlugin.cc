@@ -151,7 +151,7 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   }
 
   this->dataPtr->agvName = std::string("agv") + index;
-  this->dataPtr->trayLinkName = "shipping_box_0::box_base";
+  this->dataPtr->trayLinkName = "shipping_box_0::box::box_base";
     //this->dataPtr->agvName + "::kit_tray_" + index + "::kit_tray_" + index + "::tray";
 
   std::string agvControlTopic = "/ariac/" + this->dataPtr->agvName;
