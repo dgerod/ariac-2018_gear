@@ -43,6 +43,13 @@ void KitTrayPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   SideContactPlugin::Load(_model, _sdf);
 
+  if (_sdf->HasElement("lock_models_at"))
+  {
+    sdf::ElementPtr lockModelsAtElem = _sdf->GetElement("lock_models_at");
+    this->lockModelsAtPose = true;
+    this->lockModelsAt = lockModelsAtElem->Get<math::Vector3>();
+  }
+
   if (_sdf->HasElement("nested_animation"))
   {
     this->nestedAnimation = _sdf->Get<bool>("nested_animation");
@@ -116,6 +123,12 @@ void KitTrayPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
   if (!this->TimeToExecute())
   {
     return;
+  }
+
+  if (this->lockModelsAtPose && this->model->GetWorldPose().pos.Distance(this->lockModelsAt) < 0.5)
+  {
+    this->LockContactingModels();
+    this->lockModelsAtPose = false;
   }
 
   if (!this->newMsg)

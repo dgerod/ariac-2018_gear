@@ -107,6 +107,12 @@ namespace gazebo
     /// \brief Whether or not the Kit will be used as part of a nested animation (requires workarounds).
     protected: bool nestedAnimation = false;
 
+    /// \brief Whether or not the Kit will lock the models at a particular pose.
+    protected: bool lockModelsAtPose = false;
+
+    /// \brief The pose at which models should be locked.
+    protected: math::Vector3 lockModelsAt;
+
     /// \brief Service that locks models to the tray
     public: ros::ServiceServer lockModelsServer;
 
