@@ -41,6 +41,8 @@ ObjectDisposalPlugin::~ObjectDisposalPlugin()
 void ObjectDisposalPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   SideContactPlugin::Load(_model, _sdf);
+  this->node = transport::NodePtr(new transport::Node());
+  this->node->Init();
 
   if (this->updateRate > 0)
     gzdbg << "ObjectDisposalPlugin running at " << this->updateRate << " Hz\n";
@@ -53,13 +55,22 @@ void ObjectDisposalPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->centerOfGravityCheck = _sdf->Get<bool>("center_of_gravity_check");
   }
 
+  std::string activation_topic = "/ariac/" +  this->model->GetName() + "/activate";
+  if (_sdf->HasElement("activation_topic"))
+  {
+    activation_topic = _sdf->Get<std::string>("activation_topic");
+  }
+  this->activationSub = this->node->Subscribe(
+    activation_topic,
+    &ObjectDisposalPlugin::OnActivation, this);
+
   if (!_sdf->HasElement("disposal_pose"))
   {
     gzerr << "ObjectDisposalPlugin: Unable to find <disposal_pose> element\n";
     return;
   }
-
   this->disposalPose = _sdf->Get<math::Pose>("disposal_pose");
+  fprintf(stderr, "ObjectDisposalPlugin: finished loading");
 }
 
 /////////////////////////////////////////////////
@@ -68,6 +79,9 @@ void ObjectDisposalPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
   // If we're using a custom update rate value we have to check if it's time to
   // update the plugin or not.
   if (!this->TimeToExecute())
+    return;
+
+  if (!this->active)
     return;
 
   this->CalculateContactingModels();
@@ -115,4 +129,17 @@ void ObjectDisposalPlugin::ActOnContactingModels()
       }
     }
   }
+}
+
+/////////////////////////////////////////////////
+void ObjectDisposalPlugin::OnActivation(ConstGzStringPtr &_msg)
+{
+  fprintf(stderr, "ObjectDisposalPlugin: received activation request: %s\n", _msg->data().c_str());
+
+  if (_msg->data() == "activate")
+    this->active = true;
+  else if (_msg->data() == "deactivate")
+    this->active = false;
+  else
+    gzerr << "Unknown activation command [" << _msg->data() << "]" << std::endl;
 }

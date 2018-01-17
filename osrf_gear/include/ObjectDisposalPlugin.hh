@@ -50,14 +50,26 @@ namespace gazebo
     /// \brief Act on models that are ontop of the sensor's link
     protected: void ActOnContactingModels();
 
+    /// \brief Callback for state changes.
+    protected: void OnActivation(ConstGzStringPtr &_msg);
+
     /// \brief If true, only delete models if their CoG is within the bounding box of the link
     protected: bool centerOfGravityCheck;
+
+    /// \brief Whether or not models in contact will be deleted.
+    protected: bool active = false;
 
     /// \brief Pose where the object will be teleported.
     protected: math::Pose disposalPose;
 
     /// \brief How many models have been removed.
     protected: int numRemovedModels = 0;
+
+    /// \brief Node for communication.
+    protected: transport::NodePtr node;
+
+    /// \brief Subscription for activation topic.
+    protected: transport::SubscriberPtr activationSub;
   };
 }
 #endif
