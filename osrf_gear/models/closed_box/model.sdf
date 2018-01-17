@@ -6,6 +6,7 @@
       <collision name="collision">
         <geometry>
           <mesh>
+            <scale>1.1 1.8 0.25</scale>
             <uri>model://closed_box/meshes/closed_box.obj</uri>
           </mesh>
         </geometry>
@@ -13,6 +14,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
+            <scale>1.1 1.8 0.25</scale>
             <uri>model://closed_box/meshes/closed_box.obj</uri>
           </mesh>
         </geometry>

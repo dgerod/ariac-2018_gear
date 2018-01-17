@@ -6,6 +6,7 @@
       <collision name="collision">
         <geometry>
           <mesh>
+            <scale>1.3 1.3 1</scale>
             <uri>model://drone/meshes/drone.obj</uri>
           </mesh>
         </geometry>
@@ -13,15 +14,16 @@
       <visual name="visual">
         <geometry>
           <mesh>
+            <scale>1.3 1.3 1</scale>
             <uri>model://drone/meshes/drone.obj</uri>
           </mesh>
         </geometry>
       </visual>
       <visual name="box_visual">
-        <pose>0 0 -0.1 0 0 0</pose>
+        <pose>0 0 -0.13 0 0 1.5707</pose>
         <geometry>
           <mesh>
-            <scale>1.0 1.0 0.25</scale>
+            <scale>1.1 1.8 0.25</scale>
             <uri>model://closed_box/meshes/closed_box.obj</uri>
           </mesh>
         </geometry>
