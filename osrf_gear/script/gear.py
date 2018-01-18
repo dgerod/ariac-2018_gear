@@ -80,6 +80,7 @@ default_bin_origins = {
 
 configurable_options = {
     'insert_agvs': True,
+    'insert_shipping_boxes': True,
     'insert_models_over_bins': False,
     'disable_shadows': False,
     'fill_demo_tray': False,
