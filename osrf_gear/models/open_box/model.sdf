@@ -142,14 +142,32 @@
         </geometry>
       </collision>
 -->
-      <visual name="visual">
+      <visual name="open_box">
         <geometry>
           <mesh>
             <scale>1.1 1.8 0.25</scale>
             <uri>model://open_box/meshes/open_box.obj</uri>
           </mesh>
         </geometry>
+        <plugin name="toggle" filename="libToggleVisualPlugin.so">
+          <initially_visible>true</initially_visible>
+          <topic>~/shipping_box_visual_toggle</topic>
+        </plugin>
       </visual>
+
+      <visual name="closed_box">
+        <geometry>
+          <mesh>
+            <scale>1.1 1.8 0.25</scale>
+            <uri>model://closed_box/meshes/closed_box.obj</uri>
+          </mesh>
+        </geometry>
+        <plugin name="toggle" filename="libToggleVisualPlugin.so">
+          <initially_visible>false</initially_visible>
+          <topic>~/shipping_box_visual_toggle</topic>
+        </plugin>
+      </visual>
+
     </link>
   </model>
 </sdf>
