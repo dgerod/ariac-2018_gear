@@ -56,7 +56,7 @@ orders:
           rpy: [0, 0, 0.0]
 
 models_over_bins:
-  bin7:
+  bin3:
     models:
        order_part2:
         xyz_start: [0.1, 0.1, 0.0]
@@ -65,7 +65,7 @@ models_over_bins:
         num_models_x: 3
         num_models_y: 3
 
-  bin8:
+  bin4:
     models:
        order_part4:
         xyz_start: [0.1, 0.1, 0.0]

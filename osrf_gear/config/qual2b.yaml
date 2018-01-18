@@ -53,7 +53,7 @@ belt_parts:
         rpy: [0, 0, 'pi/2']
 
 models_over_bins:
-  bin5:
+  bin3:
     models:
       belt_model_type2:
         xyz_start: [0.2, 0.2, 0.0]
