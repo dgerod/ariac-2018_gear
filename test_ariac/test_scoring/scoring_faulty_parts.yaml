@@ -1,6 +1,6 @@
 faulty_parts:
-  - gear_part_2
-  - piston_rod_part_1
+  - part3_2
+  - part4_1
 models_to_spawn:
   # Spawn some models on the agv tray on startup
   shipping_box_0::box::box_base:
