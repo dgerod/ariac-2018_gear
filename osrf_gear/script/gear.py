@@ -64,13 +64,13 @@ default_belt_parts = {
      },
 }
 n_bins = 5
-bin1_x = -1.2
+bin1_x = -0.4
 bin1_y = -2.3
-binN_x = -1.2
+binN_x = -0.4
 binN_y = 2.3
 bin_width = 0.6
 bin_depth = 0.25
-bin_height = 0.72
+bin_height = 1.2
 bin_angle = -0.25
 default_bin_origins = {
 'bin{0}'.format(n): [
