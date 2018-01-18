@@ -710,7 +710,7 @@ count = {}
         <object>
           <time>0.0</time>
           <type>@(part.type)</type>
-          <pose>@(' '.join(part.pose.xyz[0:-1])) 0.05 @(' '.join(part.pose.rpy))</pose>
+          <pose>@(' '.join(part.pose.xyz[0:-1])) 0.00 @(' '.join(part.pose.rpy))</pose>
         </object>
 @[end for]@
       </object_sequence>
