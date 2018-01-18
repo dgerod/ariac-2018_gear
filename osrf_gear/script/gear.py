@@ -63,12 +63,13 @@ default_belt_parts = {
        }
      },
 }
-n_bins = 10
+n_bins = 5
 bin1_x = -1.2
 bin1_y = -2.3
 binN_x = -1.2
 binN_y = 2.3
-bin_width = 0.15
+bin_width = 0.6
+bin_depth = 0.25
 bin_height = 0.72
 bin_angle = -0.25
 default_bin_origins = {
@@ -281,9 +282,9 @@ def create_models_over_bins_infos(models_over_bins_dict):
     for bin_name, bin_dict in models_over_bins_dict.items():
         if bin_name in default_bin_origins:
             offset_xyz = [
-                default_bin_origins[bin_name][0] - bin_width / 2,
+                default_bin_origins[bin_name][0] - bin_depth / 2,
                 default_bin_origins[bin_name][1] - bin_width / 2,
-                bin_height + 0.03]
+                bin_height + 0.08]
             # Allow the origin of the bin to be over-written
             if 'xyz' in bin_dict:
                 offset_xyz = bin_dict['xyz']
@@ -300,6 +301,7 @@ def create_models_over_bins_infos(models_over_bins_dict):
             xyz_end = get_required_field(
                 model_type, model_to_spawn_dict, 'xyz_end')
             rpy = get_required_field(model_type, model_to_spawn_dict, 'rpy')
+            rpy[1] = -bin_angle
             num_models_x = get_required_field(
                 model_type, model_to_spawn_dict, 'num_models_x')
             num_models_y = get_required_field(
@@ -311,10 +313,11 @@ def create_models_over_bins_infos(models_over_bins_dict):
             # Create a grid of models
             for idx_x in range(num_models_x):
                 for idx_y in range(num_models_y):
+                    model_x_offset = xyz_start[0] + idx_x * step_size[0]
                     xyz = [
-                        offset_xyz[0] + xyz_start[0] + idx_x * step_size[0],
+                        offset_xyz[0] + model_x_offset,
                         offset_xyz[1] + xyz_start[1] + idx_y * step_size[1],
-                        offset_xyz[2] + xyz_start[2]]
+                        offset_xyz[2] + xyz_start[2] + model_x_offset * math.tan(bin_angle)]
                     model_to_spawn_data['pose'] = {'xyz': xyz, 'rpy': rpy}
                     model_info = create_model_info(model_type, model_to_spawn_data)
                     # assign each model a unique name because gazebo can't do this

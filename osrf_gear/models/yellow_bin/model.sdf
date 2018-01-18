@@ -6,6 +6,7 @@
       <collision name="collision">
         <geometry>
           <mesh>
+            <scale>1.0 3.0 1.0</scale>
             <uri>model://yellow_bin/meshes/yellow_bin.obj</uri>
           </mesh>
         </geometry>
@@ -13,6 +14,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
+            <scale>1.0 3.0 1.0</scale>
             <uri>model://yellow_bin/meshes/yellow_bin.obj</uri>
           </mesh>
         </geometry>

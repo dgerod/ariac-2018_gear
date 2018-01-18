@@ -21,7 +21,7 @@ orders:
           rpy: [0, 0, 'pi']
 
 models_over_bins:
-  bin7:
+  bin3:
     models:
       part4:
         xyz_start: [0.0, 0.0, 0.0]
