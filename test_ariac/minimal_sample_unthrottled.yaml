@@ -4,19 +4,8 @@ options:
   unthrottled_physics_update: true
   insert_models_over_bins: true
   insert_agvs: false
+  insert_shipping_boxes: false
   fill_demo_tray: false
-
-belt_parts:
-  piston_rod_part:
-    3.0:
-      pose:
-        xyz: [0.0, 0.0, 0.1]
-        rpy: [0, 0, 'pi/2']
-  part4:
-    6.0:
-      pose:
-        xyz: [0.0, 0.0, 0.1]
-        rpy: [0, 0, 'pi/2']
 
 orders:
   order_0:
@@ -35,14 +24,14 @@ orders:
           rpy: [0, 0, 'pi']
 
 models_over_bins:
-  bin7:
+  bin3:
     models:
-      piston_rod_part:
-        xyz_start: [0.1, 0.5, 0.0]
-        xyz_end: [0.1, 0.5, 0.0]
-        rpy: [0, 0, 'pi/4']
-        num_models_x: 1
-        num_models_y: 1
+      gear_part:
+        xyz_start: [0.0, 0.0, 0.0]
+        xyz_end: [0.3, 0.6, 0.0]
+        rpy: [0, 0, 0]
+        num_models_x: 3
+        num_models_y: 5
 
 time_limit: -1
 
