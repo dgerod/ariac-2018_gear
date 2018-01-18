@@ -36,11 +36,11 @@ template_files = [
 arm_configs = {
     'ur10': {
         'default_initial_joint_states': {
+            'elbow_joint': 2.14,
             'linear_arm_actuator_joint': 0,
+            'shoulder_lift_joint': -2.0,
             'shoulder_pan_joint': 3.14,
-            'shoulder_lift_joint': -1.13,
-            'elbow_joint': 1.51,
-            'wrist_1_joint': 3.77,
+            'wrist_1_joint': 3.27,
             'wrist_2_joint': -1.51,
             'wrist_3_joint': 0,
         }
