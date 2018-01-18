@@ -70,6 +70,12 @@ namespace gazebo
 
     /// \brief Subscription for activation topic.
     protected: transport::SubscriberPtr activationSub;
+
+    /// \brief Publishers for closing box visuals.
+    protected: std::map<std::string, transport::PublisherPtr> closeBoxPubMap;
+
+    /// \brief Status of close box requests.
+    protected: std::map<std::string, bool> boxClosedMap;
   };
 }
 #endif

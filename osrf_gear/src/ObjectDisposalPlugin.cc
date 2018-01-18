@@ -24,6 +24,9 @@
 using namespace gazebo;
 GZ_REGISTER_MODEL_PLUGIN(ObjectDisposalPlugin)
 
+static const std::string SHIPPING_BOX_MODEL_NAME = "shipping_box";
+static const int NUM_SHIPPING_BOXES = 10;
+
 /////////////////////////////////////////////////
 ObjectDisposalPlugin::ObjectDisposalPlugin() : SideContactPlugin()
 {
@@ -71,6 +74,14 @@ void ObjectDisposalPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
   this->disposalPose = _sdf->Get<math::Pose>("disposal_pose");
   fprintf(stderr, "ObjectDisposalPlugin: finished loading");
+
+  for (int i = 0; i < NUM_SHIPPING_BOXES; ++i) {
+    std::string shippingBoxName = SHIPPING_BOX_MODEL_NAME + "_" + std::to_string(i);
+    std::string topicName = "/ariac/" + shippingBoxName + "_visual_toggle";
+    auto pub = this->node->Advertise<msgs::GzString>(topicName);
+    this->closeBoxPubMap.insert(std::pair<std::string, transport::PublisherPtr>(shippingBoxName, pub));
+    this->boxClosedMap.insert(std::pair<std::string, bool>(shippingBoxName, false));
+  }
 }
 
 /////////////////////////////////////////////////
@@ -88,6 +99,23 @@ void ObjectDisposalPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
 /////////////////////////////////////////////////
 void ObjectDisposalPlugin::ActOnContactingModels()
 {
+  for (auto model : this->contactingModels)
+  {
+    if (!(model && model->GetName().compare(0, SHIPPING_BOX_MODEL_NAME.length(), SHIPPING_BOX_MODEL_NAME) == 0))
+    {
+      continue;
+    }
+    auto it = this->closeBoxPubMap.find(model->GetName());
+    if (it != this->closeBoxPubMap.end() && !this->boxClosedMap.find(model->GetName())->second)
+    {
+      // Toggle the box visual.
+      gazebo::msgs::GzString toggleMsg;
+      toggleMsg.set_data("");
+      it->second->Publish(toggleMsg);
+      this->boxClosedMap[model->GetName()] = true;
+    }
+  }
+
   if (!this->active)
     return;
 

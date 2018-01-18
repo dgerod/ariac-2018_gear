@@ -116,6 +116,7 @@ void ToggleVisualPlugin::Update()
   if (this->dataPtr->visual->GetVisible() != this->dataPtr->visible)
   {
     this->dataPtr->visual->SetVisible(this->dataPtr->visible, true);
+    gzdbg << "Toggling visual: " << this->dataPtr->visual->GetName() << std::endl;
   }
 }
 
