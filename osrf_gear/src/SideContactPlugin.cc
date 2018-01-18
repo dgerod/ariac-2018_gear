@@ -80,6 +80,7 @@ void SideContactPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
   gzdbg << "[" << this->model->GetName() << "] Watching collisions on: " << this->collisionName << "\n";
 
+  /* this is not used anymore
   if (_sdf->HasElement("contact_side_normal"))
   {
     this->sideNormal = _sdf->Get<ignition::math::Vector3d>("contact_side_normal");
@@ -88,6 +89,7 @@ void SideContactPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   {
     this->sideNormal = ignition::math::Vector3d(0, 0, 1);
   }
+  */
 
   if (_sdf->HasElement("update_rate"))
   {
