@@ -68,7 +68,7 @@ class GripperTester(ExampleNodeTester):
         return success
 
     def _send_arm_to_part(self):
-        positions = [1.85, 0.35, -0.38, 2.76, 3.67, -1.51, 0.0]
+        positions = [2.4, 0.5, -1.35, 3.14, 3.59, -1.61, 0.0]
         self.comp_class.send_arm_to_state(positions)
         time.sleep(1.5)
 
