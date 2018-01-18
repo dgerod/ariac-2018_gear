@@ -34,6 +34,7 @@
         <type>pulley_part</type>
         <type>t_brace_part</type>
         <type>u_joint_part</type>
+        <type>shipping_box</type>
       </known_model_types>
     </plugin>
     <link name="link">
