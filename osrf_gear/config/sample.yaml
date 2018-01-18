@@ -42,6 +42,16 @@ arm:
   type: ur10
 
 sensors:
+  quality_control_1:
+    type: quality_control
+    pose:
+      xyz: [1.2, 2.25, 1.66]
+      rpy: ['-pi/2', 'pi/2', '-pi']
+  quality_control_2:
+    type: quality_control
+    pose:
+      xyz: [1.2, 0.25, 1.66]
+      rpy: ['-pi/2', 'pi/2', '-pi']
   break_beam:
     type: break_beam
     pose:

@@ -51,6 +51,7 @@ sensor_configs = {
     'proximity_sensor': None,
     'logical_camera': None,
     'laser_profiler': None,
+    'quality_control': None,
 }
 default_belt_parts = {
     'shipping_box': {
