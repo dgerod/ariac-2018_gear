@@ -29,7 +29,7 @@ set(rostests
   ariac_qual2a_scoring_immediate.test
   ariac_qual2b_scoring_immediate.test
   gripper.test
-  gripper_unthrottled.test
+  # gripper_unthrottled.test  # this needs a good gripper pose; regression is fixed.
   test_scoring/ariac_scoring_perfect_kit.test
   test_scoring/ariac_scoring_perfect_kit_flipped.test
   test_scoring/ariac_scoring_correct_parts_incorrect_poses.test
