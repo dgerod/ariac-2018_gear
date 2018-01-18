@@ -3,8 +3,8 @@ options:
   insert_models_over_bins: true
   spawn_extra_models: true
   model_type_aliases:
-    order_part1: part3
-    order_part2: part4
+    order_part1: piston_rod_part
+    order_part2: gear_part
 
 orders:
   order_0:

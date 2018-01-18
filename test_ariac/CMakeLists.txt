@@ -63,6 +63,7 @@ install(FILES
   qual2a_testing.yaml
   qual2b_testing.yaml
   minimal_sample_unthrottled.yaml
+  tf_sensors.yaml
   test_scoring/scoring_base_order.yaml
   test_scoring/scoring_base_order_flipped.yaml
   test_scoring/scoring_base_order_interrupted.yaml

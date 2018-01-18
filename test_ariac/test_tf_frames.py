@@ -24,9 +24,7 @@ class TfTester(ExampleNodeTester):
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
 
-        self.camera_above_agv1 = 'logical_camera_2'
-        self.camera_above_agv2 = 'logical_camera_3'
-        self._test_agv_pose()
+        self.camera_above_box0 = 'logical_camera_1'
         self._test_tray_pose()
         self._test_logical_camera_parts()
         self._test_faulty_parts()
@@ -35,33 +33,28 @@ class TfTester(ExampleNodeTester):
         self._test_pose(
             [0.3, 3.3, 0.0],
             tf.transformations.quaternion_from_euler(0, 0, 3.1415),
-            self.camera_above_agv1 + '_agv1_frame'
+            self.camera_above_box0 + '_agv1_frame'
         )
 
         self._test_pose(
             [0.3, -3.3, 0.0],
             tf.transformations.quaternion_from_euler(0, 0, 0),
-            self.camera_above_agv2 + '_agv2_frame'
+            self.camera_above_box1 + '_agv2_frame'
         )
 
     def _test_tray_pose(self):
         self._test_pose(
-            [0.3, 3.15, 0.75],
-            tf.transformations.quaternion_from_euler(0, 0, 3.1415),
-            self.camera_above_agv1 + '_kit_tray_1_frame'
-        )
-        self._test_pose(
-            [0.3, -3.15, 0.75],
+            [1.21, 5.0, 0.91],
             tf.transformations.quaternion_from_euler(0, 0, 0),
-            self.camera_above_agv2 + '_kit_tray_2_frame'
+            self.camera_above_box0 + '_shipping_box_0_frame'
         )
 
     def _test_logical_camera_parts(self):
         self._test_pose(
             [0.1, -0.2, 0.0],
             tf.transformations.quaternion_from_euler(0, 0, 0),
-            self.camera_above_agv1 + '_piston_rod_part_1_frame',
-            self.camera_above_agv1 + '_kit_tray_1_frame'
+            self.camera_above_box0 + '_piston_rod_part_1_frame',
+            self.camera_above_box0 + '_shipping_box_0_frame'
         )
 
     def _test_faulty_parts(self):
@@ -70,7 +63,7 @@ class TfTester(ExampleNodeTester):
         self._test_pose(
             [0.1, -0.2, 0.0], tf.transformations.quaternion_from_euler(0, 0, 0),
             quality_control_sensor + '_piston_rod_part_1_frame',
-            self.camera_above_agv1 + '_kit_tray_1_frame'
+            self.camera_above_box0 + '_shipping_box_0_frame'
         )
 
         # This part is not faulty and should not be found by TF.
@@ -78,7 +71,7 @@ class TfTester(ExampleNodeTester):
             self._test_pose(
                 [0.1, -0.2, 0.0], tf.transformations.quaternion_from_euler(0, 0, 0),
                 quality_control_sensor + '_piston_rod_part_2_frame',
-                self.camera_above_agv1 + '_kit_tray_1_frame'
+                self.camera_above_box0 + '_shipping_box_0_frame'
             )
 
     def _test_pose(self, position, orientation, frame_id, parent_frame_id='world'):
