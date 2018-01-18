@@ -23,12 +23,20 @@ orders:
 models_over_bins:
   bin3:
     models:
-      part4:
+      gear_part:
         xyz_start: [0.0, 0.0, 0.0]
-        xyz_end: [0.15, 0.15, 0.0]
+        xyz_end: [0.3, 0.6, 0.0]
         rpy: [0, 0, 0]
+        num_models_x: 3
+        num_models_y: 5
+  bin4:
+    models:
+      gasket_part:
+        xyz_start: [0.0, 0.05, 0.0]
+        xyz_end: [0.15, 0.55, 0.0]
+        rpy: [0, 0, 'pi/4']
         num_models_x: 2
-        num_models_y: 2
+        num_models_y: 4
 
 faulty_parts:
   - piston_rod_part_5  # this part gets spawned manually in the tutorial
