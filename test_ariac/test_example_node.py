@@ -34,11 +34,11 @@ class ExampleNodeTester(unittest.TestCase):
 
         # Starting the competition will cause parts from the order to be spawned on AGV1
         self._test_start_comp()
-        time.sleep(1.0)
+        time.sleep(5.0)
         self._test_order_reception()
 
         self._test_agv_control()
-        time.sleep(5.0)
+        time.sleep(10.0)
         self._test_comp_end()
 
     def _test_start_comp(self):

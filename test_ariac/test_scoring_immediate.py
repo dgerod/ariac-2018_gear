@@ -22,7 +22,7 @@ class ScoringTester(ExampleNodeTester):
         self._test_start_comp()
 
         # Submit the tray as soon as the parts are spawned on the tray
-        time.sleep(0.5)  # OK, give a little bit of leeway because that's what teams would do
+        time.sleep(2.5)  # OK, give a little bit of leeway because that's what teams would do
         self._test_agv_control()
         time.sleep(5.0)
 
