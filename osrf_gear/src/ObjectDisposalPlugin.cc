@@ -81,9 +81,6 @@ void ObjectDisposalPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
   if (!this->TimeToExecute())
     return;
 
-  if (!this->active)
-    return;
-
   this->CalculateContactingModels();
   this->ActOnContactingModels();
 }
@@ -91,6 +88,9 @@ void ObjectDisposalPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
 /////////////////////////////////////////////////
 void ObjectDisposalPlugin::ActOnContactingModels()
 {
+  if (!this->active)
+    return;
+
   // Only remove models if their center of gravity is "above" the link
   // TODO: make more general than just z axis
   auto linkBox = this->parentLink->GetBoundingBox();
