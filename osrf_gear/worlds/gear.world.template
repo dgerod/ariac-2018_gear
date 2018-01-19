@@ -74,12 +74,10 @@ def expand_snippet(filename, data=locals()):
     </light>
 
     <!-- the workcell -->
-    <!--
     <include>
-      <uri>model://workcell_ariac</uri>
-      <pose>0 0 0 0 0 1.57</pose>
+      <uri>model://shipping_container</uri>
+      <pose>0.42 -1.0 0 0 0 0</pose>
     </include>
-    -->
 
 @[for bin_name, bin_pose in bins.items()]@
     <include>

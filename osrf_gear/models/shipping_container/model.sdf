@@ -3,6 +3,7 @@
   <model name="shipping_container">
     <static>true</static>
     <link name="link">
+<!--
       <collision name="collision">
         <max_contacts>10</max_contacts>
         <surface>
@@ -20,10 +21,11 @@
           </mesh>
         </geometry>
       </collision>
+-->
       <visual name="visual">
         <geometry>
           <mesh>
-            <scale>1.0 1.0 1.0</scale>
+            <scale>1.3 1.0 1.0</scale>
             <uri>model://shipping_container/meshes/ShippingContainer.obj</uri>
           </mesh>
         </geometry>
