@@ -28,10 +28,12 @@ import em
 import yaml
 
 this_dir = os.path.abspath(os.path.dirname(__file__))
+world_dir = os.path.join(this_dir, '..', '..', 'share', 'osrf_gear', 'worlds')
+launch_dir = os.path.join(this_dir, '..', '..', 'share', 'osrf_gear', 'launch')
 template_files = [
-    os.path.join(this_dir, '..', '..', 'share', 'osrf_gear', 'worlds', 'gear.world.template'),
-    os.path.join(this_dir, '..', '..', 'share', 'osrf_gear', 'launch', 'gear.launch.template'),
-    os.path.join(this_dir, '..', '..', 'share', 'osrf_gear', 'launch', 'gear.urdf.xacro.template'),
+    os.path.join(world_dir, 'gear.world.template'),
+    os.path.join(launch_dir, 'gear.launch.template'),
+    os.path.join(launch_dir, 'gear.urdf.xacro.template'),
 ]
 arm_configs = {
     'ur10': {
@@ -440,6 +442,7 @@ def prepare_template_data(config_dict, args):
         'options': {},
         'time_limit': default_time_limit,
         'bin_height': bin_height,
+        'world_dir': world_dir,
     }
     # Process the options first as they may affect the processing of the rest
     options_dict = get_field_with_default(config_dict, 'options', {})
