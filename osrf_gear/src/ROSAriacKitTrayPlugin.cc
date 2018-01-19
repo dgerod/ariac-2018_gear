@@ -125,8 +125,9 @@ void KitTrayPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
     return;
   }
 
-  if (this->lockModelsAtPose && this->model->GetWorldPose().pos.Distance(this->lockModelsAt) < 0.5)
+  if (this->lockModelsAtPose && this->model->GetWorldPose().pos.Distance(this->lockModelsAt) < 0.3)
   {
+    gzdbg << "Locking models: " << this->model->GetName() << std::endl;
     this->LockContactingModels();
     this->lockModelsAtPose = false;
   }

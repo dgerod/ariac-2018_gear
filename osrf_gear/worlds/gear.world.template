@@ -552,6 +552,7 @@
         <contact_sensor_name>box_base_contact</contact_sensor_name>
         <clear_tray_service_name>/ariac/@(shipping_box_name)/clear_tray</clear_tray_service_name>
         <lock_models_service_name>/ariac/@(shipping_box_name)/lock_models</lock_models_service_name>
+        <lock_models_at>1.2 -3.3 0.9</lock_models_at>
         <update_rate>20</update_rate>
         <faulty_parts>
 @[for part_name, part_info in faulty_parts.items()]@
@@ -739,6 +740,7 @@
         <contact_sensor_name>box_base_contact</contact_sensor_name>
         <clear_tray_service_name>/ariac/@(shipping_box_name)/clear_tray</clear_tray_service_name>
         <lock_models_service_name>/ariac/@(shipping_box_name)/lock_models</lock_models_service_name>
+        <lock_models_at>1.2 -3.3 0.9</lock_models_at>
         <update_rate>20</update_rate>
         <faulty_parts>
 @[for part_name, part_info in faulty_parts.items()]@
