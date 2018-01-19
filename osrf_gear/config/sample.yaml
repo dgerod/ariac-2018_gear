@@ -58,6 +58,11 @@ arm:
   type: ur10
 
 sensors:
+  congestion_sensor:
+    type: break_beam
+    pose:
+      xyz: [0.81, -4.25, 0.93]
+      rpy: [0, 0, 0]
   break_beam:
     type: break_beam
     pose:

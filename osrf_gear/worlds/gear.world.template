@@ -552,6 +552,7 @@ expand_snippet('shipping_box.sdf.template')
 
       <plugin name="conveyor_belt_plugin" filename="libROSConveyorBeltPlugin.so">
         <robot_namespace>/ariac</robot_namespace>
+        <enable_topic>/ariac/conveyor_enable</enable_topic>
         <population_rate_modifier_topic>/ariac/population/rate_modifier</population_rate_modifier_topic>
         <link>conveyor_belt::conveyor_belt_moving::belt</link>
         <power>0</power>
@@ -710,6 +711,12 @@ count[part.type] = id + 1
 @[end for]@
 
 @[end if]@
+
+    <!-- Populate kit tray with order parts -->
+    <plugin filename="libROSConveyorControllerPlugin.so" name="congestion_controller">
+      <congestion_sensor_topic>/ariac/congestion_sensor</congestion_sensor_topic>
+      <conveyor_control_topic>/ariac/conveyor_enable</conveyor_control_topic>
+    </plugin>
 
   </world>
 </sdf>
