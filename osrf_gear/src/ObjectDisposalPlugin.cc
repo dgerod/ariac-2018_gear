@@ -82,6 +82,12 @@ void ObjectDisposalPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->closeBoxPubMap.insert(std::pair<std::string, transport::PublisherPtr>(shippingBoxName, pub));
     this->boxClosedMap.insert(std::pair<std::string, bool>(shippingBoxName, false));
   }
+  std::string currentBoxTopic = "/ariac/" +  this->model->GetName() + "/contacting_box";
+  if (_sdf->HasElement("contacting_box_topic"))
+  {
+    currentBoxTopic = _sdf->Get<std::string>("contacting_box_topic");
+  }
+  this->currentBoxPub = this->node->Advertise<msgs::GzString>(currentBoxTopic);
 }
 
 /////////////////////////////////////////////////
@@ -99,12 +105,19 @@ void ObjectDisposalPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
 /////////////////////////////////////////////////
 void ObjectDisposalPlugin::ActOnContactingModels()
 {
+  // Publish if there's a detected box.
+  // Don't publish all detected models because parts will be detected too.
+  gazebo::msgs::GzString currentBoxMsg;
+  currentBoxMsg.set_data("");
+
   for (auto model : this->contactingModels)
   {
     if (!(model && model->GetName().compare(0, SHIPPING_BOX_MODEL_NAME.length(), SHIPPING_BOX_MODEL_NAME) == 0))
     {
       continue;
     }
+    currentBoxMsg.set_data(model->GetName());
+
     auto it = this->closeBoxPubMap.find(model->GetName());
     if (it != this->closeBoxPubMap.end() && !this->boxClosedMap.find(model->GetName())->second)
     {
@@ -115,6 +128,7 @@ void ObjectDisposalPlugin::ActOnContactingModels()
       this->boxClosedMap[model->GetName()] = true;
     }
   }
+  this->currentBoxPub->Publish(currentBoxMsg);
 
   if (!this->active)
     return;

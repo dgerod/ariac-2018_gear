@@ -71,6 +71,9 @@ namespace gazebo
     /// \brief Subscription for activation topic.
     protected: transport::SubscriberPtr activationSub;
 
+    /// \brief Publisher for current box.
+    protected: transport::PublisherPtr currentBoxPub;
+
     /// \brief Publishers for closing box visuals.
     protected: std::map<std::string, transport::PublisherPtr> closeBoxPubMap;
 
@@ -79,4 +82,3 @@ namespace gazebo
   };
 }
 #endif
-

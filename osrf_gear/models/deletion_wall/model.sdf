@@ -34,6 +34,7 @@
     <!-- plugin for processing contact sensor output -->
     <plugin name="object_disposal_plugin" filename="libObjectDisposalPlugin.so">
       <contact_sensor_name>object_disposal_contact</contact_sensor_name>
+      <contacting_box_topic>/ariac/waiting_shipping_box</contacting_box_topic>
       <contact_side_normal>1 0 0</contact_side_normal>
       <disposal_pose>30 30 -1.0 0 0 0</disposal_pose>
       <update_rate>5</update_rate>
