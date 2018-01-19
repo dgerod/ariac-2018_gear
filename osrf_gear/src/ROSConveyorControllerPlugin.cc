@@ -39,8 +39,11 @@ class ROSConveyorControllerPlugin : public WorldPlugin
   private: event::ConnectionPtr updateConnection;
 
   private: ros::Subscriber breakBeamSub;
+  private: transport::SubscriberPtr gzWaitingBoxSub;
   private: transport::PublisherPtr gzConveyorEnablePub;
   private: bool congestionSensorState;
+  private: bool boxWaiting;
+  private: bool beltEnabled = true;
 
   public: ~ROSConveyorControllerPlugin()
   {
@@ -83,9 +86,28 @@ class ROSConveyorControllerPlugin : public WorldPlugin
     this->gzConveyorEnablePub =
       this->gzNode->Advertise<msgs::GzString>(conveyorControlTopic);
 
+    std::string waitingBoxTopic = "/waiting_shipping_box";
+    if (_sdf->HasElement("waiting_box_topic"))
+    {
+      waitingBoxTopic = _sdf->Get<std::string>("waiting_box_topic");
+    }
+    this->gzWaitingBoxSub = this->gzNode->Subscribe(
+      waitingBoxTopic, &ROSConveyorControllerPlugin::OnWaitingBox, this);
+
     // Listen to the update event that is broadcasted every simulation iteration.
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
       std::bind(&ROSConveyorControllerPlugin::OnUpdate, this));
+  }
+
+  private: void OnWaitingBox(ConstGzStringPtr &_msg)
+  {
+    if (_msg->data() == "")
+    {
+      this->boxWaiting = false;
+    } else
+    {
+      this->boxWaiting = true;
+    }
   }
 
   private: void OnSensorState(const osrf_gear::Proximity::ConstPtr &_msg)
@@ -95,12 +117,26 @@ class ROSConveyorControllerPlugin : public WorldPlugin
 
   private: void OnUpdate()
   {
-    if (this->congestionSensorState)
+    if (this->congestionSensorState && this->boxWaiting)
     {
-      fprintf(stderr, "Disabling belt\n");
-      gazebo::msgs::GzString msg;
-      msg.set_data("disabled");
-      this->gzConveyorEnablePub->Publish(msg);
+      if (this->beltEnabled)
+      {
+        fprintf(stderr, "Disabling belt\n");
+        gazebo::msgs::GzString msg;
+        msg.set_data("disabled");
+        this->gzConveyorEnablePub->Publish(msg);
+        this->beltEnabled = false;
+      }
+    } else
+    {
+      if (!this->beltEnabled)
+      {
+        fprintf(stderr, "Enabling belt\n");
+        gazebo::msgs::GzString msg;
+        msg.set_data("enabled");
+        this->gzConveyorEnablePub->Publish(msg);
+        this->beltEnabled = true;
+      }
     }
   }
 };
