@@ -59,20 +59,20 @@ default_belt_parts = {
     'shipping_box': {
       10.0: {
         'pose': {
-           'xyz': [0.0, 0.0, 0.1],
+           'xyz': [0.0, 0.0, 0.5],
            'rpy': [0.0, 0.0, 1.5708]
          }
        }
      },
 }
 n_bins = 5
-bin1_x = -0.4
-bin1_y = -2.3
-binN_x = -0.4
-binN_y = 2.3
+bin1_x = -0.86
+bin1_y = -1.49
+binN_x = -0.8
+binN_y = bin1_y + n_bins * 1.17
 bin_width = 0.6
 bin_depth = 0.25
-bin_height = 1.2
+bin_height = 0.96
 bin_angle = -0.25
 default_bin_origins = {
 'bin{0}'.format(n): [
