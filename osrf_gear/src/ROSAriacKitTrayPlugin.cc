@@ -138,7 +138,7 @@ void KitTrayPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
   {
     gzdbg << "Toggling visuals: " << this->model->GetName() << std::endl;
     gazebo::msgs::GzString toggleMsg;
-    toggleMsg.set_data("");
+    toggleMsg.set_data("toggle");
     this->toggleVisualsPub->Publish(toggleMsg);
     this->toggleVisualsAtPose = false;
   }

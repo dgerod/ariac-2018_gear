@@ -124,5 +124,21 @@ void ToggleVisualPlugin::Update()
 void ToggleVisualPlugin::OnToggle(ConstGzStringPtr &_msg)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  this->dataPtr->visible = !this->dataPtr->visible;
+
+  if (_msg->data() == "toggle")
+  {
+    this->dataPtr->visible = !this->dataPtr->visible;
+  }
+  else if (_msg->data() == "on")
+  {
+    this->dataPtr->visible = true;
+  }
+  else if (_msg->data() == "off")
+  {
+    this->dataPtr->visible = false;
+  }
+  else
+  {
+    gzerr << "Unknown activation command [" << _msg->data() << "]" << std::endl;
+  }
 }
