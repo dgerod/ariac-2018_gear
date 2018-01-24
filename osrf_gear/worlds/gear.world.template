@@ -299,6 +299,12 @@ def expand_snippet(filename, data=locals()):
     </model>
 
 @[end if]@
+@[if sensor.type == "camera"]@
+@{
+expand_snippet('camera.sdf.template')
+}@
+
+@[end if]@
 @[if sensor.type == "logical_camera"]@
     <!-- a logical camera called @(name) -->
     <include>
