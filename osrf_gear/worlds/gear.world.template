@@ -34,16 +34,9 @@ def expand_snippet(filename, data=locals()):
       <uri>model://sun</uri>
     </include>
 
-    <!-- Pad to delete boxes at the end of the belt -->
-    <include>
-      <name>deletion_pad</name>
-      <uri>model://deletion_wall</uri>
-      <pose>1.15 -5.1 -0.1 0 1.5707 0</pose>
-    </include>
-
     <!-- A directed light source -->
     <light name="camera_spot_light" type='spot'>
-      <pose>-10 10 10 0 -1 -0.8</pose>
+      <pose>15 -2.3 3.05 -1.55 0.0 -1.62</pose>
       <diffuse>0.5 0.5 0.5 1</diffuse>
       <specular>0.1 0.1 0.1 1</specular>
       <direction>0 0 -1</direction>
@@ -60,6 +53,13 @@ def expand_snippet(filename, data=locals()):
         <falloff>1</falloff>
       </spot>
     </light>
+
+    <!-- Pad to delete boxes at the end of the belt -->
+    <include>
+      <name>deletion_pad</name>
+      <uri>model://deletion_wall</uri>
+      <pose>1.15 -5.1 -0.1 0 1.5707 0</pose>
+    </include>
 
     <!-- the workcell -->
     <include>
