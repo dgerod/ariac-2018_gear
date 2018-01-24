@@ -76,12 +76,6 @@ namespace gazebo
 
     /// \brief Publisher for current box.
     protected: transport::PublisherPtr currentBoxPub;
-
-    /// \brief Publishers for closing box visuals.
-    protected: std::map<std::string, transport::PublisherPtr> closeBoxPubMap;
-
-    /// \brief Status of close box requests.
-    protected: std::map<std::string, bool> boxClosedMap;
   };
 }
 #endif

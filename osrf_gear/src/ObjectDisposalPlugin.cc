@@ -75,13 +75,6 @@ void ObjectDisposalPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->disposalPose = _sdf->Get<math::Pose>("disposal_pose");
   fprintf(stderr, "ObjectDisposalPlugin: finished loading");
 
-  for (int i = 0; i < NUM_SHIPPING_BOXES; ++i) {
-    std::string shippingBoxName = SHIPPING_BOX_MODEL_NAME + "_" + std::to_string(i);
-    std::string topicName = "/ariac/" + shippingBoxName + "_visual_toggle";
-    auto pub = this->node->Advertise<msgs::GzString>(topicName);
-    this->closeBoxPubMap.insert(std::pair<std::string, transport::PublisherPtr>(shippingBoxName, pub));
-    this->boxClosedMap.insert(std::pair<std::string, bool>(shippingBoxName, false));
-  }
   std::string currentBoxTopic = "/ariac/" +  this->model->GetName() + "/contacting_box";
   if (_sdf->HasElement("contacting_box_topic"))
   {
@@ -109,7 +102,6 @@ void ObjectDisposalPlugin::ActOnContactingModels()
   // Don't publish all detected models because parts will be detected too.
   gazebo::msgs::GzString currentBoxMsg;
   currentBoxMsg.set_data("");
-
   for (auto model : this->contactingModels)
   {
     if (!(model && model->GetName().compare(0, SHIPPING_BOX_MODEL_NAME.length(), SHIPPING_BOX_MODEL_NAME) == 0))
@@ -117,16 +109,6 @@ void ObjectDisposalPlugin::ActOnContactingModels()
       continue;
     }
     currentBoxMsg.set_data(model->GetName());
-
-    auto it = this->closeBoxPubMap.find(model->GetName());
-    if (it != this->closeBoxPubMap.end() && !this->boxClosedMap.find(model->GetName())->second)
-    {
-      // Toggle the box visual.
-      gazebo::msgs::GzString toggleMsg;
-      toggleMsg.set_data("");
-      it->second->Publish(toggleMsg);
-      this->boxClosedMap[model->GetName()] = true;
-    }
   }
   this->currentBoxPub->Publish(currentBoxMsg);
 
