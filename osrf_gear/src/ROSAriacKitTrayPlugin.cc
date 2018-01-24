@@ -43,6 +43,15 @@ void KitTrayPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   SideContactPlugin::Load(_model, _sdf);
 
+  if (_sdf->HasElement("toggle_visuals_at"))
+  {
+    sdf::ElementPtr toggleVisualsAtElem = _sdf->GetElement("toggle_visuals_at");
+    this->toggleVisualsAtPose = true;
+    this->toggleVisualsAt = toggleVisualsAtElem->Get<math::Vector3>();
+    std::string topicName = "/ariac/" + _model->GetName() + "_visual_toggle";
+    this->toggleVisualsPub = this->node->Advertise<msgs::GzString>(topicName);
+  }
+
   if (_sdf->HasElement("lock_models_at"))
   {
     sdf::ElementPtr lockModelsAtElem = _sdf->GetElement("lock_models_at");
@@ -123,6 +132,15 @@ void KitTrayPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
   if (!this->TimeToExecute())
   {
     return;
+  }
+
+  if (this->toggleVisualsAtPose && this->model->GetWorldPose().pos.Distance(this->toggleVisualsAt) < 0.3)
+  {
+    gzdbg << "Toggling visuals: " << this->model->GetName() << std::endl;
+    gazebo::msgs::GzString toggleMsg;
+    toggleMsg.set_data("");
+    this->toggleVisualsPub->Publish(toggleMsg);
+    this->toggleVisualsAtPose = false;
   }
 
   if (this->lockModelsAtPose && this->model->GetWorldPose().pos.Distance(this->lockModelsAt) < 0.3)

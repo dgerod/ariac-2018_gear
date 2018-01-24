@@ -15,14 +15,14 @@
             <izz>0.0616</izz>
           </inertia>
         </inertial>
-  
+
         <sensor name='box_base_contact' type='contact'>
           <update_rate>1</update_rate>
           <contact>
             <collision>box_base</collision>
           </contact>
         </sensor>
-  
+
         <collision name="box_base">
           <pose>0.0 0 0.0015 0 0 0</pose>
           <max_contacts>10</max_contacts>
@@ -40,7 +40,7 @@
             </box>
           </geometry>
         </collision>
-  
+
         <collision name="box_bottom">
           <pose>0.0 0 0.0005 0 0 0</pose>
           <max_contacts>10</max_contacts>
@@ -58,7 +58,7 @@
             </box>
           </geometry>
         </collision>
-  
+
         <collision name="box_collision1">
           <pose>0.25 0 0.0127 0 0 0</pose>
           <max_contacts>10</max_contacts>
@@ -76,7 +76,7 @@
             </box>
           </geometry>
         </collision>
-  
+
         <collision name="box_collision2">
           <pose>-0.25 0 0.0127 0 0 0</pose>
           <max_contacts>10</max_contacts>
@@ -94,7 +94,7 @@
             </box>
           </geometry>
         </collision>
-  
+
         <collision name="box_collision3">
           <pose>0 0.35 0.0127 0 0 0</pose>
           <max_contacts>10</max_contacts>
@@ -112,7 +112,7 @@
             </box>
           </geometry>
         </collision>
-  
+
         <collision name="box_collision4">
           <pose>0 -0.35 0.0127 0 0 0</pose>
           <max_contacts>10</max_contacts>
@@ -130,7 +130,7 @@
             </box>
           </geometry>
         </collision>
-  
+
         <visual name="open_box">
           <geometry>
             <mesh>
@@ -143,7 +143,7 @@
             <topic>/ariac/@(shipping_box_name)_visual_toggle</topic>
           </plugin>
         </visual>
-  
+
         <visual name="closed_box">
           <geometry>
             <mesh>
@@ -163,7 +163,8 @@
         <contact_sensor_name>box_base_contact</contact_sensor_name>
         <clear_tray_service_name>/ariac/@(shipping_box_name)/clear_tray</clear_tray_service_name>
         <lock_models_service_name>/ariac/@(shipping_box_name)/lock_models</lock_models_service_name>
-        <lock_models_at>1.2 -3.3 0.9</lock_models_at>
+        <toggle_visuals_at>1.2 -4.2 0.4</toggle_visuals_at>
+        <lock_models_at>1.2 -3.3 0.4</lock_models_at>
         <update_rate>20</update_rate>
         <faulty_parts>
 @[for part_name, part_info in faulty_parts.items()]@
