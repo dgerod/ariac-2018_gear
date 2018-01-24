@@ -163,7 +163,7 @@
         <contact_sensor_name>box_base_contact</contact_sensor_name>
         <clear_tray_service_name>/ariac/@(shipping_box_name)/clear_tray</clear_tray_service_name>
         <lock_models_service_name>/ariac/@(shipping_box_name)/lock_models</lock_models_service_name>
-        <toggle_visuals_at>1.2 -4.2 0.4</toggle_visuals_at>
+        <toggle_visuals_at>1.2 -4.35 0.4</toggle_visuals_at>
         <lock_models_at>1.2 -3.3 0.4</lock_models_at>
         <update_rate>20</update_rate>
         <faulty_parts>
