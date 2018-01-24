@@ -41,26 +41,26 @@
           </geometry>
         </collision>
 
-        <collision name="box_bottom">
-          <pose>0.0 0 0.0005 0 0 0</pose>
+        <collision name="box_underneath">
+          <pose>0.0 0 0.001 0 0 0</pose>
           <max_contacts>10</max_contacts>
           <surface>
             <contact>
               <ode>
                 <max_vel>0.0</max_vel>
-                <min_depth>0.001</min_depth>
+                <min_depth>0.0001</min_depth>
               </ode>
             </contact>
           </surface>
           <geometry>
             <box>
-              <size>0.49 0.69 0.001</size>
+              <size>0.5 0.7 0.0025</size>
             </box>
           </geometry>
         </collision>
 
         <collision name="box_collision1">
-          <pose>0.25 0 0.0127 0 0 0</pose>
+          <pose>0.25 0 0.059 0 0 0</pose>
           <max_contacts>10</max_contacts>
           <surface>
             <contact>
@@ -72,13 +72,13 @@
           </surface>
           <geometry>
             <box>
-              <size>0.001 0.7 0.0254</size>
+              <size>0.001 0.7 0.118</size>
             </box>
           </geometry>
         </collision>
 
         <collision name="box_collision2">
-          <pose>-0.25 0 0.0127 0 0 0</pose>
+          <pose>-0.25 0 0.059 0 0 0</pose>
           <max_contacts>10</max_contacts>
           <surface>
             <contact>
@@ -90,13 +90,13 @@
           </surface>
           <geometry>
             <box>
-              <size>0.001 0.7 0.0254</size>
+              <size>0.001 0.7 0.118</size>
             </box>
           </geometry>
         </collision>
 
         <collision name="box_collision3">
-          <pose>0 0.35 0.0127 0 0 0</pose>
+          <pose>0 0.35 0.059 0 0 0</pose>
           <max_contacts>10</max_contacts>
           <surface>
             <contact>
@@ -108,13 +108,13 @@
           </surface>
           <geometry>
             <box>
-              <size>0.5 0.001 0.0254</size>
+              <size>0.5 0.001 0.118</size>
             </box>
           </geometry>
         </collision>
 
         <collision name="box_collision4">
-          <pose>0 -0.35 0.0127 0 0 0</pose>
+          <pose>0 -0.35 0.059 0 0 0</pose>
           <max_contacts>10</max_contacts>
           <surface>
             <contact>
@@ -126,7 +126,7 @@
           </surface>
           <geometry>
             <box>
-              <size>0.5 0.001 0.0254</size>
+              <size>0.5 0.001 0.118</size>
             </box>
           </geometry>
         </collision>
@@ -134,7 +134,7 @@
         <visual name="open_box">
           <geometry>
             <mesh>
-              <scale>1.1 1.8 0.25</scale>
+              <scale>1.065 1.74 0.25</scale>
               <uri>model://open_box/meshes/open_box.obj</uri>
             </mesh>
           </geometry>
@@ -147,7 +147,7 @@
         <visual name="closed_box">
           <geometry>
             <mesh>
-              <scale>1.1 1.8 0.25</scale>
+              <scale>1.065 1.74 0.25</scale>
               <uri>model://closed_box/meshes/closed_box.obj</uri>
             </mesh>
           </geometry>
@@ -159,6 +159,7 @@
       </link>
 
       <!-- plugin for processing contact sensor output -->
+      <!--
       <plugin name="kit_tray_plugin" filename="libROSAriacKitTrayPlugin.so">
         <contact_sensor_name>box_base_contact</contact_sensor_name>
         <clear_tray_service_name>/ariac/@(shipping_box_name)/clear_tray</clear_tray_service_name>
@@ -172,3 +173,4 @@
 @[end for]@
         </faulty_parts>
       </plugin>
+      -->
