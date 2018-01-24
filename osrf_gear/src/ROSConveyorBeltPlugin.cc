@@ -87,7 +87,15 @@ bool ROSConveyorBeltPlugin::OnControlCommand(ros::ServiceEvent<
     res.success = false;
     return true;
   }
-  this->SetPower(req.state.power);
-  res.success = true;
+  if (this->IsEnabled())
+  {
+    this->SetPower(req.state.power);
+    res.success = true;
+  } else {
+    std::string errStr = "Belt is not currently enabled so power cannot be set. It may be congested.";
+    gzerr << errStr << std::endl;
+    ROS_ERROR_STREAM(errStr);
+    res.success = false;
+  }
   return true;
 }
