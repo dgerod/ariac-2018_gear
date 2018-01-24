@@ -29,7 +29,7 @@
           </mesh>
         </geometry>
         <plugin name="toggle" filename="libToggleVisualPlugin.so">
-          <initially_visible>true</initially_visible>
+          <initially_visible>false</initially_visible>
           <topic>~/drone_box_visual_toggle</topic>
         </plugin>
       </visual>

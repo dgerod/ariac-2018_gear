@@ -253,18 +253,7 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
   {
     if (this->dataPtr->deliveryTriggered)
     {
-      this->dataPtr->currentState = "preparing_to_collect";
       this->dataPtr->deliveryTriggerTime = currentSimTime;
-    }
-    this->dataPtr->deliveryTriggered = false;
-  }
-  if (this->dataPtr->currentState == "preparing_to_collect")
-  {
-      // Toggle the box visual.
-      gazebo::msgs::GzString toggleMsg;
-      toggleMsg.set_data("");
-      this->dataPtr->toggleBoxVisualPub->Publish(toggleMsg);
-
       // Make a service call to submit the tray for inspection.
       // Do this before animating and clearing the AGV in case the assigned
       // goal changes as the AGV is moving.
@@ -281,50 +270,37 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
       {
         this->dataPtr->inspectionResult = submit_srv.response.inspection_result;
       }
-      
-      // Dispose of the real box in favour of a dummy one.
-      gazebo::msgs::GzString activateMsg;
-      activateMsg.set_data("activate");
-      this->dataPtr->clearBoxesPub->Publish(activateMsg);
 
       // Trigger the tray delivery animation
       this->dataPtr->collectTrayAnimation->SetTime(0);
       this->dataPtr->model->SetAnimation(this->dataPtr->collectTrayAnimation);
       ROS_INFO_STREAM("AGV successfully triggered.");
       this->dataPtr->currentState = "collecting";
+    }
+    this->dataPtr->deliveryTriggered = false;
   }
   if (this->dataPtr->currentState == "collecting")
   {
-/*
-    // Wait until AGV is away from potential user interference
-    if (!this->dataPtr->gravityDisabled && this->dataPtr->collectTrayAnimation->GetTime() >= 0.5)
-    {
-      // Parts will fall through the tray during the animation unless gravity is disabled on the AGV
-      gzdbg << "Disabling gravity on model: " << this->dataPtr->agvName << std::endl;
-      this->dataPtr->model->SetGravityMode(false);
-      this->dataPtr->gravityDisabled = true;
-    }
-*/
     bool collectTrayAnimationDone = this->dataPtr->collectTrayAnimation->GetTime() >= \
       this->dataPtr->collectTrayAnimation->GetLength();
     if (collectTrayAnimationDone)
     {
+      // Dispose of the real box in favour of the dummy collected box visual.
+      gazebo::msgs::GzString activateMsg;
+      activateMsg.set_data("activate_once");
+      this->dataPtr->clearBoxesPub->Publish(activateMsg);
+
+      // Enable the collected box visual.
+      gazebo::msgs::GzString toggleMsg;
+      toggleMsg.set_data("on");
+      this->dataPtr->toggleBoxVisualPub->Publish(toggleMsg);
+
       gzdbg << "Collect tray animation finished." << std::endl;
       this->dataPtr->currentState = "collected";
     }
   }
   if (this->dataPtr->currentState == "collected")
   {
-      // Disable the deletion pad again so new boxes arriving don't get deleted.
-      gazebo::msgs::GzString activateMsg;
-      activateMsg.set_data("deactivate");
-      this->dataPtr->clearBoxesPub->Publish(activateMsg);
-
-      // Toggle the box visual.
-      gazebo::msgs::GzString msg;
-      msg.set_data("");
-      this->dataPtr->toggleBoxVisualPub->Publish(msg);
-
     // Report the result of the previously-performed tray inspection.
     if (this->dataPtr->inspectionResult < 0)
     {
@@ -334,26 +310,6 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
     {
       ROS_INFO_STREAM("Result of inspection: " << this->dataPtr->inspectionResult);
     }
-
-/*
-    // Make a service call to clear the tray.
-    if (!this->dataPtr->rosClearTrayClient.exists())
-    {
-      this->dataPtr->rosClearTrayClient.waitForExistence();
-    }
-    std_srvs::Trigger clear_srv;
-    this->dataPtr->rosClearTrayClient.call(clear_srv);
-    if (!clear_srv.response.success)
-    {
-      ROS_ERROR_STREAM("Failed to clear tray.");
-    }
-    else
-    {
-      ROS_DEBUG_STREAM("Tray successfully cleared.");
-    }
-    this->dataPtr->model->SetGravityMode(true);
-    this->dataPtr->gravityDisabled = false;
-*/
 
     // Trigger the return animation.
     this->dataPtr->returnAnimation->SetTime(0);
@@ -367,12 +323,14 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
     if (returnAnimationDone)
     {
       gzdbg << "Return animation finished." << std::endl;
-      this->dataPtr->currentState = "returned";
+
+      // Disable the visual of the dummy collected box.
+      gazebo::msgs::GzString toggleMsg;
+      toggleMsg.set_data("off");
+      this->dataPtr->toggleBoxVisualPub->Publish(toggleMsg);
+
+      this->dataPtr->currentState = "ready_to_collect";
     }
-  }
-  if (this->dataPtr->currentState == "returned")
-  {
-    this->dataPtr->currentState = "ready_to_collect";
   }
   std_msgs::String stateMsg;
   stateMsg.data = this->dataPtr->currentState;
