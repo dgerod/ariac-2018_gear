@@ -38,7 +38,7 @@ def expand_snippet(filename, data=locals()):
     <include>
       <name>deletion_pad</name>
       <uri>model://deletion_wall</uri>
-      <pose>1.15 -5.1 0.0 0 1.5707 0</pose>
+      <pose>1.15 -5.1 -0.1 0 1.5707 0</pose>
     </include>
 
     <!-- A directed light source -->

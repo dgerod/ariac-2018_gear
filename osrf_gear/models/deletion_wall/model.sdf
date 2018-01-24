@@ -15,14 +15,14 @@
         <max_contacts>10</max_contacts>
         <geometry>
           <box>
-            <size>0.1 1 1</size>
+            <size>0.1 2 2</size>
           </box>
         </geometry>
       </collision>
       <visual name='visual'>
         <geometry>
           <box>
-            <size>0.1 1 1</size>
+            <size>0.1 2 2</size>
           </box>
         </geometry>
         <cast_shadows>0</cast_shadows>
