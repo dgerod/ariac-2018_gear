@@ -66,6 +66,9 @@ namespace gazebo
     /// \brief Gazebo publisher for removing boxes.
     public: transport::PublisherPtr clearBoxesPub;
 
+    /// \brief Gazebo subscriber for boxes waiting to be collected.
+    public: transport::SubscriberPtr waitingBoxSub;
+
     /// \brief Client for clearing this AGV's tray
     public: ros::ServiceClient rosClearTrayClient;
 
@@ -87,8 +90,8 @@ namespace gazebo
     /// \brief The time the last tray delivery was triggered
     public: common::Time deliveryTriggerTime;
 
-    /// \brief Whether or not gravity of the AGV has been disabled
-    public: bool gravityDisabled;
+    /// \brief Name of the shipping box waiting to be collected ("" if none)
+    public: std::string waitingBoxName;
 
     /// \brief Flag for triggering tray delivery from the service callback
     public: bool deliveryTriggered = false;
@@ -172,6 +175,12 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     clearTrayServiceName = _sdf->Get<std::string>("clear_tray_service_name");
   ROS_DEBUG_STREAM("Using clear tray service topic: " << clearTrayServiceName);
 
+  std::string waitingBoxTopic = "waiting_shipping_box";
+  if (_sdf->HasElement("waiting_box_topic"))
+  {
+    waitingBoxTopic = _sdf->Get<std::string>("waiting_box_topic");
+  }
+
   this->dataPtr->rosnode = new ros::NodeHandle(this->dataPtr->robotNamespace);
 
   // Initialize Gazebo transport
@@ -181,6 +190,8 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->dataPtr->gzNode->Advertise<msgs::GzString>("~/drone_box_visual_toggle");
   this->dataPtr->clearBoxesPub =
     this->dataPtr->gzNode->Advertise<msgs::GzString>("/ariac/deletion_pad/activate");
+  this->dataPtr->waitingBoxSub = this->dataPtr->gzNode->Subscribe(
+    waitingBoxTopic, &ROSAGVPlugin::OnWaitingBox, this);
 
   double speedFactor = 0.8;
   this->dataPtr->collectTrayAnimation.reset(
@@ -349,9 +360,21 @@ bool ROSAGVPlugin::OnCommand(
     _res.success = false;
     return true;
   }
+  if (this->dataPtr->waitingBoxName == "")
+  {
+    ROS_ERROR_STREAM("AGV not successfully triggered as there is no shipping box to collect.");
+    _res.success = false;
+    return true;
+  }
   ROS_ERROR_STREAM("[INFO] AGV '" << this->dataPtr->agvName << "' collection triggered for kit: " << _req.kit_type);
   this->dataPtr->kitType = _req.kit_type;
   this->dataPtr->deliveryTriggered = true;
   _res.success = true;
   return true;
+}
+
+/////////////////////////////////////////////////
+void ROSAGVPlugin::OnWaitingBox(ConstGzStringPtr &_msg)
+{
+  this->dataPtr->waitingBoxName = _msg->data();
 }
