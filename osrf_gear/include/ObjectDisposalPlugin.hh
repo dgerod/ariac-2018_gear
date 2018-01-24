@@ -59,6 +59,9 @@ namespace gazebo
     /// \brief Whether or not models in contact will be deleted.
     protected: bool active = false;
 
+    /// \brief True if should be deactivated after an active iteration.
+    protected: bool activateOnce = false;
+
     /// \brief Pose where the object will be teleported.
     protected: math::Pose disposalPose;
 

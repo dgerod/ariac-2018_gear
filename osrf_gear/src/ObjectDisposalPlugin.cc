@@ -171,6 +171,11 @@ void ObjectDisposalPlugin::ActOnContactingModels()
       }
     }
   }
+  if (this->activateOnce)
+  {
+    this->activateOnce = false;
+    this->active = false;
+  }
 }
 
 /////////////////////////////////////////////////
@@ -178,10 +183,21 @@ void ObjectDisposalPlugin::OnActivation(ConstGzStringPtr &_msg)
 {
   fprintf(stderr, "ObjectDisposalPlugin: received activation request: %s\n", _msg->data().c_str());
 
-  if (_msg->data() == "activate")
+  if (_msg->data() == "activate_once")
+  {
     this->active = true;
+    this->activateOnce = true;
+  }
+  else if (_msg->data() == "activate")
+  {
+    this->active = true;
+  }
   else if (_msg->data() == "deactivate")
+  {
     this->active = false;
+  }
   else
+  {
     gzerr << "Unknown activation command [" << _msg->data() << "]" << std::endl;
+  }
 }
