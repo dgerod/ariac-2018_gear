@@ -125,33 +125,39 @@ void ObjectDisposalPlugin::ActOnContactingModels()
   auto disposalBox = math::Box(linkBoxMin, linkBoxMax);
 
   for (auto model : this->contactingModels) {
-    if (model) {
-      bool removeModel = true;
-      if (this->centerOfGravityCheck)
+    // Only remove boxes because the contacting models will have already been locked
+    if (!(model && model->GetName().compare(0, SHIPPING_BOX_MODEL_NAME.length(), SHIPPING_BOX_MODEL_NAME) == 0))
+    {
+      continue;
+    }
+
+    if (this->centerOfGravityCheck)
+    {
+      // Calculate the center of gravity of the model
+      math::Vector3 modelCog = math::Vector3::Zero;
+      double modelMass = 0.0;
+      for (auto modelLink : model->GetLinks())
       {
-        // Calculate the center of gravity of the model
-        math::Vector3 modelCog = math::Vector3::Zero;
-        double modelMass = 0.0;
-        for (auto modelLink : model->GetLinks())
-        {
-          double linkMass = modelLink->GetInertial()->GetMass();
-          modelCog += modelLink->GetWorldCoGPose().pos * linkMass;
-          modelMass += linkMass;
-        }
-        if (modelMass > 0.0)
-        {
-          modelCog /= modelMass;
-        }
-        removeModel = disposalBox.Contains(modelCog);
+        double linkMass = modelLink->GetInertial()->GetMass();
+        modelCog += modelLink->GetWorldCoGPose().pos * linkMass;
+        modelMass += linkMass;
       }
-      if (removeModel)
+      if (modelMass > 0.0)
       {
-        gzdbg << "[" << this->model->GetName() << "] Removing model: " << model->GetName() << "\n";
-        model->SetAutoDisable(true);
-        model->SetStatic(true);
-        model->SetWorldPose(this->disposalPose + math::Pose(0, 0.25 * this->numRemovedModels++, 0, 0, 0, 0));
+        modelCog /= modelMass;
+      }
+      if (!disposalBox.Contains(modelCog))
+      {
+        continue;
       }
     }
+    // Only update the position, not the orientation.
+    math::Pose modelDisposalPose = model->GetWorldPose();
+    modelDisposalPose.pos = this->disposalPose.pos + math::Vector3(0, 1.25 * this->numRemovedModels++, 0);
+
+    gzdbg << "[" << this->model->GetName() << "] Removing model: " << model->GetName() << "\n";
+    model->SetAutoDisable(true);
+    model->SetWorldPose(modelDisposalPose);
   }
   if (this->activateOnce)
   {

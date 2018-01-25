@@ -1,4 +1,4 @@
-      <allow_auto_disable>0</allow_auto_disable>
+      <allow_auto_disable>1</allow_auto_disable>
       <static>false</static>
 
       <!-- include box with contact sensor -->
