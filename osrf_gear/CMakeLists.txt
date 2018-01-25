@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(osrf_gear)
 
+# This package was developed with gazebo7, but now uses gazebo8.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+
 if(NOT WIN32)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
 endif()
