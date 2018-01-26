@@ -94,6 +94,8 @@ def prepare_arguments(parser):
         help='if true the competition mode environment variable will not be set (default false)')
     add('--no-gui', action='store_true', default=False,
         help="don't run the gazebo client gui")
+    add('-l', '--state-logging', action='store',
+        help='generate gazebo state logs (will override config file option)')
     mex_group = parser.add_mutually_exclusive_group(required=False)
     add = mex_group.add_argument
     add('config', nargs="?", metavar="CONFIG",
@@ -408,7 +410,7 @@ def create_options_info(options_dict):
     return options
 
 
-def prepare_template_data(config_dict):
+def prepare_template_data(config_dict, args):
     template_data = {
         'arm': None,
         'sensors': {},
@@ -425,6 +427,8 @@ def prepare_template_data(config_dict):
     # Process the options first as they may affect the processing of the rest
     options_dict = get_field_with_default(config_dict, 'options', {})
     template_data['options'].update(create_options_info(options_dict))
+    if args.state_logging is not None:
+        template_data['options']['gazebo_state_logging'] = args.state_logging
 
     models_over_bins = {}
     for key, value in config_dict.items():
@@ -486,7 +490,7 @@ def main(sysargv=None):
     expanded_dict_config = expand_yaml_substitutions(dict_config)
     if args.verbose:
         print(yaml.dump({'Using configuration': expanded_dict_config}))
-    template_data = prepare_template_data(expanded_dict_config)
+    template_data = prepare_template_data(expanded_dict_config, args)
     files = generate_files(template_data)
     if not args.dry_run and not os.path.isdir(args.output):
         if os.path.exists(args.output) and not os.path.isdir(args.output):
