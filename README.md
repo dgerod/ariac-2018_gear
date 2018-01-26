@@ -13,4 +13,4 @@ Most participants will not need to build GEAR from source: please see the binary
 
 The `master` branch is the "bleeding edge" development branch for the active competition year (2018).
 
-To access the source code for the version of GEAR used in ARIAC 2017, use the [`ariac_1.1.4` tag](https://bitbucket.org/osrf/ariac/src?at=ariac_1.1.4).
+To access the source code for the version of GEAR used in ARIAC 2017, use the [`ariac_2017` branch](https://bitbucket.org/osrf/ariac/src/7342fec80e5612230710f82bf918f13b4dc4b08b/?at=ariac_2017).
