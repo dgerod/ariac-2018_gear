@@ -36,9 +36,6 @@ namespace gazebo
     /// \brief Name of the AGV
     public: std::string agvName;
 
-    /// \brief Scoped name of the link of the tray on the AGV
-    public: std::string trayLinkName;
-
     /// \brief World pointer
     public: physics::WorldPtr world;
 
@@ -154,8 +151,6 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   }
 
   this->dataPtr->agvName = std::string("agv") + index;
-  this->dataPtr->trayLinkName = "shipping_box_0::box_base";
-    //this->dataPtr->agvName + "::kit_tray_" + index + "::kit_tray_" + index + "::tray";
 
   std::string agvControlTopic = "/ariac/" + this->dataPtr->agvName;
   ROS_DEBUG_STREAM("Using AGV control service topic: " << agvControlTopic);
@@ -273,7 +268,7 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
         this->dataPtr->rosSubmitTrayClient.waitForExistence();
       }
       osrf_gear::SubmitTray submit_srv;
-      submit_srv.request.tray_id = this->dataPtr->trayLinkName;
+      submit_srv.request.tray_id = this->dataPtr->waitingBoxName + "::box_base";
       submit_srv.request.kit_type = this->dataPtr->kitType;
       this->dataPtr->rosSubmitTrayClient.call(submit_srv);
       this->dataPtr->inspectionResult = -1;
