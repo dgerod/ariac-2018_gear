@@ -66,13 +66,13 @@ default_sensors = {
 }
 default_belt_parts = {
     'shipping_box': {
-      10.0: {
-        'pose': {
-           'xyz': [0.0, 0.0, 0.5],
-           'rpy': [0.0, 0.0, 1.5708]
-         }
-       }
-     },
+        10.0: {
+            'pose': {
+                'xyz': [0.0, 0.0, 0.5],
+                'rpy': [0.0, 0.0, 1.5708]
+            }
+        }
+    },
 }
 n_bins = 5
 bin1_x = -0.86
@@ -84,10 +84,10 @@ bin_depth = 0.25
 bin_height = 0.96
 bin_angle = -0.25
 default_bin_origins = {
-'bin{0}'.format(n): [
-   bin1_x + (binN_x - bin1_x)/n_bins*n,
-   bin1_y + (binN_y - bin1_y)/n_bins*n,
-   bin_height] for n in range(1, n_bins+1)}
+    'bin{0}'.format(n): [
+        bin1_x + (binN_x - bin1_x) / n_bins * n,
+        bin1_y + (binN_y - bin1_y) / n_bins * n,
+        bin_height] for n in range(1, n_bins + 1)}
 
 configurable_options = {
     'insert_agvs': True,
@@ -124,7 +124,7 @@ def prepare_arguments(parser):
         help='generate gazebo state logs (will override config file option)')
     mex_group = parser.add_mutually_exclusive_group(required=False)
     add = mex_group.add_argument
-    add('config', nargs="?", metavar="CONFIG",
+    add('config', nargs='?', metavar='CONFIG',
         help='yaml string that is the configuration')
     add('-f', '--file', nargs='+', help='list of paths to yaml files that contain the '
         'configuration (contents will be concatenated)')
@@ -375,7 +375,8 @@ def create_drops_info(drops_dict):
 def create_order_info(name, order_dict):
     kit_count = get_field_with_default(order_dict, 'kit_count', 1)
     announcement_condition = get_required_field(name, order_dict, 'announcement_condition')
-    announcement_condition_value = get_required_field(name, order_dict, 'announcement_condition_value')
+    announcement_condition_value = get_required_field(
+        name, order_dict, 'announcement_condition_value')
     parts_dict = get_required_field(name, order_dict, 'parts')
     parts = []
     for part_name, part_dict in parts_dict.items():
@@ -411,7 +412,7 @@ def create_bin_infos():
 
 def create_material_location_info(belt_parts, models_over_bins):
     # Specify where trays can be found
-    material_locations = {'tray': set(['agv1_load_point', 'agv2_load_point'])}
+    material_locations = {'tray': {'agv1_load_point', 'agv2_load_point'}}
 
     # Specify that belt parts can be found on the conveyor belt
     for _, spawn_times in belt_parts.items():
@@ -419,14 +420,14 @@ def create_material_location_info(belt_parts, models_over_bins):
             if part.type in material_locations:
                 material_locations[part.type].update(['belt'])
             else:
-                material_locations[part.type] = set(['belt'])
+                material_locations[part.type] = {'belt'}
 
     # Specify in which bin the different bin parts can be found
     for part_name, part in models_over_bins.items():
         if part.type in material_locations:
             material_locations[part.type].update([part.bin])
         else:
-            material_locations[part.type] = set([part.bin])
+            material_locations[part.type] = {part.bin}
 
     return material_locations
 
@@ -523,7 +524,7 @@ def main(sysargv=None):
     files = generate_files(template_data)
     if not args.dry_run and not os.path.isdir(args.output):
         if os.path.exists(args.output) and not os.path.isdir(args.output):
-            print("Error, given output directory exists but is not a directory.", file=sys.stderr)
+            print('Error, given output directory exists but is not a directory.', file=sys.stderr)
             sys.exit(1)
         print('creating directory: ' + args.output)
         os.makedirs(args.output)
@@ -555,7 +556,7 @@ def main(sysargv=None):
     if not args.development_mode:
         os.environ['ARIAC_COMPETITION'] = '1'
 
-    print("Running command: " + ' '.join(cmd))
+    print('Running command: ' + ' '.join(cmd))
     if not args.dry_run:
         try:
             p = subprocess.Popen(cmd)
