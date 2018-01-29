@@ -55,6 +55,15 @@ sensor_configs = {
     'laser_profiler': None,
     'quality_control': None,
 }
+default_sensors = {
+    'congestion_sensor': {
+        'type': 'break_beam',
+        'pose': {
+            'xyz': [0.71, -4.25, 0.46],
+            'rpy': [0.0, 0.0, 0.0]
+        }
+    }
+}
 default_belt_parts = {
     'shipping_box': {
       10.0: {
@@ -432,7 +441,7 @@ def create_options_info(options_dict):
 def prepare_template_data(config_dict, args):
     template_data = {
         'arm': None,
-        'sensors': {},
+        'sensors': create_sensor_infos(default_sensors),
         'models_to_insert': {},
         'models_to_spawn': {},
         'belt_parts': create_belt_part_infos(default_belt_parts),
