@@ -1,25 +1,12 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
-  <model name="drone">
-    <pose>0 0 0 0 0 1.5707</pose>
+  <model name="drone_with_box">
+    <include>
+      <name>drone</name>
+      <uri>model://drone</uri>
+    </include>
     <static>true</static>
-    <link name="link">
-      <collision name="collision">
-        <geometry>
-          <mesh>
-            <scale>1.3 1.3 1</scale>
-            <uri>model://drone/meshes/drone.obj</uri>
-          </mesh>
-        </geometry>
-      </collision>
-      <visual name="visual">
-        <geometry>
-          <mesh>
-            <scale>1.3 1.3 1</scale>
-            <uri>model://drone/meshes/drone.obj</uri>
-          </mesh>
-        </geometry>
-      </visual>
+    <link name="box_link">
       <visual name="box_visual">
         <pose>0 0 -0.13 0 0 1.5707</pose>
         <geometry>
