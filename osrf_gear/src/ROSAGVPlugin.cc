@@ -184,7 +184,7 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->dataPtr->toggleBoxVisualPub =
     this->dataPtr->gzNode->Advertise<msgs::GzString>("~/drone_box_visual_toggle");
   this->dataPtr->clearBoxesPub =
-    this->dataPtr->gzNode->Advertise<msgs::GzString>("/ariac/deletion_pad/activate");
+    this->dataPtr->gzNode->Advertise<msgs::GzString>("/ariac/drone_collection_zone/activate_deletion");
   this->dataPtr->waitingBoxSub = this->dataPtr->gzNode->Subscribe(
     waitingBoxTopic, &ROSAGVPlugin::OnWaitingBox, this);
 

@@ -54,10 +54,10 @@ def expand_snippet(filename, data=locals()):
       </spot>
     </light>
 
-    <!-- Pad to delete boxes at the end of the belt -->
+    <!-- Pad to detect (and delete) boxes at the end of the belt -->
     <include>
-      <name>deletion_pad</name>
-      <uri>model://deletion_wall</uri>
+      <name>drone_collection_zone</name>
+      <uri>model://drone_collection_zone</uri>
       <pose>1.15 -5.1 -0.1 0 1.5707 0</pose>
     </include>
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
-  <model name="deletion_wall">
+  <model name="drone_collection_zone">
     <!-- add a link that is sensing collisions -->
     <static>true</static>
     <link name="sensing_link">
@@ -19,6 +19,7 @@
           </box>
         </geometry>
       </collision>
+      <!--
       <visual name='visual'>
         <geometry>
           <box>
@@ -26,15 +27,15 @@
           </box>
         </geometry>
         <cast_shadows>0</cast_shadows>
-        <!-- make invisible -->
-        <transparency>100</transparency>
       </visual>
+      -->
     </link>
 
     <!-- plugin for processing contact sensor output -->
     <plugin name="object_disposal_plugin" filename="libObjectDisposalPlugin.so">
       <contact_sensor_name>object_disposal_contact</contact_sensor_name>
       <contacting_box_topic>/ariac/waiting_shipping_box</contacting_box_topic>
+      <activation_topic>/ariac/drone_collection_zone/activate_deletion</activation_topic>
       <contact_side_normal>1 0 0</contact_side_normal>
       <disposal_pose>-7.5 -10 -0.5 0 0 0</disposal_pose>
       <update_rate>5</update_rate>
