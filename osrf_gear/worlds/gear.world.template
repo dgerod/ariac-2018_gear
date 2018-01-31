@@ -342,7 +342,7 @@ count[part.type] = id + 1
 @[end if]@
 
     <!-- Populate kit tray with order parts -->
-    <plugin filename="libROSConveyorControllerPlugin.so" name="congestion_controller">
+    <plugin filename="libROSConveyorCongestionPlugin.so" name="congestion_controller">
       <congestion_sensor_topic>/ariac/congestion_sensor</congestion_sensor_topic>
       <conveyor_control_topic>/ariac/conveyor_enable</conveyor_control_topic>
       <waiting_box_topic>/ariac/waiting_shipping_box</waiting_box_topic>

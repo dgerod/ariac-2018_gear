@@ -30,7 +30,7 @@
 
 namespace gazebo
 {
-class ROSConveyorControllerPlugin : public WorldPlugin
+class ROSConveyorCongestionPlugin : public WorldPlugin
 {
   private: ros::NodeHandle* rosnode;
   private: transport::NodePtr gzNode;
@@ -45,7 +45,7 @@ class ROSConveyorControllerPlugin : public WorldPlugin
   private: bool boxWaiting;
   private: bool beltEnabled = true;
 
-  public: ~ROSConveyorControllerPlugin()
+  public: ~ROSConveyorCongestionPlugin()
   {
     this->rosnode->shutdown();
   }
@@ -75,7 +75,7 @@ class ROSConveyorControllerPlugin : public WorldPlugin
     }
     this->breakBeamSub =
       this->rosnode->subscribe(breakBeamStateTopic, 1000,
-        &ROSConveyorControllerPlugin::OnSensorState, this);
+        &ROSConveyorCongestionPlugin::OnSensorState, this);
 
     // Create a publisher for the conveyor enable topic
     std::string conveyorControlTopic = "/conveyor_enable";
@@ -92,11 +92,11 @@ class ROSConveyorControllerPlugin : public WorldPlugin
       waitingBoxTopic = _sdf->Get<std::string>("waiting_box_topic");
     }
     this->gzWaitingBoxSub = this->gzNode->Subscribe(
-      waitingBoxTopic, &ROSConveyorControllerPlugin::OnWaitingBox, this);
+      waitingBoxTopic, &ROSConveyorCongestionPlugin::OnWaitingBox, this);
 
     // Listen to the update event that is broadcasted every simulation iteration.
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-      std::bind(&ROSConveyorControllerPlugin::OnUpdate, this));
+      std::bind(&ROSConveyorCongestionPlugin::OnUpdate, this));
   }
 
   private: void OnWaitingBox(ConstGzStringPtr &_msg)
@@ -142,5 +142,5 @@ class ROSConveyorControllerPlugin : public WorldPlugin
 };
 
 // Register this plugin with the simulator
-GZ_REGISTER_WORLD_PLUGIN(ROSConveyorControllerPlugin)
+GZ_REGISTER_WORLD_PLUGIN(ROSConveyorCongestionPlugin)
 }

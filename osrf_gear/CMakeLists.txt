@@ -167,16 +167,16 @@ install(TARGETS ${ros_conveyor_belt_plugin_name}
   RUNTIME DESTINATION bin
 )
 
-# Create the libROSConveyorControllerPlugin.so library.
-set(ros_conveyor_controller_plugin ROSConveyorControllerPlugin)
-add_library(${ros_conveyor_controller_plugin} src/ROSConveyorControllerPlugin.cc)
-target_link_libraries(${ros_conveyor_controller_plugin}
+# Create the libROSConveyorCongestionPlugin.so library.
+set(ros_conveyor_congestion_plugin ROSConveyorCongestionPlugin)
+add_library(${ros_conveyor_congestion_plugin} src/ROSConveyorCongestionPlugin.cc)
+target_link_libraries(${ros_conveyor_congestion_plugin}
   ${GAZEBO_LIBRARIES}
 )
-add_dependencies(${ros_conveyor_controller_plugin}
+add_dependencies(${ros_conveyor_congestion_plugin}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
-install(TARGETS ${ros_conveyor_controller_plugin}
+install(TARGETS ${ros_conveyor_congestion_plugin}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
