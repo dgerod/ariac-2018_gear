@@ -59,7 +59,7 @@ default_sensors = {
     'congestion_sensor': {
         'type': 'break_beam',
         'pose': {
-            'xyz': [0.71, -4.25, 0.46],
+            'xyz': [0.645, -4.25, 0.5],
             'rpy': [0.0, 0.0, 0.0]
         }
     }
