@@ -74,6 +74,8 @@ namespace gazebo
     protected: void PublishKitMsg();
 
     /// \brief Service for locking the models to the tray and disabling updates
+    protected: bool HandleLockModelsService(
+      ros::ServiceEvent<std_srvs::Trigger::Request, std_srvs::Trigger::Response>& event);
     protected: void HandleLockModelsRequest(ConstGzStringPtr &_msg);
 
     /// \brief Service for clearing the tray
@@ -101,6 +103,24 @@ namespace gazebo
     /// \brief Whether or not the Kit ROS topic is enabled
     /// If unpermitted subscribers connect during the competition, publishing is disabled
     protected: bool publishingEnabled;
+
+    /// \brief Whether or not the Kit will be used as part of a nested animation (requires workarounds).
+    protected: bool nestedAnimation = false;
+
+    /// \brief Whether or not the Kit will lock toggle its visuals at a particular pose.
+    protected: bool toggleVisualsAtPose = false;
+
+    /// \brief The pose at which visuals should be toggled.
+    protected: math::Vector3 toggleVisualsAt;
+
+    /// \brief Publisher for toggling the visuals.
+    protected: transport::PublisherPtr toggleVisualsPub;
+
+    /// \brief Whether or not the Kit will lock the models at a particular pose.
+    protected: bool lockModelsAtPose = false;
+
+    /// \brief The pose at which models should be locked.
+    protected: math::Vector3 lockModelsAt;
 
     /// \brief Service that locks models to the tray
     public: ros::ServiceServer lockModelsServer;

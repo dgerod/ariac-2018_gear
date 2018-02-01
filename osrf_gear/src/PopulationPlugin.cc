@@ -127,6 +127,12 @@ namespace gazebo
     /// other values will scale the populating frequency.
     public: double rateModifier = 1.0;
 
+    /// \brief Object names will be prefixed by plugin name if True.
+    public: bool prefixObjectNames = true;
+
+    /// \brief Id of first object to teleport.
+    public: int startIndex = 0;
+
     /// \brief Last time (sim time) that the plugin was updated.
     public: gazebo::common::Time lastUpdateTime;
 
@@ -167,6 +173,16 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
   {
     sdf::ElementPtr loopElem = _sdf->GetElement("loop_forever");
     this->dataPtr->loopForever = loopElem->Get<bool>();
+  }
+
+  if (_sdf->HasElement("start_index"))
+  {
+    this->dataPtr->startIndex = _sdf->Get<int>("start_index");
+  }
+
+  if (_sdf->HasElement("prefix_object_names"))
+  {
+    this->dataPtr->prefixObjectNames = _sdf->Get<bool>("prefix_object_names");
   }
 
   if (_sdf->HasElement("frame"))
@@ -339,13 +355,18 @@ void PopulationPlugin::OnUpdate()
       ignition::math::Matrix4d pose_local(obj.pose.Ign());
       obj.pose = (transMat * pose_local).Pose();
     }
-    std::string modelName = this->GetHandle() + "|" + obj.type;
+
+    std::string modelName = obj.type;
+    if (this->dataPtr->prefixObjectNames)
+    {
+      modelName = this->GetHandle() + "|" + modelName;
+    }
 
     // Get a new index for the object.
     if (this->dataPtr->objectCounter.find(obj.type) ==
         this->dataPtr->objectCounter.end())
     {
-      this->dataPtr->objectCounter[obj.type] = 0;
+      this->dataPtr->objectCounter[obj.type] = this->dataPtr->startIndex;
     }
     else
     {
@@ -354,7 +375,7 @@ void PopulationPlugin::OnUpdate()
     int index = this->dataPtr->objectCounter[obj.type];
 
     // Get a unique name for the object.
-    modelName += "_clone_" + std::to_string(index);
+    modelName += "_" + std::to_string(index);
     auto modelPtr = this->dataPtr->world->GetModel(modelName);
     if (modelPtr)
     {

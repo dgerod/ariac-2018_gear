@@ -9,9 +9,9 @@
 
   <node name="ariac_sim" pkg="osrf_gear" type="gear.py"
         args="--development-mode
-        $(arg state_logging_args)
-        $(arg gui_args)
-        -f $(find osrf_gear)/config/sample.yaml"
-        output="screen" />
-
+          $(arg state_logging_args)
+          $(arg gui_args)
+          -f $(find osrf_gear)/config/sample.yaml
+          $(find osrf_gear)/config/sample_user_config.yaml
+          " output="screen" />
 </launch>

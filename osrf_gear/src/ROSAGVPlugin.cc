@@ -36,9 +36,6 @@ namespace gazebo
     /// \brief Name of the AGV
     public: std::string agvName;
 
-    /// \brief Scoped name of the link of the tray on the AGV
-    public: std::string trayLinkName;
-
     /// \brief World pointer
     public: physics::WorldPtr world;
 
@@ -60,14 +57,20 @@ namespace gazebo
     /// \brief Transportation node.
     public: transport::NodePtr gzNode;
 
-    /// \brief Gazebo publish for locking parts to this AGV's tray
-    public: transport::PublisherPtr lockTrayModelsPub;
+    /// \brief Gazebo publisher for toggling box visual visibility.
+    public: transport::PublisherPtr toggleBoxVisualPub;
+
+    /// \brief Gazebo publisher for removing boxes.
+    public: transport::PublisherPtr clearBoxesPub;
+
+    /// \brief Gazebo subscriber for boxes waiting to be collected.
+    public: transport::SubscriberPtr waitingBoxSub;
 
     /// \brief Client for clearing this AGV's tray
     public: ros::ServiceClient rosClearTrayClient;
 
-    /// \brief Robot animation for delivering the tray
-    public: gazebo::common::PoseAnimationPtr deliverTrayAnimation;
+    /// \brief Robot animation for collecting the tray
+    public: gazebo::common::PoseAnimationPtr collectTrayAnimation;
 
     /// \brief Robot animation for the AGV returning to its base
     public: gazebo::common::PoseAnimationPtr returnAnimation;
@@ -84,8 +87,8 @@ namespace gazebo
     /// \brief The time the last tray delivery was triggered
     public: common::Time deliveryTriggerTime;
 
-    /// \brief Whether or not gravity of the AGV has been disabled
-    public: bool gravityDisabled;
+    /// \brief Name of the shipping box waiting to be collected ("" if none)
+    public: std::string waitingBoxName;
 
     /// \brief Flag for triggering tray delivery from the service callback
     public: bool deliveryTriggered = false;
@@ -148,8 +151,6 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   }
 
   this->dataPtr->agvName = std::string("agv") + index;
-  this->dataPtr->trayLinkName =
-    this->dataPtr->agvName + "::kit_tray_" + index + "::kit_tray_" + index + "::tray";
 
   std::string agvControlTopic = "/ariac/" + this->dataPtr->agvName;
   ROS_DEBUG_STREAM("Using AGV control service topic: " << agvControlTopic);
@@ -169,91 +170,60 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     clearTrayServiceName = _sdf->Get<std::string>("clear_tray_service_name");
   ROS_DEBUG_STREAM("Using clear tray service topic: " << clearTrayServiceName);
 
+  std::string waitingBoxTopic = "waiting_shipping_box";
+  if (_sdf->HasElement("waiting_box_topic"))
+  {
+    waitingBoxTopic = _sdf->Get<std::string>("waiting_box_topic");
+  }
+
   this->dataPtr->rosnode = new ros::NodeHandle(this->dataPtr->robotNamespace);
 
   // Initialize Gazebo transport
   this->dataPtr->gzNode = transport::NodePtr(new transport::Node());
   this->dataPtr->gzNode->Init();
-  this->dataPtr->lockTrayModelsPub =
-    this->dataPtr->gzNode->Advertise<msgs::GzString>(lockTrayServiceName);
+  this->dataPtr->toggleBoxVisualPub =
+    this->dataPtr->gzNode->Advertise<msgs::GzString>("~/drone_box_visual_toggle");
+  this->dataPtr->clearBoxesPub =
+    this->dataPtr->gzNode->Advertise<msgs::GzString>("/ariac/drone_collection_zone/activate_deletion");
+  this->dataPtr->waitingBoxSub = this->dataPtr->gzNode->Subscribe(
+    waitingBoxTopic, &ROSAGVPlugin::OnWaitingBox, this);
 
-  double speedFactor = 1.2;
-  this->dataPtr->deliverTrayAnimation.reset(
-    new gazebo::common::PoseAnimation(this->dataPtr->agvName, 10/speedFactor, false));
+  double speedFactor = 0.8;
+  this->dataPtr->collectTrayAnimation.reset(
+    new gazebo::common::PoseAnimation(this->dataPtr->agvName, 4/speedFactor, false));
 
-  float sign = index == "1" ? 1.0 : -1.0;
-  float yaw = index == "1" ? 3.1415 : 0.0;
-  float height = -0.02f;
-  gazebo::common::PoseKeyFrame *key = this->dataPtr->deliverTrayAnimation->CreateKeyFrame(0);
-  key->Translation(ignition::math::Vector3d(0.3, 3.3*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
+  ignition::math::Vector3d off_screen_position1(-1.4, -9.4, 4.3);
+  ignition::math::Vector3d off_screen_position2(5.4, -9.4, 4.3);
+  ignition::math::Vector3d hover_position(1.2, -4.6, 1.6);
+  ignition::math::Vector3d lower_position(1.3, -4.7, 1.3);
 
-  key = this->dataPtr->deliverTrayAnimation->CreateKeyFrame(1.5/speedFactor);
-  key->Translation(ignition::math::Vector3d(-0.76, 3.3*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
+  gazebo::common::PoseKeyFrame *key = this->dataPtr->collectTrayAnimation->CreateKeyFrame(0);
+  key->Translation(off_screen_position1);
+  key->Rotation(ignition::math::Quaterniond(0, 0, 1.5707));
 
-  key = this->dataPtr->deliverTrayAnimation->CreateKeyFrame(3.0/speedFactor);
-  key->Translation(ignition::math::Vector3d(-2.73, 3.3*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
+  key = this->dataPtr->collectTrayAnimation->CreateKeyFrame(3.5/speedFactor);
+  key->Translation(hover_position);
+  key->Rotation(ignition::math::Quaterniond(0, 0, 0.2));
 
-  key = this->dataPtr->deliverTrayAnimation->CreateKeyFrame(4/speedFactor);
-  key->Translation(ignition::math::Vector3d(-3.94, 3.6*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
 
-  key = this->dataPtr->deliverTrayAnimation->CreateKeyFrame(5.3/speedFactor);
-  key->Translation(ignition::math::Vector3d(-4.5, 4.4*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
-
-  key = this->dataPtr->deliverTrayAnimation->CreateKeyFrame(6.5/speedFactor);
-  key->Translation(ignition::math::Vector3d(-4.5, 5.3*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
-
-  key = this->dataPtr->deliverTrayAnimation->CreateKeyFrame(7.7/speedFactor);
-  key->Translation(ignition::math::Vector3d(-4.5, 6.3*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
-
-  key = this->dataPtr->deliverTrayAnimation->CreateKeyFrame(9.0/speedFactor);
-  key->Translation(ignition::math::Vector3d(-4.2, 8.0*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
-
-  key = this->dataPtr->deliverTrayAnimation->CreateKeyFrame(10/speedFactor);
-  key->Translation(ignition::math::Vector3d(-4.2, 8.3*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
+  key = this->dataPtr->collectTrayAnimation->CreateKeyFrame(4/speedFactor);
+  key->Translation(lower_position);
+  key->Rotation(ignition::math::Quaterniond(0, 0, 0));
 
   this->dataPtr->returnAnimation.reset(
-    new gazebo::common::PoseAnimation(this->dataPtr->agvName, 12/speedFactor, false));
+    new gazebo::common::PoseAnimation(this->dataPtr->agvName, 4/speedFactor, false));
 
   key = this->dataPtr->returnAnimation->CreateKeyFrame(0);
-  key->Translation(ignition::math::Vector3d(-4.2, 8.3*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
+  key->Translation(lower_position);
+  key->Rotation(ignition::math::Quaterniond(0, 0, 0));
 
-  key = this->dataPtr->returnAnimation->CreateKeyFrame(2.6/speedFactor);
-  key->Translation(ignition::math::Vector3d(-4.4, 6.4*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
+  key = this->dataPtr->returnAnimation->CreateKeyFrame(0.6/speedFactor);
+  key->Translation(hover_position);
+  key->Rotation(ignition::math::Quaterniond(0, 0, 0));
 
-  key = this->dataPtr->returnAnimation->CreateKeyFrame(3.8/speedFactor);
-  key->Translation(ignition::math::Vector3d(-4.5, 5.2*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
-
-  key = this->dataPtr->returnAnimation->CreateKeyFrame(5.4/speedFactor);
-  key->Translation(ignition::math::Vector3d(-4.4, 4.1*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
-
-  key = this->dataPtr->returnAnimation->CreateKeyFrame(6.8/speedFactor);
-  key->Translation(ignition::math::Vector3d(-3.8, 3.5*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
-
-  key = this->dataPtr->returnAnimation->CreateKeyFrame(7.9/speedFactor);
-  key->Translation(ignition::math::Vector3d(-2.8, 3.3*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
-
-  key = this->dataPtr->returnAnimation->CreateKeyFrame(9.4/speedFactor);
-  key->Translation(ignition::math::Vector3d(-1.6, 3.3*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
-
-  key = this->dataPtr->returnAnimation->CreateKeyFrame(12/speedFactor);
-  key->Translation(ignition::math::Vector3d(0.3, 3.3*sign, height));
-  key->Rotation(ignition::math::Quaterniond(0, 0, yaw));
+  key = this->dataPtr->returnAnimation->CreateKeyFrame(4.0/speedFactor);
+  key->Translation(off_screen_position2);
+  key->Rotation(ignition::math::Quaterniond(0, 0, -1.2));
 
   this->dataPtr->model = _parent;
 
@@ -273,7 +243,7 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->dataPtr->statePub = this->dataPtr->rosnode->advertise<
     std_msgs::String>(stateTopic, 1000);
 
-  this->dataPtr->currentState = "ready_to_deliver";
+  this->dataPtr->currentState = "ready_to_collect";
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -285,25 +255,11 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
 {
   auto currentSimTime = this->dataPtr->world->GetSimTime();
-  if (this->dataPtr->currentState == "ready_to_deliver")
+  if (this->dataPtr->currentState == "ready_to_collect")
   {
     if (this->dataPtr->deliveryTriggered)
     {
-      this->dataPtr->currentState = "preparing_to_deliver";
       this->dataPtr->deliveryTriggerTime = currentSimTime;
-    }
-    this->dataPtr->deliveryTriggered = false;
-  }
-  if (this->dataPtr->currentState == "preparing_to_deliver")
-  {
-    // Wait a bit to ensure the models have been detected by the kit tray's plugin
-    if (currentSimTime - this->dataPtr->deliveryTriggerTime > 0.75)
-    {
-      // Make a request to lock the models to the tray
-      gazebo::msgs::GzString lock_msg;
-      lock_msg.set_data("lock");
-      this->dataPtr->lockTrayModelsPub->Publish(lock_msg);
-
       // Make a service call to submit the tray for inspection.
       // Do this before animating and clearing the AGV in case the assigned
       // goal changes as the AGV is moving.
@@ -312,7 +268,7 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
         this->dataPtr->rosSubmitTrayClient.waitForExistence();
       }
       osrf_gear::SubmitTray submit_srv;
-      submit_srv.request.tray_id = this->dataPtr->trayLinkName;
+      submit_srv.request.tray_id = this->dataPtr->waitingBoxName + "::box_base";
       submit_srv.request.kit_type = this->dataPtr->kitType;
       this->dataPtr->rosSubmitTrayClient.call(submit_srv);
       this->dataPtr->inspectionResult = -1;
@@ -322,31 +278,34 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
       }
 
       // Trigger the tray delivery animation
-      this->dataPtr->deliverTrayAnimation->SetTime(0);
-      this->dataPtr->model->SetAnimation(this->dataPtr->deliverTrayAnimation);
+      this->dataPtr->collectTrayAnimation->SetTime(0);
+      this->dataPtr->model->SetAnimation(this->dataPtr->collectTrayAnimation);
       ROS_INFO_STREAM("AGV successfully triggered.");
-      this->dataPtr->currentState = "delivering";
+      this->dataPtr->currentState = "collecting";
     }
+    this->dataPtr->deliveryTriggered = false;
   }
-  if (this->dataPtr->currentState == "delivering")
+  if (this->dataPtr->currentState == "collecting")
   {
-    // Wait until AGV is away from potential user interference
-    if (!this->dataPtr->gravityDisabled && this->dataPtr->deliverTrayAnimation->GetTime() >= 0.5)
+    bool collectTrayAnimationDone = this->dataPtr->collectTrayAnimation->GetTime() >= \
+      this->dataPtr->collectTrayAnimation->GetLength();
+    if (collectTrayAnimationDone)
     {
-      // Parts will fall through the tray during the animation unless gravity is disabled on the AGV
-      gzdbg << "Disabling gravity on model: " << this->dataPtr->agvName << std::endl;
-      this->dataPtr->model->SetGravityMode(false);
-      this->dataPtr->gravityDisabled = true;
-    }
-    bool deliverTrayAnimationDone = this->dataPtr->deliverTrayAnimation->GetTime() >= \
-      this->dataPtr->deliverTrayAnimation->GetLength();
-    if (deliverTrayAnimationDone)
-    {
-      gzdbg << "Delivery animation finished." << std::endl;
-      this->dataPtr->currentState = "delivered";
+      // Dispose of the real box in favour of the dummy collected box visual.
+      gazebo::msgs::GzString activateMsg;
+      activateMsg.set_data("activate_once");
+      this->dataPtr->clearBoxesPub->Publish(activateMsg);
+
+      // Enable the collected box visual.
+      gazebo::msgs::GzString toggleMsg;
+      toggleMsg.set_data("on");
+      this->dataPtr->toggleBoxVisualPub->Publish(toggleMsg);
+
+      gzdbg << "Collect tray animation finished." << std::endl;
+      this->dataPtr->currentState = "collected";
     }
   }
-  if (this->dataPtr->currentState == "delivered")
+  if (this->dataPtr->currentState == "collected")
   {
     // Report the result of the previously-performed tray inspection.
     if (this->dataPtr->inspectionResult < 0)
@@ -357,24 +316,6 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
     {
       ROS_INFO_STREAM("Result of inspection: " << this->dataPtr->inspectionResult);
     }
-
-    // Make a service call to clear the tray.
-    if (!this->dataPtr->rosClearTrayClient.exists())
-    {
-      this->dataPtr->rosClearTrayClient.waitForExistence();
-    }
-    std_srvs::Trigger clear_srv;
-    this->dataPtr->rosClearTrayClient.call(clear_srv);
-    if (!clear_srv.response.success)
-    {
-      ROS_ERROR_STREAM("Failed to clear tray.");
-    }
-    else
-    {
-      ROS_DEBUG_STREAM("Tray successfully cleared.");
-    }
-    this->dataPtr->model->SetGravityMode(true);
-    this->dataPtr->gravityDisabled = false;
 
     // Trigger the return animation.
     this->dataPtr->returnAnimation->SetTime(0);
@@ -388,7 +329,13 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
     if (returnAnimationDone)
     {
       gzdbg << "Return animation finished." << std::endl;
-      this->dataPtr->currentState = "ready_to_deliver";
+
+      // Disable the visual of the dummy collected box.
+      gazebo::msgs::GzString toggleMsg;
+      toggleMsg.set_data("off");
+      this->dataPtr->toggleBoxVisualPub->Publish(toggleMsg);
+
+      this->dataPtr->currentState = "ready_to_collect";
     }
   }
   std_msgs::String stateMsg;
@@ -402,15 +349,27 @@ bool ROSAGVPlugin::OnCommand(
   osrf_gear::AGVControl::Request &_req,
   osrf_gear::AGVControl::Response &_res)
 {
-  if (this->dataPtr->currentState != "ready_to_deliver")
+  if (this->dataPtr->currentState != "ready_to_collect")
   {
-    ROS_ERROR_STREAM("AGV not successfully triggered as it was not ready to deliver trays.");
+    ROS_ERROR_STREAM("AGV not successfully triggered as it was not ready to collect trays.");
     _res.success = false;
     return true;
   }
-  ROS_ERROR_STREAM("[INFO] AGV '" << this->dataPtr->agvName << "' delivery triggered for kit: " << _req.kit_type);
+  if (this->dataPtr->waitingBoxName == "")
+  {
+    ROS_ERROR_STREAM("AGV not successfully triggered as there is no shipping box to collect.");
+    _res.success = false;
+    return true;
+  }
+  ROS_ERROR_STREAM("[INFO] AGV '" << this->dataPtr->agvName << "' collection triggered for kit: " << _req.kit_type);
   this->dataPtr->kitType = _req.kit_type;
   this->dataPtr->deliveryTriggered = true;
   _res.success = true;
   return true;
+}
+
+/////////////////////////////////////////////////
+void ROSAGVPlugin::OnWaitingBox(ConstGzStringPtr &_msg)
+{
+  this->dataPtr->waitingBoxName = _msg->data();
 }

@@ -26,7 +26,7 @@ class UnthrottledGripperTester(GripperTester):
 
         # Pick up and drop the part multiple times.
         # Regression test for https://bitbucket.org/osrf/ariac/issues/61
-        for i in range(100):
+        for i in range(50):
             print('Enabling & disabling gripper for the {0}th time...'.format(i))
             self._enable_gripper()
             self._disable_gripper()

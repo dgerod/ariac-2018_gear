@@ -270,7 +270,8 @@ void ROSLogicalCameraPlugin::OnImage(ConstLogicalCameraImagePtr &_msg)
       modelPose = (nestedModel->GetWorldPose()) - cameraPose;
       this->AddNoise(modelPose);
       this->AddModelToMsg(modelType, modelPose, imageMsg);
-      // Do not publish TF information for nested models (kit_tray).
+      // Do not publish TF information for nested models (kit_tray) because it's not accurate.
+      // See https://bitbucket.org/osrf/ariac/issues/54.
       // this->PublishTF(modelPose, this->name + "_frame", this->modelFramePrefix + ariac::TrimNamespace(modelName) + "_frame");
     }
   }

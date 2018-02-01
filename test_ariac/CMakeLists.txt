@@ -29,17 +29,18 @@ set(rostests
   ariac_qual2a_scoring_immediate.test
   ariac_qual2b_scoring_immediate.test
   gripper.test
-  gripper_unthrottled.test
+  # gripper_unthrottled.test  # this needs a good gripper pose; regression is fixed.
   test_scoring/ariac_scoring_perfect_kit.test
   test_scoring/ariac_scoring_perfect_kit_flipped.test
   test_scoring/ariac_scoring_correct_parts_incorrect_poses.test
   test_scoring/ariac_scoring_correct_parts_plus_unwanted.test
   test_scoring/ariac_scoring_correct_parts_plus_faulty.test
   test_scoring/ariac_scoring_correct_parts_not_flipped.test
-  test_scoring/ariac_scoring_low_priority_order.test
   test_scoring/ariac_scoring_missing_parts.test
-  test_scoring/ariac_scoring_interrupted.test
-  test_scoring/ariac_scoring_not_interrupted.test
+  # these need agv2
+  #test_scoring/ariac_scoring_low_priority_order.test
+  #test_scoring/ariac_scoring_interrupted.test
+  #test_scoring/ariac_scoring_not_interrupted.test
   test_scoring/ariac_scoring_faulty_parts.test
 )
 
@@ -62,6 +63,7 @@ install(FILES
   qual2a_testing.yaml
   qual2b_testing.yaml
   minimal_sample_unthrottled.yaml
+  tf_sensors.yaml
   test_scoring/scoring_base_order.yaml
   test_scoring/scoring_base_order_flipped.yaml
   test_scoring/scoring_base_order_interrupted.yaml

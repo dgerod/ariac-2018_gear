@@ -4,30 +4,40 @@ sensors:
   break_beam_1:
     type: break_beam
     pose:
-      xyz: [1.6, 2.25, 0.91]
+      xyz: [1.663, 4.5, 0.5]
       rpy: [0, 0, 'pi']
   proximity_sensor_1:
     type: proximity_sensor
     pose:
-      xyz: [0.95, 2.6, 0.916]
+      xyz: [0.73, 2.6, 0.47]
       rpy: [0, 0, 0]
+  camera_1:
+    type: camera
+    pose:
+      xyz: [0.5, 2.8, 2.4]
+      rpy: [0, 0.9, '-pi']
   logical_camera_1:
     type: logical_camera
     pose:
-      xyz: [-0.66, 0.22, 1.36]
-      rpy: ['pi/2', 1.32, 0]
+      xyz: [-0.4, 2.0, 1.54]
+      rpy: [0, 1.2, '-pi']
   logical_camera_2:
     type: logical_camera
     pose:
-      xyz: [0.3, 3.15, 1.5]
-      rpy: [0, 'pi/2', 0]
-  logical_camera_3:
-    type: logical_camera
+      xyz: [1.2, 2.25, 1.185]
+      rpy: ['-pi/2', 'pi/2', '-pi']
+  quality_control_sensor_1:
+    type: quality_control
     pose:
-      xyz: [0.3, -3.15, 1.5]
-      rpy: [0, 'pi/2', 0]
+      xyz: [1.2, 0.25, 1.2]
+      rpy: ['-pi/2', 'pi/2', '-pi']
+  quality_control_sensor_2:
+    type: quality_control
+    pose:
+      xyz: [1.2, -2.25, 1.2]
+      rpy: ['-pi/2', 'pi/2', 'pi']
   laser_profiler_1:
     type: laser_profiler
     pose:
-      xyz: [1.21, 4, 1.64]
+      xyz: [1.21, 4, 1.17]
       rpy: ['-pi', 'pi/2', 'pi/2']

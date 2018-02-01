@@ -55,6 +55,10 @@ namespace gazebo
     /// \param[in] _info Update information provided by the server.
     protected: virtual void OnUpdate(const common::UpdateInfo &_info);
 
+    /// \brief Called when waiting box messages are received
+    /// \param[in] _msg Name of box
+    public: void OnWaitingBox(ConstGzStringPtr &_msg);
+
     /// \brief Private data pointer.
     private: std::unique_ptr<ROSAGVPluginPrivate> dataPtr;
   };

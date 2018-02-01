@@ -59,15 +59,15 @@ topics:
     num_publishers: 1
     num_subscribers: 0
 
-  - topic: /ariac/quality_control_sensor_1
-    type: osrf_gear/LogicalCameraImage
-    num_publishers: 1
-    num_subscribers: 0
-
-  - topic: /ariac/quality_control_sensor_2
-    type: osrf_gear/LogicalCameraImage
-    num_publishers: 1
-    num_subscribers: 0
+#   - topic: /ariac/quality_control_sensor_1
+#     type: osrf_gear/LogicalCameraImage
+#     num_publishers: 1
+#     num_subscribers: 0
+# 
+#   - topic: /ariac/quality_control_sensor_2
+#     type: osrf_gear/LogicalCameraImage
+#     num_publishers: 1
+#     num_subscribers: 0
 
 
   #####################################
@@ -139,9 +139,6 @@ services:
     type: osrf_gear/GetMaterialLocations
 
   - service: /ariac/agv1
-    type: osrf_gear/AGVControl
-
-  - service: /ariac/agv2
     type: osrf_gear/AGVControl
 
   - service: /ariac/end_competition

@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(osrf_gear)
 
+# This package was developed with gazebo7, but now uses gazebo8.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+
 if(NOT WIN32)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
 endif()
@@ -109,6 +112,19 @@ install(TARGETS ${ros_vacuum_gripper_plugin_name}
   RUNTIME DESTINATION bin)
 
 
+# Create the libToggleVisualPlugin.so library.
+set(toggle_visual_plugin_name ToggleVisualPlugin)
+add_library(${toggle_visual_plugin_name} src/ToggleVisualPlugin.cc)
+target_link_libraries(${toggle_visual_plugin_name}
+  ${GAZEBO_LIBRARIES}
+)
+install(TARGETS ${toggle_visual_plugin_name}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+
 # Create the libSideContactPlugin.so library.
 set(side_contact_plugin_name SideContactPlugin)
 add_library(${side_contact_plugin_name} src/SideContactPlugin.cc)
@@ -146,6 +162,21 @@ add_dependencies(${ros_conveyor_belt_plugin_name}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
 install(TARGETS ${ros_conveyor_belt_plugin_name}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+# Create the libROSConveyorCongestionPlugin.so library.
+set(ros_conveyor_congestion_plugin ROSConveyorCongestionPlugin)
+add_library(${ros_conveyor_congestion_plugin} src/ROSConveyorCongestionPlugin.cc)
+target_link_libraries(${ros_conveyor_congestion_plugin}
+  ${GAZEBO_LIBRARIES}
+)
+add_dependencies(${ros_conveyor_congestion_plugin}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+)
+install(TARGETS ${ros_conveyor_congestion_plugin}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin

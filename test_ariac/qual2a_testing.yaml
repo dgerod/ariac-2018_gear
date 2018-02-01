@@ -76,7 +76,7 @@ drops:
       part_type_to_drop: reachable_drop_part
 
 models_over_bins:
-  bin7:
+  bin3:
     models:
       piston_rod_part:
         xyz_start: [0.2, 0.2, 0.0]
@@ -85,7 +85,7 @@ models_over_bins:
         num_models_x: 2
         num_models_y: 2
 
-  bin6:
+  bin4:
     models:
        gear_part:
         xyz_start: [0.1, 0.1, 0.0]

@@ -33,9 +33,11 @@ class ScoringTester(ExampleNodeTester):
             # Submit the tray on AGV 1
             self._test_agv_control()
             time.sleep(5.0)
+            ''' commented because only one drone supported
             # Submit the tray on AGV 2
             self._test_agv_control(index=2, kit_id='order_1_kit_0')
             time.sleep(5.0)
+            '''
 
         self.assertTrue(
             self.current_comp_score == expectedScore,

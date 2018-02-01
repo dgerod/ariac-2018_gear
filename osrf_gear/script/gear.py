@@ -28,19 +28,21 @@ import em
 import yaml
 
 this_dir = os.path.abspath(os.path.dirname(__file__))
+world_dir = os.path.join(this_dir, '..', '..', 'share', 'osrf_gear', 'worlds')
+launch_dir = os.path.join(this_dir, '..', '..', 'share', 'osrf_gear', 'launch')
 template_files = [
-    os.path.join(this_dir, '..', '..', 'share', 'osrf_gear', 'worlds', 'gear.world.template'),
-    os.path.join(this_dir, '..', '..', 'share', 'osrf_gear', 'launch', 'gear.launch.template'),
-    os.path.join(this_dir, '..', '..', 'share', 'osrf_gear', 'launch', 'gear.urdf.xacro.template'),
+    os.path.join(world_dir, 'gear.world.template'),
+    os.path.join(launch_dir, 'gear.launch.template'),
+    os.path.join(launch_dir, 'gear.urdf.xacro.template'),
 ]
 arm_configs = {
     'ur10': {
         'default_initial_joint_states': {
+            'elbow_joint': 2.14,
             'linear_arm_actuator_joint': 0,
+            'shoulder_lift_joint': -2.0,
             'shoulder_pan_joint': 3.14,
-            'shoulder_lift_joint': -1.13,
-            'elbow_joint': 1.51,
-            'wrist_1_joint': 3.77,
+            'wrist_1_joint': 3.27,
             'wrist_2_joint': -1.51,
             'wrist_3_joint': 0,
         }
@@ -51,25 +53,49 @@ sensor_configs = {
     'proximity_sensor': None,
     'logical_camera': None,
     'laser_profiler': None,
+    'quality_control': None,
 }
-default_bin_origins = {
-    'bin1': [-1.0, -1.33, 0],
-    'bin2': [-1.0, -0.535, 0],
-    'bin3': [-1.0, 0.23, 0],
-    'bin4': [-1.0, 0.995, 0],
-    'bin5': [-0.3, -1.33, 0],
-    'bin6': [-0.3, -0.535, 0],
-    'bin7': [-0.3, 0.23, 0],
-    'bin8': [-0.3, 0.995, 0],
+default_sensors = {
+    'congestion_sensor': {
+        'type': 'break_beam',
+        'pose': {
+            'xyz': [0.645, -4.25, 0.5],
+            'rpy': [0.0, 0.0, 0.0]
+        }
+    }
 }
+default_belt_parts = {
+    'shipping_box': {
+        10.0: {
+            'pose': {
+                'xyz': [0.0, 0.0, 0.5],
+                'rpy': [0.0, 0.0, 1.5708]
+            }
+        }
+    },
+}
+n_bins = 5
+bin1_x = -0.86
+bin1_y = -1.49
+binN_x = -0.8
+binN_y = bin1_y + n_bins * 1.17
 bin_width = 0.6
-bin_height = 0.72
+bin_depth = 0.25
+bin_height = 0.96
+bin_angle = -0.25
+default_bin_origins = {
+    'bin{0}'.format(n): [
+        bin1_x + (binN_x - bin1_x) / n_bins * n,
+        bin1_y + (binN_y - bin1_y) / n_bins * n,
+        bin_height] for n in range(1, n_bins + 1)}
+
 configurable_options = {
     'insert_agvs': True,
+    'insert_shipping_boxes': True,
     'insert_models_over_bins': False,
     'disable_shadows': False,
     'fill_demo_tray': False,
-    'belt_population_cycles': 1,
+    'belt_population_cycles': 5,
     'gazebo_state_logging': False,
     'spawn_extra_models': False,
     'unthrottled_physics_update': False,
@@ -98,7 +124,7 @@ def prepare_arguments(parser):
         help='generate gazebo state logs (will override config file option)')
     mex_group = parser.add_mutually_exclusive_group(required=False)
     add = mex_group.add_argument
-    add('config', nargs="?", metavar="CONFIG",
+    add('config', nargs='?', metavar='CONFIG',
         help='yaml string that is the configuration')
     add('-f', '--file', nargs='+', help='list of paths to yaml files that contain the '
         'configuration (contents will be concatenated)')
@@ -268,9 +294,9 @@ def create_models_over_bins_infos(models_over_bins_dict):
     for bin_name, bin_dict in models_over_bins_dict.items():
         if bin_name in default_bin_origins:
             offset_xyz = [
-                default_bin_origins[bin_name][0] - bin_width / 2,
+                default_bin_origins[bin_name][0] - bin_depth / 2,
                 default_bin_origins[bin_name][1] - bin_width / 2,
-                bin_height + 0.03]
+                bin_height + 0.08]
             # Allow the origin of the bin to be over-written
             if 'xyz' in bin_dict:
                 offset_xyz = bin_dict['xyz']
@@ -287,6 +313,7 @@ def create_models_over_bins_infos(models_over_bins_dict):
             xyz_end = get_required_field(
                 model_type, model_to_spawn_dict, 'xyz_end')
             rpy = get_required_field(model_type, model_to_spawn_dict, 'rpy')
+            rpy[1] = -bin_angle
             num_models_x = get_required_field(
                 model_type, model_to_spawn_dict, 'num_models_x')
             num_models_y = get_required_field(
@@ -298,10 +325,11 @@ def create_models_over_bins_infos(models_over_bins_dict):
             # Create a grid of models
             for idx_x in range(num_models_x):
                 for idx_y in range(num_models_y):
+                    model_x_offset = xyz_start[0] + idx_x * step_size[0]
                     xyz = [
-                        offset_xyz[0] + xyz_start[0] + idx_x * step_size[0],
+                        offset_xyz[0] + model_x_offset,
                         offset_xyz[1] + xyz_start[1] + idx_y * step_size[1],
-                        offset_xyz[2] + xyz_start[2]]
+                        offset_xyz[2] + xyz_start[2] + model_x_offset * math.tan(bin_angle)]
                     model_to_spawn_data['pose'] = {'xyz': xyz, 'rpy': rpy}
                     model_info = create_model_info(model_type, model_to_spawn_data)
                     # assign each model a unique name because gazebo can't do this
@@ -347,7 +375,8 @@ def create_drops_info(drops_dict):
 def create_order_info(name, order_dict):
     kit_count = get_field_with_default(order_dict, 'kit_count', 1)
     announcement_condition = get_required_field(name, order_dict, 'announcement_condition')
-    announcement_condition_value = get_required_field(name, order_dict, 'announcement_condition_value')
+    announcement_condition_value = get_required_field(
+        name, order_dict, 'announcement_condition_value')
     parts_dict = get_required_field(name, order_dict, 'parts')
     parts = []
     for part_name, part_dict in parts_dict.items():
@@ -377,13 +406,13 @@ def create_faulty_parts_info(faulty_parts_dict):
 def create_bin_infos():
     bin_infos = {}
     for bin_name, xyz in default_bin_origins.items():
-        bin_infos[bin_name] = PoseInfo(xyz, [0, 0, 1.5708])
+        bin_infos[bin_name] = PoseInfo(xyz, [0, bin_angle, 3.14159])
     return bin_infos
 
 
 def create_material_location_info(belt_parts, models_over_bins):
     # Specify where trays can be found
-    material_locations = {'tray': set(['agv1_load_point', 'agv2_load_point'])}
+    material_locations = {'tray': {'agv1_load_point', 'agv2_load_point'}}
 
     # Specify that belt parts can be found on the conveyor belt
     for _, spawn_times in belt_parts.items():
@@ -391,14 +420,14 @@ def create_material_location_info(belt_parts, models_over_bins):
             if part.type in material_locations:
                 material_locations[part.type].update(['belt'])
             else:
-                material_locations[part.type] = set(['belt'])
+                material_locations[part.type] = {'belt'}
 
     # Specify in which bin the different bin parts can be found
     for part_name, part in models_over_bins.items():
         if part.type in material_locations:
             material_locations[part.type].update([part.bin])
         else:
-            material_locations[part.type] = set([part.bin])
+            material_locations[part.type] = {part.bin}
 
     return material_locations
 
@@ -413,16 +442,17 @@ def create_options_info(options_dict):
 def prepare_template_data(config_dict, args):
     template_data = {
         'arm': None,
-        'sensors': {},
+        'sensors': create_sensor_infos(default_sensors),
         'models_to_insert': {},
         'models_to_spawn': {},
-        'belt_parts': {},
+        'belt_parts': create_belt_part_infos(default_belt_parts),
         'faulty_parts': {},
         'drops': {},
         'orders': {},
         'options': {},
         'time_limit': default_time_limit,
         'bin_height': bin_height,
+        'world_dir': world_dir,
     }
     # Process the options first as they may affect the processing of the rest
     options_dict = get_field_with_default(config_dict, 'options', {})
@@ -494,7 +524,7 @@ def main(sysargv=None):
     files = generate_files(template_data)
     if not args.dry_run and not os.path.isdir(args.output):
         if os.path.exists(args.output) and not os.path.isdir(args.output):
-            print("Error, given output directory exists but is not a directory.", file=sys.stderr)
+            print('Error, given output directory exists but is not a directory.', file=sys.stderr)
             sys.exit(1)
         print('creating directory: ' + args.output)
         os.makedirs(args.output)
@@ -518,13 +548,15 @@ def main(sysargv=None):
     ]
     if args.verbose:
         cmd += ['verbose:=true']
+    '''
     if args.no_gui:
         cmd += ['gui:=false']
+    '''
 
     if not args.development_mode:
         os.environ['ARIAC_COMPETITION'] = '1'
 
-    print("Running command: " + ' '.join(cmd))
+    print('Running command: ' + ' '.join(cmd))
     if not args.dry_run:
         try:
             p = subprocess.Popen(cmd)

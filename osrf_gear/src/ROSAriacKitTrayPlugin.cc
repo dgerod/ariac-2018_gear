@@ -43,6 +43,27 @@ void KitTrayPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   SideContactPlugin::Load(_model, _sdf);
 
+  if (_sdf->HasElement("toggle_visuals_at"))
+  {
+    sdf::ElementPtr toggleVisualsAtElem = _sdf->GetElement("toggle_visuals_at");
+    this->toggleVisualsAtPose = true;
+    this->toggleVisualsAt = toggleVisualsAtElem->Get<math::Vector3>();
+    std::string topicName = "/ariac/" + _model->GetName() + "_visual_toggle";
+    this->toggleVisualsPub = this->node->Advertise<msgs::GzString>(topicName);
+  }
+
+  if (_sdf->HasElement("lock_models_at"))
+  {
+    sdf::ElementPtr lockModelsAtElem = _sdf->GetElement("lock_models_at");
+    this->lockModelsAtPose = true;
+    this->lockModelsAt = lockModelsAtElem->Get<math::Vector3>();
+  }
+
+  if (_sdf->HasElement("nested_animation"))
+  {
+    this->nestedAnimation = _sdf->Get<bool>("nested_animation");
+  }
+
   if (_sdf->HasElement("faulty_parts"))
   {
     this->faultyPartNames.clear();
@@ -98,6 +119,9 @@ void KitTrayPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     lockModelsServiceName = _sdf->Get<std::string>("lock_models_service_name");
   this->lockModelsSub = this->gzNode->Subscribe(
     lockModelsServiceName, &KitTrayPlugin::HandleLockModelsRequest, this);
+  // ROS service for locking the tray
+  this->lockModelsServer =
+    this->rosNode->advertiseService(lockModelsServiceName, &KitTrayPlugin::HandleLockModelsService, this);
 }
 
 /////////////////////////////////////////////////
@@ -108,6 +132,22 @@ void KitTrayPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
   if (!this->TimeToExecute())
   {
     return;
+  }
+
+  if (this->toggleVisualsAtPose && this->model->GetWorldPose().pos.Distance(this->toggleVisualsAt) < 0.3)
+  {
+    gzdbg << "Toggling visuals: " << this->model->GetName() << std::endl;
+    gazebo::msgs::GzString toggleMsg;
+    toggleMsg.set_data("toggle");
+    this->toggleVisualsPub->Publish(toggleMsg);
+    this->toggleVisualsAtPose = false;
+  }
+
+  if (this->lockModelsAtPose && this->model->GetWorldPose().pos.Distance(this->lockModelsAt) < 0.3)
+  {
+    gzdbg << "Locking models: " << this->model->GetName() << std::endl;
+    this->LockContactingModels();
+    this->lockModelsAtPose = false;
   }
 
   if (!this->newMsg)
@@ -237,11 +277,6 @@ void KitTrayPlugin::LockContactingModels()
   gzdbg << "Creating fixed joint: " << jointName << std::endl;
   fixedJoint->SetName(jointName);
 
-  model->SetGravityMode(false);
-
-  // Lift the part slightly because it will fall through the tray if the tray is animated
-  model->SetWorldPose(model->GetWorldPose() + math::Pose(0,0,0.01,0,0,0));
-
   auto modelName = model->GetName();
   auto linkName = modelName + "::link";
   auto link = model->GetLink(linkName);
@@ -257,13 +292,46 @@ void KitTrayPlugin::LockContactingModels()
       continue;
     }
   }
-  link->SetGravityMode(false);
+  if (this->nestedAnimation)
+  {
+    model->SetGravityMode(false);
+    link->SetGravityMode(false);
+
+    // Lift the part slightly because it will fall through the tray if the tray is animated
+    model->SetWorldPose(model->GetWorldPose() + math::Pose(0,0,0.01,0,0,0));
+  }
+
   fixedJoint->Load(link, this->parentLink, math::Pose());
   fixedJoint->Attach(this->parentLink, link);
   fixedJoint->Init();
   this->fixedJoints.push_back(fixedJoint);
   model->SetAutoDisable(true);
   }
+}
+
+/////////////////////////////////////////////////
+bool KitTrayPlugin::HandleLockModelsService(
+  ros::ServiceEvent<std_srvs::Trigger::Request, std_srvs::Trigger::Response>& event)
+{
+  std_srvs::Trigger::Response& res = event.getResponse();
+
+  const std::string& callerName = event.getCallerName();
+  gzdbg << this->trayID << ": Handle lock models service called by: " << callerName << std::endl;
+
+  // During the competition, this environment variable will be set.
+  auto compRunning = std::getenv("ARIAC_COMPETITION");
+  if (compRunning && callerName.compare("/gazebo") != 0)
+  {
+    std::string errStr = "Competition is running so this service is not enabled.";
+    gzerr << errStr << std::endl;
+    ROS_ERROR_STREAM(errStr);
+    res.success = false;
+    return true;
+  }
+
+  this->LockContactingModels();
+  res.success = true;
+  return true;
 }
 
 /////////////////////////////////////////////////

@@ -34,11 +34,11 @@ class ExampleNodeTester(unittest.TestCase):
 
         # Starting the competition will cause parts from the order to be spawned on AGV1
         self._test_start_comp()
-        time.sleep(1.0)
+        time.sleep(5.0)
         self._test_order_reception()
 
         self._test_agv_control()
-        time.sleep(5.0)
+        time.sleep(10.0)
         self._test_comp_end()
 
     def _test_start_comp(self):
@@ -52,7 +52,7 @@ class ExampleNodeTester(unittest.TestCase):
         self.assertEqual(len(self.comp_class.received_orders), 1)
 
     def _send_arm_to_initial_pose(self):
-        positions = [1.51, 0.0, -1.12, 3.14, 3.77, -1.51, 0.0]
+        positions = [2.14, 0.0, -2.0, 3.14, 3.27, -1.51, 0.0]
         self.comp_class.send_arm_to_state(positions)
         time.sleep(1.0)
 

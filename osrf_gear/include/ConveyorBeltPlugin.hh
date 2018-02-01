@@ -131,6 +131,10 @@ namespace gazebo
     /// \brief Callback that receives the world update event
     protected: void OnUpdate();
 
+    /// \brief Get if the belt is enabled.
+    /// \return True if enabled.
+    protected: bool IsEnabled() const;
+
     /// \brief Get the power of the conveyor belt.
     /// \return Power of the belt as a percentage (0-100).
     protected: double Power() const;
@@ -139,12 +143,18 @@ namespace gazebo
     /// \param[in] _power Power of the belt as a percentage (0-100).
     protected: void SetPower(const double _power);
 
+    /// \brief Call back for enable/disable messaged.
+    protected: void OnEnabled(ConstGzStringPtr &_msg);
+
     /// \brief Belt velocity (m/s).
     protected: double beltVelocity = 0.0;
 
     /// \brief Belt power expressed as a percentage of the internal maximum
     /// speed.
     protected: double beltPower = 0.0;
+
+    /// \brief If true, power commands are processed, otherwise the belt won't move.
+    protected: bool enabled = true;
 
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
@@ -167,6 +177,9 @@ namespace gazebo
 
     /// \brief Gazebo publisher for modifying the rate of populating the belt.
     public: transport::PublisherPtr populationRateModifierPub;
+
+    /// \brief Gazebo subscriber for modifying the enabled state of the belt.
+    public: transport::SubscriberPtr enabledSub;
   };
 }
 #endif
