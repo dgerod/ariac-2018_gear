@@ -231,9 +231,9 @@
       </link>
 
       <!-- plugin for processing contact sensor output -->
-      <plugin name="kit_tray_plugin" filename="libROSAriacKitTrayPlugin.so">
+      <plugin name="shipping_box_plugin" filename="libROSAriacShippingBoxPlugin.so">
         <contact_sensor_name>box_base_contact</contact_sensor_name>
-        <clear_tray_service_name>/ariac/@(shipping_box_name)/clear_tray</clear_tray_service_name>
+        <clear_shipping_box_service_name>/ariac/@(shipping_box_name)/clear_shipping_box</clear_shipping_box_service_name>
         <lock_models_service_name>/ariac/@(shipping_box_name)/lock_models</lock_models_service_name>
         <toggle_visuals_at>1.2 -4.35 0.4</toggle_visuals_at>
         <lock_models_at>1.2 -3.3 0.4</lock_models_at>

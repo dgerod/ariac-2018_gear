@@ -24,9 +24,9 @@ if __name__ == '__main__':
     tfBuffer = tf2_ros.Buffer()
     listener = tf2_ros.TransformListener(tfBuffer)
 
-    # The kit tray TF frames are published by logical cameras, or can be published
+    # The shipping box TF frames are published by logical cameras, or can be published
     # by user-created TF broadcasters.
-    frame = 'kit_tray_frame'
+    frame = 'shipping_box_frame'
     rate = rospy.Rate(1.0)
     while not rospy.is_shutdown():
         # Ensure that the transform is available.

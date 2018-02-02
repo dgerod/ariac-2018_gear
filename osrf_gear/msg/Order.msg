@@ -4,5 +4,5 @@
 # ID of the order
 string order_id
 
-# Collection of kits
-Kit[] kits
+# Collection of shipments
+Shipment[] shipments

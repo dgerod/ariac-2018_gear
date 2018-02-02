@@ -39,8 +39,8 @@ topics:
     num_publishers: 1
     num_subscribers: 0
 
-  - topic: /ariac/trays
-    type: osrf_gear/TrayContents
+  - topic: /ariac/shipping_boxes
+    type: osrf_gear/ShippingBoxContents
     num_publishers: 1
     num_subscribers: 1
 
@@ -63,7 +63,7 @@ topics:
 #     type: osrf_gear/LogicalCameraImage
 #     num_publishers: 1
 #     num_subscribers: 0
-# 
+#
 #   - topic: /ariac/quality_control_sensor_2
 #     type: osrf_gear/LogicalCameraImage
 #     num_publishers: 1
@@ -138,14 +138,14 @@ services:
   - service: /ariac/material_locations
     type: osrf_gear/GetMaterialLocations
 
-  - service: /ariac/agv1
-    type: osrf_gear/AGVControl
+  - service: /ariac/drone
+    type: osrf_gear/DroneControl
 
   - service: /ariac/end_competition
     type: std_srvs/Trigger
 
-  - service: /ariac/submit_tray
-    type: osrf_gear/SubmitTray
+  - service: /ariac/submit_shipment
+    type: osrf_gear/SubmitShipment
 
   - service: /ariac/conveyor/control
     type: osrf_gear/ConveyorBeltControl

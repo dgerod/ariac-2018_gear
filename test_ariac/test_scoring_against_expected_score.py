@@ -19,23 +19,25 @@ class ScoringTester(ExampleNodeTester):
             self.agv2_first = sys.argv[2] == '--agv2-first'
         self.prepare_tester()
 
-        # Starting the competition will cause parts from the order to be spawned on AGV1
+        # Starting the competition will cause parts from the order to be spawned on shipping_box_0
         self._test_start_comp()
 
         if self.agv2_first:
-            # Submit the tray on AGV 2
-            self._test_agv_control(index=2, kit_id='order_1_kit_0')
+            ''' commented because only one drone supported
+            # Submit the tray on AGV2
+            self._test_drone_control(index=2, shipment_id='order_1_shipment_0')
             time.sleep(5.0)
-            # Submit the tray on AGV 1
-            self._test_agv_control()
+            # Submit the tray on shipping_box_0
+            self._test_drone_control()
             time.sleep(5.0)
+            '''
         else:
-            # Submit the tray on AGV 1
-            self._test_agv_control()
+            # Submit the tray on shipping_box_0
+            self._test_drone_control()
             time.sleep(5.0)
             ''' commented because only one drone supported
-            # Submit the tray on AGV 2
-            self._test_agv_control(index=2, kit_id='order_1_kit_0')
+            # Submit the tray on AGV2
+            self._test_drone_control(index=2, shipment_id='order_1_shipment_0')
             time.sleep(5.0)
             '''
 

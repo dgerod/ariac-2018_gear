@@ -18,20 +18,20 @@
 #include <cstdlib>
 #include <string>
 
-#include <osrf_gear/TrayContents.h>
+#include <osrf_gear/ShippingBoxContents.h>
 
-#include "ROSAriacKitTrayPlugin.hh"
+#include "ROSAriacShippingBoxPlugin.hh"
 
 using namespace gazebo;
-GZ_REGISTER_MODEL_PLUGIN(KitTrayPlugin)
+GZ_REGISTER_MODEL_PLUGIN(ShippingBoxPlugin)
 
 /////////////////////////////////////////////////
-KitTrayPlugin::KitTrayPlugin() : SideContactPlugin()
+ShippingBoxPlugin::ShippingBoxPlugin() : SideContactPlugin()
 {
 }
 
 /////////////////////////////////////////////////
-KitTrayPlugin::~KitTrayPlugin()
+ShippingBoxPlugin::~ShippingBoxPlugin()
 {
   event::Events::DisconnectWorldUpdateBegin(this->updateConnection);
   this->parentSensor.reset();
@@ -39,7 +39,7 @@ KitTrayPlugin::~KitTrayPlugin()
 }
 
 /////////////////////////////////////////////////
-void KitTrayPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
+void ShippingBoxPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
   SideContactPlugin::Load(_model, _sdf);
 
@@ -66,28 +66,28 @@ void KitTrayPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   if (_sdf->HasElement("faulty_parts"))
   {
-    this->faultyPartNames.clear();
-    sdf::ElementPtr faultyPartNamesElem = _sdf->GetElement("faulty_parts");
-    if (faultyPartNamesElem->HasElement("name"))
+    this->faultyProductNames.clear();
+    sdf::ElementPtr faultyProductNamesElem = _sdf->GetElement("faulty_parts");
+    if (faultyProductNamesElem->HasElement("name"))
     {
-      sdf::ElementPtr faultyPartElem = faultyPartNamesElem->GetElement("name");
-      while (faultyPartElem)
+      sdf::ElementPtr faultyProductElem = faultyProductNamesElem->GetElement("name");
+      while (faultyProductElem)
       {
-        std::string faultyPartName = faultyPartElem->Get<std::string>();
+        std::string faultyProductName = faultyProductElem->Get<std::string>();
 
-        ROS_DEBUG_STREAM("Ignoring part: " << faultyPartName);
-        this->faultyPartNames.push_back(faultyPartName);
-        faultyPartElem = faultyPartElem->GetNextElement("name");
+        ROS_DEBUG_STREAM("Ignoring part: " << faultyProductName);
+        this->faultyProductNames.push_back(faultyProductName);
+        faultyProductElem = faultyProductElem->GetNextElement("name");
       }
     }
   }
 
   if (this->updateRate > 0)
-    gzdbg << "KitTrayPlugin running at " << this->updateRate << " Hz\n";
+    gzdbg << "ShippingBoxPlugin running at " << this->updateRate << " Hz\n";
   else
-    gzdbg << "KitTrayPlugin running at the default update rate\n";
+    gzdbg << "ShippingBoxPlugin running at the default update rate\n";
 
-  this->trayID = this->parentLink->GetScopedName();
+  this->shippingBoxID = this->parentLink->GetScopedName();
 
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
@@ -98,34 +98,34 @@ void KitTrayPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
 
   this->rosNode = new ros::NodeHandle("");
-  this->currentKitPub = this->rosNode->advertise<osrf_gear::TrayContents>(
-    "/ariac/trays", 1000, boost::bind(&KitTrayPlugin::OnSubscriberConnect, this, _1));
+  this->currentShipmentPub = this->rosNode->advertise<osrf_gear::ShippingBoxContents>(
+    "/ariac/shipping_boxes", 1000, boost::bind(&ShippingBoxPlugin::OnSubscriberConnect, this, _1));
   this->publishingEnabled = true;
 
-  // ROS service for clearing the tray
+  // ROS service for clearing the shipping box
   std::string clearServiceName = "clear";
-  if (_sdf->HasElement("clear_tray_service_name"))
-    clearServiceName = _sdf->Get<std::string>("clear_tray_service_name");
-  this->clearTrayServer =
-    this->rosNode->advertiseService(clearServiceName, &KitTrayPlugin::HandleClearService, this);
+  if (_sdf->HasElement("clear_shipping_box_service_name"))
+    clearServiceName = _sdf->Get<std::string>("clear_shipping_box_service_name");
+  this->clearShippingBoxServer =
+    this->rosNode->advertiseService(clearServiceName, &ShippingBoxPlugin::HandleClearService, this);
 
   // Initialize Gazebo transport
   this->gzNode = transport::NodePtr(new transport::Node());
   this->gzNode->Init();
 
-  // Gazebo subscription for the lock trays topic
+  // Gazebo subscription for the lock shipping boxes topic
   std::string lockModelsServiceName = "lock_models";
   if (_sdf->HasElement("lock_models_service_name"))
     lockModelsServiceName = _sdf->Get<std::string>("lock_models_service_name");
   this->lockModelsSub = this->gzNode->Subscribe(
-    lockModelsServiceName, &KitTrayPlugin::HandleLockModelsRequest, this);
-  // ROS service for locking the tray
+    lockModelsServiceName, &ShippingBoxPlugin::HandleLockModelsRequest, this);
+  // ROS service for locking the shipping box
   this->lockModelsServer =
-    this->rosNode->advertiseService(lockModelsServiceName, &KitTrayPlugin::HandleLockModelsService, this);
+    this->rosNode->advertiseService(lockModelsServiceName, &ShippingBoxPlugin::HandleLockModelsService, this);
 }
 
 /////////////////////////////////////////////////
-void KitTrayPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
+void ShippingBoxPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
 {
   // If we're using a custom update rate value we have to check if it's time to
   // update the plugin or not.
@@ -164,53 +164,53 @@ void KitTrayPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
   this->ProcessContactingModels();
   if (this->publishingEnabled)
   {
-    this->PublishKitMsg();
+    this->PublishShipmentMsg();
   }
 }
 
 /////////////////////////////////////////////////
-void KitTrayPlugin::ProcessContactingModels()
+void ShippingBoxPlugin::ProcessContactingModels()
 {
-  // Make sure that models fixed to the tray are included in the contacting models,
-  // even if they aren't contacting the tray anymore.
+  // Make sure that models fixed to the shipping box are included in the contacting models,
+  // even if they aren't contacting the shipping box anymore.
   for (auto fixedJoint : this->fixedJoints)
   {
     auto link = fixedJoint->GetChild();
     this->contactingLinks.insert(link);
     this->contactingModels.insert(link->GetParentModel());
   }
-  this->currentKit.objects.clear();
-  auto trayPose = this->parentLink->GetWorldPose().Ign();
+  this->currentShipment.products.clear();
+  auto shippingBoxPose = this->parentLink->GetWorldPose().Ign();
   for (auto model : this->contactingModels) {
     if (model) {
       model->SetAutoDisable(false);
-      ariac::KitObject object;
+      ariac::Product product;
 
-      // Determine the object type
-      object.type = ariac::DetermineModelType(model->GetName());
+      // Determine the product type
+      product.type = ariac::DetermineModelType(model->GetName());
 
-      // Determine if the object is faulty
+      // Determine if the product is faulty
       auto modelName = ariac::TrimNamespace(model->GetName());
-      auto it = std::find(this->faultyPartNames.begin(), this->faultyPartNames.end(), modelName);
-      object.isFaulty = it != this->faultyPartNames.end();
+      auto it = std::find(this->faultyProductNames.begin(), this->faultyProductNames.end(), modelName);
+      product.isFaulty = it != this->faultyProductNames.end();
 
-      // Determine the pose of the object in the frame of the tray
-      math::Pose objectPose = model->GetWorldPose();
-      ignition::math::Matrix4d transMat(trayPose);
-      ignition::math::Matrix4d objectPoseMat(objectPose.Ign());
-      object.pose = (transMat.Inverse() * objectPoseMat).Pose();
-      object.pose.rot.Normalize();
+      // Determine the pose of the product in the frame of the shipping box
+      math::Pose productPose = model->GetWorldPose();
+      ignition::math::Matrix4d transMat(shippingBoxPose);
+      ignition::math::Matrix4d productPoseMat(productPose.Ign());
+      product.pose = (transMat.Inverse() * productPoseMat).Pose();
+      product.pose.rot.Normalize();
 
-      this->currentKit.objects.push_back(object);
+      this->currentShipment.products.push_back(product);
     }
   }
 }
 
 /////////////////////////////////////////////////
-void KitTrayPlugin::OnSubscriberConnect(const ros::SingleSubscriberPublisher& pub)
+void ShippingBoxPlugin::OnSubscriberConnect(const ros::SingleSubscriberPublisher& pub)
 {
   auto subscriberName = pub.getSubscriberName();
-  gzdbg << this->trayID << ": New subscription from node: " << subscriberName << std::endl;
+  gzdbg << this->shippingBoxID << ": New subscription from node: " << subscriberName << std::endl;
 
   // During the competition, this environment variable will be set.
   auto compRunning = std::getenv("ARIAC_COMPETITION");
@@ -219,21 +219,21 @@ void KitTrayPlugin::OnSubscriberConnect(const ros::SingleSubscriberPublisher& pu
     std::string errStr = "Competition is running so subscribing to this topic is not permitted.";
     gzerr << errStr << std::endl;
     ROS_ERROR_STREAM(errStr);
-    // Disable publishing of kit messages.
+    // Disable publishing of shipment messages.
     // This will break the scoring but ensure competitors can't cheat.
     this->publishingEnabled = false;
   }
 }
 
 /////////////////////////////////////////////////
-void KitTrayPlugin::PublishKitMsg()
+void ShippingBoxPlugin::PublishShipmentMsg()
 {
-  // Publish current kit
-  osrf_gear::TrayContents kitTrayMsg;
-  kitTrayMsg.tray = this->trayID;
-  for (const auto &obj : this->currentKit.objects)
+  // Publish current shipment
+  osrf_gear::ShippingBoxContents shippingBoxMsg;
+  shippingBoxMsg.shipping_box = this->shippingBoxID;
+  for (const auto &obj : this->currentShipment.products)
   {
-    osrf_gear::DetectedObject msgObj;
+    osrf_gear::DetectedProduct msgObj;
     msgObj.type = obj.type;
     msgObj.is_faulty = obj.isFaulty;
     msgObj.pose.position.x = obj.pose.pos.x;
@@ -244,14 +244,14 @@ void KitTrayPlugin::PublishKitMsg()
     msgObj.pose.orientation.z = obj.pose.rot.z;
     msgObj.pose.orientation.w = obj.pose.rot.w;
 
-    // Add the object to the kit.
-    kitTrayMsg.objects.push_back(msgObj);
+    // Add the product to the shipment.
+    shippingBoxMsg.products.push_back(msgObj);
   }
-  this->currentKitPub.publish(kitTrayMsg);
+  this->currentShipmentPub.publish(shippingBoxMsg);
 }
 
 /////////////////////////////////////////////////
-void KitTrayPlugin::UnlockContactingModels()
+void ShippingBoxPlugin::UnlockContactingModels()
 {
   boost::mutex::scoped_lock lock(this->mutex);
   physics::JointPtr fixedJoint;
@@ -263,11 +263,11 @@ void KitTrayPlugin::UnlockContactingModels()
 }
 
 /////////////////////////////////////////////////
-void KitTrayPlugin::LockContactingModels()
+void ShippingBoxPlugin::LockContactingModels()
 {
   boost::mutex::scoped_lock lock(this->mutex);
   physics::JointPtr fixedJoint;
-  gzdbg << "Number of models in contact with the tray: " << this->contactingModels.size() << std::endl;
+  gzdbg << "Number of models in contact with the shipping box: " << this->contactingModels.size() << std::endl;
   for (auto model : this->contactingModels)
   {
   // Create the joint that will attach the models
@@ -297,7 +297,7 @@ void KitTrayPlugin::LockContactingModels()
     model->SetGravityMode(false);
     link->SetGravityMode(false);
 
-    // Lift the part slightly because it will fall through the tray if the tray is animated
+    // Lift the part slightly because it will fall through the shipping box if the shipping box is animated
     model->SetWorldPose(model->GetWorldPose() + math::Pose(0,0,0.01,0,0,0));
   }
 
@@ -310,13 +310,13 @@ void KitTrayPlugin::LockContactingModels()
 }
 
 /////////////////////////////////////////////////
-bool KitTrayPlugin::HandleLockModelsService(
+bool ShippingBoxPlugin::HandleLockModelsService(
   ros::ServiceEvent<std_srvs::Trigger::Request, std_srvs::Trigger::Response>& event)
 {
   std_srvs::Trigger::Response& res = event.getResponse();
 
   const std::string& callerName = event.getCallerName();
-  gzdbg << this->trayID << ": Handle lock models service called by: " << callerName << std::endl;
+  gzdbg << this->shippingBoxID << ": Handle lock models service called by: " << callerName << std::endl;
 
   // During the competition, this environment variable will be set.
   auto compRunning = std::getenv("ARIAC_COMPETITION");
@@ -335,21 +335,21 @@ bool KitTrayPlugin::HandleLockModelsService(
 }
 
 /////////////////////////////////////////////////
-void KitTrayPlugin::HandleLockModelsRequest(ConstGzStringPtr &_msg)
+void ShippingBoxPlugin::HandleLockModelsRequest(ConstGzStringPtr &_msg)
 {
-  gzdbg << this->trayID << ": Handle clear tray service called.\n";
+  gzdbg << this->shippingBoxID << ": Handle clear shipping box service called.\n";
   (void)_msg;
   this->LockContactingModels();
 }
 
 /////////////////////////////////////////////////
-bool KitTrayPlugin::HandleClearService(
+bool ShippingBoxPlugin::HandleClearService(
   ros::ServiceEvent<std_srvs::Trigger::Request, std_srvs::Trigger::Response>& event)
 {
   std_srvs::Trigger::Response& res = event.getResponse();
 
   const std::string& callerName = event.getCallerName();
-  gzdbg << this->trayID << ": Handle clear tray service called by: " << callerName << std::endl;
+  gzdbg << this->shippingBoxID << ": Handle clear shipping box service called by: " << callerName << std::endl;
 
   // During the competition, this environment variable will be set.
   auto compRunning = std::getenv("ARIAC_COMPETITION");

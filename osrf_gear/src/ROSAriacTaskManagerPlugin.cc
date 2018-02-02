@@ -42,8 +42,8 @@
 #include "osrf_gear/AriacScorer.h"
 #include <osrf_gear/ConveyorBeltControl.h>
 #include <osrf_gear/ConveyorBeltState.h>
-#include "osrf_gear/Kit.h"
-#include "osrf_gear/KitObject.h"
+#include "osrf_gear/Shipment.h"
+#include "osrf_gear/Product.h"
 #include "osrf_gear/Order.h"
 #include "osrf_gear/VacuumGripperState.h"
 
@@ -81,8 +81,8 @@ namespace gazebo
     /// \brief Publishes an order.
     public: ros::Publisher orderPub;
 
-    /// \brief ROS subscriber for the tray states.
-    public: ros::Subscriber trayInfoSub;
+    /// \brief ROS subscriber for the shipping box states.
+    public: ros::Subscriber shippingBoxInfoSub;
 
     /// \brief ROS subscriber for the gripper state.
     public: ros::Subscriber gripperStateSub;
@@ -102,13 +102,13 @@ namespace gazebo
     /// \brief Service that allows users to query the location of materials.
     public: ros::ServiceServer getMaterialLocationsServiceServer;
 
-    /// \brief Service that allows a tray to be submitted for inspection.
-    public: ros::ServiceServer submitTrayServiceServer;
+    /// \brief Service that allows a shipment to be submitted for inspection.
+    public: ros::ServiceServer submitShipmentServiceServer;
 
     /// \brief Transportation node.
     public: transport::NodePtr node;
 
-    /// \brief Publisher for enabling the object population on the conveyor.
+    /// \brief Publisher for enabling the product population on the conveyor.
     public: transport::PublisherPtr populatePub;
 
     /// \brief Client for controlling the conveyor.
@@ -129,7 +129,7 @@ namespace gazebo
     /// \brief The time the sim time was last published.
     public: common::Time lastSimTimePublish;
 
-    /// \brief The time specified in the object is relative to this time.
+    /// \brief The time specified in the product is relative to this time.
     public: common::Time gameStartTime;
 
     /// \brief The time in seconds permitted to complete the trial.
@@ -158,13 +158,13 @@ static void fillOrderMsg(const ariac::Order &_order,
                         osrf_gear::Order &_msgOrder)
 {
   _msgOrder.order_id = _order.orderID;
-  for (const auto &kit : _order.kits)
+  for (const auto &shipment : _order.shipments)
   {
-    osrf_gear::Kit msgKit;
-    msgKit.kit_type = kit.kitType;
-    for (const auto &obj : kit.objects)
+    osrf_gear::Shipment msgShipment;
+    msgShipment.shipment_type = shipment.shipmentType;
+    for (const auto &obj : shipment.products)
     {
-      osrf_gear::KitObject msgObj;
+      osrf_gear::Product msgObj;
       msgObj.type = obj.type;
       msgObj.pose.position.x = obj.pose.pos.x;
       msgObj.pose.position.y = obj.pose.pos.y;
@@ -174,10 +174,10 @@ static void fillOrderMsg(const ariac::Order &_order,
       msgObj.pose.orientation.z = obj.pose.rot.z;
       msgObj.pose.orientation.w = obj.pose.rot.w;
 
-      // Add the object to the kit.
-      msgKit.objects.push_back(msgObj);
+      // Add the product to the shipment.
+      msgShipment.products.push_back(msgObj);
     }
-    _msgOrder.kits.push_back(msgKit);
+    _msgOrder.shipments.push_back(msgShipment);
   }
 }
 
@@ -246,9 +246,9 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
   if (_sdf->HasElement("orders_topic"))
     ordersTopic = _sdf->Get<std::string>("orders_topic");
 
-  std::string submitTrayServiceName = "submit_tray";
-  if (_sdf->HasElement("submit_tray_service_name"))
-    submitTrayServiceName = _sdf->Get<std::string>("submit_tray_service_name");
+  std::string submitShipmentServiceName = "submit_shipment";
+  if (_sdf->HasElement("submit_shipment_service_name"))
+    submitShipmentServiceName = _sdf->Get<std::string>("submit_shipment_service_name");
 
   std::string getMaterialLocationsServiceName = "material_locations";
   if (_sdf->HasElement("material_locations_service_name"))
@@ -274,17 +274,17 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
     }
 
     // Parse the interruption criteria.
-    int interruptOnUnwantedParts = -1;
+    int interruptOnUnwantedProducts = -1;
     if (orderElem->HasElement("interrupt_on_unwanted_parts"))
     {
-      sdf::ElementPtr interruptOnUnwantedPartsElem = orderElem->GetElement("interrupt_on_unwanted_parts");
-      interruptOnUnwantedParts = interruptOnUnwantedPartsElem->Get<int>();
+      sdf::ElementPtr interruptOnUnwantedProductsElem = orderElem->GetElement("interrupt_on_unwanted_parts");
+      interruptOnUnwantedProducts = interruptOnUnwantedProductsElem->Get<int>();
     }
-    int interruptOnWantedParts = -1;
+    int interruptOnWantedProducts = -1;
     if (orderElem->HasElement("interrupt_on_wanted_parts"))
     {
-      sdf::ElementPtr interruptOnWantedPartsElem = orderElem->GetElement("interrupt_on_wanted_parts");
-      interruptOnWantedParts = interruptOnWantedPartsElem->Get<int>();
+      sdf::ElementPtr interruptOnWantedProductsElem = orderElem->GetElement("interrupt_on_wanted_parts");
+      interruptOnWantedProducts = interruptOnWantedProductsElem->Get<int>();
     }
 
     // Parse the allowed completion time.
@@ -295,80 +295,80 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
       allowedTime = allowedTimeElement->Get<double>();
     }
 
-    // Parse the kits.
-    if (!orderElem->HasElement("kit"))
+    // Parse the shipments.
+    if (!orderElem->HasElement("shipment"))
     {
-      gzerr << "Unable to find <kit> element in <order>. Ignoring" << std::endl;
+      gzerr << "Unable to find <shipment> element in <order>. Ignoring" << std::endl;
       orderElem = orderElem->GetNextElement("order");
       continue;
     }
 
-    // Store all kits for an order.
-    std::vector<ariac::Kit> kits;
+    // Store all shipments for an order.
+    std::vector<ariac::Shipment> shipments;
 
-    sdf::ElementPtr kitElem = orderElem->GetElement("kit");
-    while (kitElem)
+    sdf::ElementPtr shipmentElem = orderElem->GetElement("shipment");
+    while (shipmentElem)
     {
-      // Check the validity of the kit.
-      if (!kitElem->HasElement("object"))
+      // Check the validity of the shipment.
+      if (!shipmentElem->HasElement("product"))
       {
-        gzerr << "Unable to find <object> element in <kit>. Ignoring"
+        gzerr << "Unable to find <product> element in <shipment>. Ignoring"
               << std::endl;
-        kitElem = kitElem->GetNextElement("kit");
+        shipmentElem = shipmentElem->GetNextElement("shipment");
         continue;
       }
 
-      ariac::Kit kit;
+      ariac::Shipment shipment;
 
-      // Parse the kit type.
-      ariac::KitType_t kitType;
-      if (kitElem->HasElement("kit_type"))
+      // Parse the shipment type.
+      ariac::ShipmentType_t shipmentType;
+      if (shipmentElem->HasElement("shipment_type"))
       {
-        kitType = kitElem->Get<std::string>("kit_type");
+        shipmentType = shipmentElem->Get<std::string>("shipment_type");
       }
-      kit.kitType = kitType;
+      shipment.shipmentType = shipmentType;
 
-      // Parse the objects inside the kit.
-      sdf::ElementPtr objectElem = kitElem->GetElement("object");
-      while (objectElem)
+      // Parse the products inside the shipment.
+      sdf::ElementPtr productElem = shipmentElem->GetElement("product");
+      while (productElem)
       {
-        // Parse the object type.
-        if (!objectElem->HasElement("type"))
+        // Parse the product type.
+        if (!productElem->HasElement("type"))
         {
-          gzerr << "Unable to find <type> in object.\n";
-          objectElem = objectElem->GetNextElement("object");
+          gzerr << "Unable to find <type> in product.\n";
+          productElem = productElem->GetNextElement("product");
           continue;
         }
-        sdf::ElementPtr typeElement = objectElem->GetElement("type");
+        sdf::ElementPtr typeElement = productElem->GetElement("type");
         std::string type = typeElement->Get<std::string>();
 
-        // Parse the object pose (optional).
-        if (!objectElem->HasElement("pose"))
+        // Parse the product pose (optional).
+        if (!productElem->HasElement("pose"))
         {
-          gzerr << "Unable to find <pose> in object.\n";
-          objectElem = objectElem->GetNextElement("object");
+          gzerr << "Unable to find <pose> in product.\n";
+          productElem = productElem->GetNextElement("product");
           continue;
         }
-        sdf::ElementPtr poseElement = objectElem->GetElement("pose");
+        sdf::ElementPtr poseElement = productElem->GetElement("pose");
         math::Pose pose = poseElement->Get<math::Pose>();
 
-        // Add the object to the kit.
+        // Add the product to the shipment.
         bool isFaulty = false;  // We never want to request faulty parts.
-        ariac::KitObject obj = {type, isFaulty, pose};
-        kit.objects.push_back(obj);
+        ariac::Product obj = {type, isFaulty, pose};
+        shipment.products.push_back(obj);
 
-        objectElem = objectElem->GetNextElement("object");
+        productElem = productElem->GetNextElement("product");
       }
 
-      // Add a new kit to the collection of kits.
-      kits.push_back(kit);
+      // Add a new shipment to the collection of shipments.
+      shipments.push_back(shipment);
 
-      kitElem = kitElem->GetNextElement("kit");
+      shipmentElem = shipmentElem->GetNextElement("shipment");
     }
 
     // Add a new order.
     ariac::OrderID_t orderID = "order_" + std::to_string(orderCount++);
-    ariac::Order order = {orderID, startTime, interruptOnUnwantedParts, interruptOnWantedParts, allowedTime, kits, 0.0};
+    ariac::Order order = {orderID, startTime, interruptOnUnwantedProducts, interruptOnWantedProducts, allowedTime, shipments, 0.0};
     this->dataPtr->ordersToAnnounce.push_back(order);
 
     orderElem = orderElem->GetNextElement("order");
@@ -443,10 +443,10 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
     this->dataPtr->rosnode->advertiseService(compEndServiceName,
       &ROSAriacTaskManagerPlugin::HandleEndService, this);
 
-  // Service for submitting trays for inspection.
-  this->dataPtr->submitTrayServiceServer =
-    this->dataPtr->rosnode->advertiseService(submitTrayServiceName,
-      &ROSAriacTaskManagerPlugin::HandleSubmitTrayService, this);
+  // Service for submitting shipping boxes for inspection.
+  this->dataPtr->submitShipmentServiceServer =
+    this->dataPtr->rosnode->advertiseService(submitShipmentServiceName,
+      &ROSAriacTaskManagerPlugin::HandleSubmitShipmentService, this);
 
   // Service for querying material storage locations.
   this->dataPtr->getMaterialLocationsServiceServer =
@@ -470,8 +470,8 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
     this->dataPtr->node->Advertise<msgs::GzString>(populationActivateTopic);
 
   // Initialize the game scorer.
-  this->dataPtr->trayInfoSub = this->dataPtr->rosnode->subscribe(
-    "/ariac/trays", 10, &AriacScorer::OnTrayInfoReceived, &this->dataPtr->ariacScorer);
+  this->dataPtr->shippingBoxInfoSub = this->dataPtr->rosnode->subscribe(
+    "/ariac/shipping_boxes", 10, &AriacScorer::OnShippingBoxInfoReceived, &this->dataPtr->ariacScorer);
   this->dataPtr->gripperStateSub = this->dataPtr->rosnode->subscribe(
     "/ariac/gripper/state", 10, &AriacScorer::OnGripperStateReceived,
     &this->dataPtr->ariacScorer);
@@ -613,8 +613,8 @@ void ROSAriacTaskManagerPlugin::ProcessOrdersToAnnounce()
     return;
 
   auto nextOrder = this->dataPtr->ordersToAnnounce.front();
-  bool interruptOnUnwantedParts = nextOrder.interruptOnUnwantedParts > 0;
-  bool interruptOnWantedParts = nextOrder.interruptOnWantedParts > 0;
+  bool interruptOnUnwantedProducts = nextOrder.interruptOnUnwantedProducts > 0;
+  bool interruptOnWantedProducts = nextOrder.interruptOnWantedProducts > 0;
   bool noActiveOrder = this->dataPtr->ordersInProgress.empty();
   auto elapsed = this->dataPtr->world->GetSimTime() - this->dataPtr->gameStartTime;
   bool announceNextOrder = false;
@@ -623,34 +623,34 @@ void ROSAriacTaskManagerPlugin::ProcessOrdersToAnnounce()
   // Announce next order if the appropriate amount of time has elapsed
   announceNextOrder |= elapsed.Double() >= nextOrder.startTime;
   // Announce next order if there is no active order and we are waiting to interrupt
-  announceNextOrder |= noActiveOrder && (interruptOnWantedParts || interruptOnUnwantedParts);
+  announceNextOrder |= noActiveOrder && (interruptOnWantedProducts || interruptOnUnwantedProducts);
 
-  int maxNumUnwantedParts = 0;
-  int maxNumWantedParts = 0;
+  int maxNumUnwantedProducts = 0;
+  int maxNumWantedProducts = 0;
   // Check if it's time to interrupt (skip if we're already interrupting anyway)
-  if (!announceNextOrder && (interruptOnWantedParts || interruptOnUnwantedParts))
+  if (!announceNextOrder && (interruptOnWantedProducts || interruptOnUnwantedProducts))
   {
-    // Check if the parts in the trays are enough to interrupt the current order
+    // Check if the parts in the shipping boxes are enough to interrupt the current order
 
     // Determine what parts are in the next order
     std::vector<std::string> partsInNextOrder;
-    for (const auto & kit : nextOrder.kits)
+    for (const auto & shipment : nextOrder.shipments)
     {
-      for (const auto & part : kit.objects)
+      for (const auto & part : shipment.products)
       {
         partsInNextOrder.push_back(part.type);
       }
     }
 
-    // Check the trays for parts from the pending order
-    std::vector<int> numUnwantedPartsOnTrays;
-    std::vector<int> numWantedPartsOnTrays;
-    for (const auto & tray : this->dataPtr->ariacScorer.GetTrays())
+    // Check the shipping boxes for parts from the pending order
+    std::vector<int> numUnwantedProductsInShippingBoxes;
+    std::vector<int> numWantedProductsInShippingBoxes;
+    for (const auto & shippingBox : this->dataPtr->ariacScorer.GetShippingBoxes())
     {
-      int numUnwantedPartsOnTray = 0;
-      int numWantedPartsOnTray = 0;
+      int numUnwantedProductsInShippingBox = 0;
+      int numWantedProductsInShippingBox = 0;
       std::vector<std::string> partsInNextOrder_copy(partsInNextOrder);
-      for (const auto part : tray.currentKit.objects)
+      for (const auto part : shippingBox.currentShipment.products)
       {
         // Don't count faulty parts, because they have to be removed anyway.
         if (part.isFaulty)
@@ -660,23 +660,23 @@ void ROSAriacTaskManagerPlugin::ProcessOrdersToAnnounce()
         auto it = std::find(partsInNextOrder_copy.begin(), partsInNextOrder_copy.end(), part.type);
         if (it == partsInNextOrder_copy.end())
         {
-          numUnwantedPartsOnTray += 1;
+          numUnwantedProductsInShippingBox += 1;
         }
         else
         {
-          numWantedPartsOnTray += 1;
+          numWantedProductsInShippingBox += 1;
           partsInNextOrder_copy.erase(it);
         }
       }
-      numUnwantedPartsOnTrays.push_back(numUnwantedPartsOnTray);
-      numWantedPartsOnTrays.push_back(numWantedPartsOnTray);
+      numUnwantedProductsInShippingBoxes.push_back(numUnwantedProductsInShippingBox);
+      numWantedProductsInShippingBoxes.push_back(numWantedProductsInShippingBox);
     }
-    maxNumUnwantedParts = *std::max_element(numUnwantedPartsOnTrays.begin(), numUnwantedPartsOnTrays.end());
-    maxNumWantedParts = *std::max_element(numWantedPartsOnTrays.begin(), numWantedPartsOnTrays.end());
+    maxNumUnwantedProducts = *std::max_element(numUnwantedProductsInShippingBoxes.begin(), numUnwantedProductsInShippingBoxes.end());
+    maxNumWantedProducts = *std::max_element(numWantedProductsInShippingBoxes.begin(), numWantedProductsInShippingBoxes.end());
 
     // Announce next order if the appropriate number of wanted/unwanted parts are detected
-    announceNextOrder |= interruptOnWantedParts && (maxNumWantedParts >= nextOrder.interruptOnWantedParts);
-    announceNextOrder |= interruptOnUnwantedParts && (maxNumUnwantedParts >= nextOrder.interruptOnUnwantedParts);
+    announceNextOrder |= interruptOnWantedProducts && (maxNumWantedProducts >= nextOrder.interruptOnWantedProducts);
+    announceNextOrder |= interruptOnUnwantedProducts && (maxNumUnwantedProducts >= nextOrder.interruptOnUnwantedProducts);
   }
 
   if (announceNextOrder)
@@ -727,15 +727,15 @@ bool ROSAriacTaskManagerPlugin::HandleEndService(
 }
 
 /////////////////////////////////////////////////
-bool ROSAriacTaskManagerPlugin::HandleSubmitTrayService(
-  ros::ServiceEvent<osrf_gear::SubmitTray::Request, osrf_gear::SubmitTray::Response> & event)
+bool ROSAriacTaskManagerPlugin::HandleSubmitShipmentService(
+  ros::ServiceEvent<osrf_gear::SubmitShipment::Request, osrf_gear::SubmitShipment::Response> & event)
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
-  const osrf_gear::SubmitTray::Request& req = event.getRequest();
-  osrf_gear::SubmitTray::Response& res = event.getResponse();
+  const osrf_gear::SubmitShipment::Request& req = event.getRequest();
+  osrf_gear::SubmitShipment::Response& res = event.getResponse();
 
   const std::string& callerName = event.getCallerName();
-  gzdbg << "Submit tray service called by: " << callerName << std::endl;
+  gzdbg << "Submit shipment service called by: " << callerName << std::endl;
 
   if (this->dataPtr->competitonMode && callerName.compare("/gazebo") != 0)
   {
@@ -747,22 +747,22 @@ bool ROSAriacTaskManagerPlugin::HandleSubmitTrayService(
   }
 
   if (this->dataPtr->currentState != "go") {
-    std::string errStr = "Competition is not running so trays cannot be submitted.";
+    std::string errStr = "Competition is not running so shipping boxes cannot be submitted.";
     gzerr << errStr << std::endl;
     ROS_ERROR_STREAM(errStr);
     return false;
   }
 
-  ariac::KitTray kitTray;
-  gzdbg << "SubmitTray request received for tray: " << req.tray_id << std::endl;
-  if (!this->dataPtr->ariacScorer.GetTrayById(req.tray_id, kitTray))
+  ariac::ShippingBox shippingBox;
+  gzdbg << "SubmitShipment request received for shipping box: " << req.shipping_box_id << std::endl;
+  if (!this->dataPtr->ariacScorer.GetShippingBoxById(req.shipping_box_id, shippingBox))
   {
     res.success = false;
     return true;
   }
-  kitTray.currentKit.kitType = req.kit_type;
+  shippingBox.currentShipment.shipmentType = req.shipment_type;
   res.success = true;
-  res.inspection_result = this->dataPtr->ariacScorer.SubmitTray(kitTray).total();
+  res.inspection_result = this->dataPtr->ariacScorer.SubmitShipment(shippingBox).total();
   gzdbg << "Inspection result: " << res.inspection_result << std::endl;
   return true;
 }

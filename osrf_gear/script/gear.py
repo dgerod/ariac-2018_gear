@@ -64,7 +64,7 @@ default_sensors = {
         }
     }
 }
-default_belt_parts = {
+default_belt_models = {
     'shipping_box': {
         10.0: {
             'pose': {
@@ -90,11 +90,10 @@ default_bin_origins = {
         bin_height] for n in range(1, n_bins + 1)}
 
 configurable_options = {
-    'insert_agvs': True,
     'insert_shipping_boxes': True,
     'insert_models_over_bins': False,
     'disable_shadows': False,
-    'fill_demo_tray': False,
+    'fill_demo_shipment': False,
     'belt_population_cycles': 5,
     'gazebo_state_logging': False,
     'spawn_extra_models': False,
@@ -341,16 +340,16 @@ def create_models_over_bins_infos(models_over_bins_dict):
     return models_to_spawn_infos
 
 
-def create_belt_part_infos(belt_parts_dict):
-    belt_part_infos = {}
-    for obj_type, spawn_times in belt_parts_dict.items():
-        for spawn_time, belt_part_dict in spawn_times.items():
+def create_belt_model_infos(belt_models_dict):
+    belt_model_infos = {}
+    for obj_type, spawn_times in belt_models_dict.items():
+        for spawn_time, belt_model_dict in spawn_times.items():
             obj_type = replace_type_aliases(obj_type)
-            if obj_type not in belt_part_infos:
-                belt_part_infos[obj_type] = {}
-            belt_part_dict['type'] = obj_type
-            belt_part_infos[obj_type][spawn_time] = create_model_info('belt_part', belt_part_dict)
-    return belt_part_infos
+            if obj_type not in belt_model_infos:
+                belt_model_infos[obj_type] = {}
+            belt_model_dict['type'] = obj_type
+            belt_model_infos[obj_type][spawn_time] = create_model_info('belt_model', belt_model_dict)
+    return belt_model_infos
 
 
 def create_drops_info(drops_dict):
@@ -373,7 +372,7 @@ def create_drops_info(drops_dict):
 
 
 def create_order_info(name, order_dict):
-    kit_count = get_field_with_default(order_dict, 'kit_count', 1)
+    shipment_count = get_field_with_default(order_dict, 'shipment_count', 1)
     announcement_condition = get_required_field(name, order_dict, 'announcement_condition')
     announcement_condition_value = get_required_field(
         name, order_dict, 'announcement_condition_value')
@@ -385,7 +384,7 @@ def create_order_info(name, order_dict):
         'announcement_condition': announcement_condition,
         'announcement_condition_value': announcement_condition_value,
         'parts': parts,
-        'kit_count': kit_count,
+        'shipment_count': shipment_count,
     }
 
 
@@ -410,12 +409,11 @@ def create_bin_infos():
     return bin_infos
 
 
-def create_material_location_info(belt_parts, models_over_bins):
-    # Specify where trays can be found
-    material_locations = {'tray': {'agv1_load_point', 'agv2_load_point'}}
+def create_material_location_info(belt_models, models_over_bins):
+    material_locations = {}
 
     # Specify that belt parts can be found on the conveyor belt
-    for _, spawn_times in belt_parts.items():
+    for _, spawn_times in belt_models.items():
         for spawn_time, part in spawn_times.items():
             if part.type in material_locations:
                 material_locations[part.type].update(['belt'])
@@ -445,7 +443,7 @@ def prepare_template_data(config_dict, args):
         'sensors': create_sensor_infos(default_sensors),
         'models_to_insert': {},
         'models_to_spawn': {},
-        'belt_parts': create_belt_part_infos(default_belt_parts),
+        'belt_models': create_belt_model_infos(default_belt_models),
         'faulty_parts': {},
         'drops': {},
         'orders': {},
@@ -470,8 +468,8 @@ def prepare_template_data(config_dict, args):
         elif key == 'models_over_bins':
             models_over_bins = create_models_over_bins_infos(value)
             template_data['models_to_insert'].update(models_over_bins)
-        elif key == 'belt_parts':
-            template_data['belt_parts'].update(create_belt_part_infos(value))
+        elif key == 'belt_models':
+            template_data['belt_models'].update(create_belt_model_infos(value))
         elif key == 'drops':
             template_data['drops'].update(create_drops_info(value))
         elif key == 'faulty_parts':
@@ -490,7 +488,7 @@ def prepare_template_data(config_dict, args):
             sys.exit(1)
     template_data['bins'] = create_bin_infos()
     template_data['material_locations'] = create_material_location_info(
-        template_data['belt_parts'] or {},
+        template_data['belt_models'] or {},
         models_over_bins,
     )
     return template_data

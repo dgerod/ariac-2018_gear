@@ -15,29 +15,29 @@
  *
 */
 
-#include "osrf_gear/AriacKitTray.h"
+#include "osrf_gear/AriacShippingBox.h"
 
 using namespace ariac;
 
 /////////////////////////////////////////////////
-KitTray::KitTray()
+ShippingBox::ShippingBox()
 {
 }
 
 /////////////////////////////////////////////////
-KitTray::~KitTray()
+ShippingBox::~ShippingBox()
 {
 }
 
 /////////////////////////////////////////////////
-KitTray::KitTray(std::string _trayID)
-  : trayID(_trayID)
+ShippingBox::ShippingBox(std::string _shippingBoxID)
+  : shippingBoxID(_shippingBoxID)
 {
 }
 
 /////////////////////////////////////////////////
-void KitTray::UpdateKitState(const Kit & kit)
+void ShippingBox::UpdateShipmentState(const Shipment & shipment)
 {
-  this->currentKit = kit;
-  this->kitStateChanged = true;
+  this->currentShipment = shipment;
+  this->shipmentStateChanged = true;
 }

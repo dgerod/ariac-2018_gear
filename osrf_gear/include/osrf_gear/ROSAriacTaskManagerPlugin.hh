@@ -22,7 +22,7 @@
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/physics/PhysicsTypes.hh>
 #include <osrf_gear/GetMaterialLocations.h>
-#include <osrf_gear/SubmitTray.h>
+#include <osrf_gear/SubmitShipment.h>
 #include <sdf/sdf.hh>
 #include <std_msgs/String.h>
 #include <std_srvs/Trigger.h>
@@ -37,44 +37,44 @@ namespace gazebo
   ///
   ///  <order>
   ///    <time>5.0</time>
-  ///    <!-- 1st kit -->
-  ///    <kit>
-  ///      <object>
+  ///    <!-- 1st shipment -->
+  ///    <shipment>
+  ///      <product>
   ///        <type>coke_can</type>
   ///        <pose>-1 2.5 0.2 0 0 0</pose>
-  ///      </object>
-  ///      <object>
+  ///      </product>
+  ///      <product>
   ///        <type>cordless_drill/</type>
   ///        <pose>-1 2.5 0.2 0 0 0</pose>
-  ///      </object>
-  ///      <object>
+  ///      </product>
+  ///      <product>
   ///        <type>beer</type>
   ///        <pose>-1 2.5 0.2 0 0 0</pose>
-  ///      </object>
-  ///    </kit>
-  ///    <!-- 2nd kit -->
-  ///    <kit>
-  ///      <object>
+  ///      </product>
+  ///    </shipment>
+  ///    <!-- 2nd shipment -->
+  ///    <shipment>
+  ///      <product>
   ///        <type>coke_can</type>
   ///        <pose>-1 2.5 0.2 0 0 0</pose>
-  ///      </object>
-  ///      <object>
+  ///      </product>
+  ///      <product>
   ///        <type>cordless_drill/</type>
   ///        <pose>-1 2.5 0.2 0 0 0</pose>
-  ///      </object>
-  ///      <object>
+  ///      </product>
+  ///      <product>
   ///        <type>beer</type>
   ///        <pose>-1 2.5 0.2 0 0 0</pose>
-  ///      </object>
-  ///    </kit>
+  ///      </product>
+  ///    </shipment>
   ///  </order>
   ///
   /// A task can have multiple orders. Each order has a time element. At that
   /// point in simulation time, the order will be notified to the team.
-  /// An order is composed by a positive number of kits. A kit is composed by
-  /// a positive number of objects. An object contains a type (e.g.: coke_can)
-  /// and a pose. The pose is the target pose where the object should be placed
-  /// on a destination tray.
+  /// An order is composed by a positive number of shipments. A shipment is composed by
+  /// a positive number of products. An product contains a type (e.g.: coke_can)
+  /// and a pose. The pose is the target pose where the product should be placed
+  /// on a destination shipping box.
   ///
   /// After loading the orders, the plugin will use a simple finite state machine
   /// to handle the different tasks to do.
@@ -139,9 +139,9 @@ namespace gazebo
     public: bool HandleEndService(
       std_srvs::Trigger::Request & req, std_srvs::Trigger::Response & res);
 
-    /// \brief Callback for when a tray is submitted for inspection.
-    public: bool HandleSubmitTrayService(
-      ros::ServiceEvent<osrf_gear::SubmitTray::Request, osrf_gear::SubmitTray::Response> & event);
+    /// \brief Callback for when a shipment is submitted for inspection.
+    public: bool HandleSubmitShipmentService(
+      ros::ServiceEvent<osrf_gear::SubmitShipment::Request, osrf_gear::SubmitShipment::Response> & event);
 
     /// \brief Callback for when a query is made for material locations.
     public: bool HandleGetMaterialLocationsService(

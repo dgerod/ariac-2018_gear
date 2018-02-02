@@ -28,27 +28,27 @@ find_package(gazebo REQUIRED)
 add_message_files(DIRECTORY msg
   FILES
   ConveyorBeltState.msg
-  DetectedObject.msg
-  Kit.msg
-  KitObject.msg
-  KitTray.msg
+  DetectedProduct.msg
+  Shipment.msg
+  Product.msg
+  ShippingBox.msg
   LogicalCameraImage.msg
   Model.msg
   Order.msg
   PopulationState.msg
   Proximity.msg
   StorageUnit.msg
-  TrayContents.msg
+  ShippingBoxContents.msg
   VacuumGripperState.msg
 )
 
 add_service_files(DIRECTORY srv
   FILES
-  AGVControl.srv
+  DroneControl.srv
   ConveyorBeltControl.srv
   GetMaterialLocations.srv
   PopulationControl.srv
-  SubmitTray.srv
+  SubmitShipment.srv
   VacuumGripperControl.srv
 )
 
@@ -182,14 +182,14 @@ install(TARGETS ${ros_conveyor_congestion_plugin}
   RUNTIME DESTINATION bin
 )
 
-# Create the libROSAGVPlugin.so library.
-set(ros_agv_plugin_name ROSAGVPlugin)
-add_library(${ros_agv_plugin_name} src/ROSAGVPlugin.cc)
-target_link_libraries(${ros_agv_plugin_name} ${GAZEBO_LIBRARIES})
-add_dependencies(${ros_agv_plugin_name}
+# Create the libROSDronePlugin.so library.
+set(ros_drone_plugin_name ROSDronePlugin)
+add_library(${ros_drone_plugin_name} src/ROSDronePlugin.cc)
+target_link_libraries(${ros_drone_plugin_name} ${GAZEBO_LIBRARIES})
+add_dependencies(${ros_drone_plugin_name}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
-install(TARGETS ${ros_agv_plugin_name}
+install(TARGETS ${ros_drone_plugin_name}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -301,26 +301,26 @@ install(TARGETS ${object_disposal_plugin_name}
   RUNTIME DESTINATION bin
 )
 
-# Create the libROSAriacKitTrayPlugin.so library.
-set(kit_tray_plugin_name ROSAriacKitTrayPlugin)
-add_library(${kit_tray_plugin_name} src/ROSAriacKitTrayPlugin.cc)
-target_link_libraries(${kit_tray_plugin_name}
+# Create the libROSAriacShippingBoxPlugin.so library.
+set(shipping_box_plugin_name ROSAriacShippingBoxPlugin)
+add_library(${shipping_box_plugin_name} src/ROSAriacShippingBoxPlugin.cc)
+target_link_libraries(${shipping_box_plugin_name}
   ${GAZEBO_LIBRARIES}
   ${roscpp_LIBRARIES}
   ${side_contact_plugin_name}
 )
-add_dependencies(${kit_tray_plugin_name}
+add_dependencies(${shipping_box_plugin_name}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
-install(TARGETS ${kit_tray_plugin_name}
+install(TARGETS ${shipping_box_plugin_name}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
 
-# Create the libAriacKitTray.so library.
-set(target_name AriacKitTray)
-add_library(${target_name} src/AriacKitTray.cpp)
+# Create the libAriacShippingBox.so library.
+set(target_name AriacShippingBox)
+add_library(${target_name} src/AriacShippingBox.cpp)
 target_link_libraries(${target_name}
   ${GAZEBO_LIBRARIES}
   ${roscpp_LIBRARIES}
@@ -340,7 +340,7 @@ add_library(${target_name} src/AriacScorer.cpp)
 target_link_libraries(${target_name}
   ${GAZEBO_LIBRARIES}
   ${roscpp_LIBRARIES}
-  AriacKitTray
+  AriacShippingBox
 )
 add_dependencies(${target_name}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}

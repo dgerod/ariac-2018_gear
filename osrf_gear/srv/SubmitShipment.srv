@@ -1,5 +1,5 @@
-string tray_id
-string kit_type
+string shipping_box_id
+string shipment_type
 
 ---
 bool success

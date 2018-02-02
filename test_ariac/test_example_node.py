@@ -32,12 +32,12 @@ class ExampleNodeTester(unittest.TestCase):
         self.prepare_tester()
         self._test_send_arm_to_zero_state()
 
-        # Starting the competition will cause parts from the order to be spawned on AGV1
+        # Starting the competition will cause parts from the order to be spawned on shipping_box_0
         self._test_start_comp()
         time.sleep(5.0)
         self._test_order_reception()
 
-        self._test_agv_control()
+        self._test_drone_control()
         time.sleep(10.0)
         self._test_comp_end()
 
@@ -65,21 +65,21 @@ class ExampleNodeTester(unittest.TestCase):
             error += abs(position - 0.0)
         self.assertTrue(error < 0.5, 'Arm was not properly sent to zero state')
 
-    def _test_agv_control(self, index=1, kit_id='order_0_kit_0'):
-        success = ariac_example.control_agv(index, kit_id)
-        self.assertTrue(success, 'Failed to control AGV')
+    def _test_drone_control(self, index=1, shipment_id='order_0_shipment_0'):
+        success = ariac_example.control_drone(index, shipment_id)
+        self.assertTrue(success, 'Failed to control drone')
 
     def _test_comp_end(self):
         num_received_orders = len(self.comp_class.received_orders)
-        num_kits = len(self.comp_class.received_orders[0].kits)
-        if num_received_orders == 1 and num_kits == 1:
+        num_shipments = len(self.comp_class.received_orders[0].shipments)
+        if num_received_orders == 1 and num_shipments == 1:
             self.assertTrue(
                 self.comp_class.current_comp_state == 'done', 'Competition not in "done" state')
         else:
-            # If there were more kits expected, the order won't be done
+            # If there were more shipments expected, the order won't be done
             self.assertTrue(
                 self.comp_class.current_comp_state == 'go', 'Competition not in "go" state')
-        num_parts_in_order = len(self.comp_class.received_orders[0].kits[0].objects)
+        num_parts_in_order = len(self.comp_class.received_orders[0].shipments[0].objects)
         self.assertTrue(
             # Expect to have a point for each part, the all parts bonus, and a point for each part's pose
             self.current_comp_score == 3 * num_parts_in_order,

@@ -22,16 +22,10 @@ set(rostests
   ariac_rosapi.test
   ariac_example.test
   ariac_tf_frames.test
-  ariac_qual2a.test
-  ariac_qual2b.test
-  ariac_qual2a_scoring_after_waiting.test
-  ariac_qual2b_scoring_after_waiting.test
-  ariac_qual2a_scoring_immediate.test
-  ariac_qual2b_scoring_immediate.test
   gripper.test
   # gripper_unthrottled.test  # this needs a good gripper pose; regression is fixed.
-  test_scoring/ariac_scoring_perfect_kit.test
-  test_scoring/ariac_scoring_perfect_kit_flipped.test
+  test_scoring/ariac_scoring_perfect_shipment.test
+  test_scoring/ariac_scoring_perfect_shipment_flipped.test
   test_scoring/ariac_scoring_correct_parts_incorrect_poses.test
   test_scoring/ariac_scoring_correct_parts_plus_unwanted.test
   test_scoring/ariac_scoring_correct_parts_plus_faulty.test
@@ -59,25 +53,23 @@ endforeach()
 install(FILES
   ${rostests}
   ariac_rosapi.yaml
-  fill_demo_tray.yaml
-  qual2a_testing.yaml
-  qual2b_testing.yaml
+  fill_demo_shipment.yaml
   minimal_sample_unthrottled.yaml
   tf_sensors.yaml
   test_scoring/scoring_base_order.yaml
   test_scoring/scoring_base_order_flipped.yaml
   test_scoring/scoring_base_order_interrupted.yaml
-  test_scoring/scoring_partial_kit_both_trays.yaml
-  test_scoring/scoring_perfect_kit.yaml
-  test_scoring/scoring_perfect_kit_both_trays.yaml
-  test_scoring/scoring_perfect_kit_flipped.yaml
+  test_scoring/scoring_partial_shipment_both_shipments.yaml
+  test_scoring/scoring_perfect_shipment.yaml
+  test_scoring/scoring_perfect_shipment_both_shipments.yaml
+  test_scoring/scoring_perfect_shipment_flipped.yaml
   test_scoring/scoring_correct_parts_incorrect_poses.yaml
   test_scoring/scoring_correct_parts_plus_unwanted.yaml
   test_scoring/scoring_correct_parts_plus_faulty.yaml
   test_scoring/scoring_correct_parts_not_flipped.yaml
   test_scoring/scoring_missing_parts.yaml
   test_scoring/scoring_faulty_parts.yaml
-  test_scoring/scoring_perfect_kit_both_trays.yaml
+  test_scoring/scoring_perfect_shipment_both_shipments.yaml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/test
 )
 

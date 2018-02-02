@@ -21,7 +21,7 @@ import rospy
 
 from osrf_gear.msg import Order
 from osrf_gear.msg import VacuumGripperState
-from osrf_gear.srv import AGVControl
+from osrf_gear.srv import DroneControl
 from osrf_gear.srv import VacuumGripperControl
 from sensor_msgs.msg import JointState
 from std_msgs.msg import String
@@ -68,23 +68,23 @@ def control_gripper(enabled):
     return response.success
 
 
-def control_agv(index, kit_type):
-    rospy.loginfo("Waiting for AGV control to be ready...")
-    name = '/ariac/agv' + str(index)
+def control_drone(index, shipment_type):
+    rospy.loginfo("Waiting for drone control to be ready...")
+    name = '/ariac/drone'
     rospy.wait_for_service(name)
-    rospy.loginfo("AGV control is now ready.")
-    rospy.loginfo("Requesting AGV control...")
+    rospy.loginfo("Drone control is now ready.")
+    rospy.loginfo("Requesting drone control...")
 
     try:
-        agv_control = rospy.ServiceProxy(name, AGVControl)
-        response = agv_control(kit_type)
+        drone_control = rospy.ServiceProxy(name, DroneControl)
+        response = drone_control(shipment_type)
     except rospy.ServiceException as exc:
-        rospy.logerr("Failed to control the AGV: %s" % exc)
+        rospy.logerr("Failed to control the drone: %s" % exc)
         return False
     if not response.success:
-        rospy.logerr("Failed to control the AGV: %s" % response)
+        rospy.logerr("Failed to control the drone: %s" % response)
     else:
-        rospy.loginfo("AGV controlled successfully")
+        rospy.loginfo("Drone controlled successfully")
     return response.success
 
 

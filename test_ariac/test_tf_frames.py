@@ -25,24 +25,11 @@ class TfTester(ExampleNodeTester):
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
 
         self.camera_above_box0 = 'logical_camera_1'
-        self._test_tray_pose()
+        self._test_shipping_box_pose()
         self._test_logical_camera_parts()
         self._test_faulty_parts()
 
-    def _test_agv_pose(self):
-        self._test_pose(
-            [0.3, 3.3, 0.0],
-            tf.transformations.quaternion_from_euler(0, 0, 3.1415),
-            self.camera_above_box0 + '_agv1_frame'
-        )
-
-        self._test_pose(
-            [0.3, -3.3, 0.0],
-            tf.transformations.quaternion_from_euler(0, 0, 0),
-            self.camera_above_box1 + '_agv2_frame'
-        )
-
-    def _test_tray_pose(self):
+    def _test_shipping_box_pose(self):
         self._test_pose(
             [1.21, 5.0, 0.91],
             tf.transformations.quaternion_from_euler(0, 0, 0),

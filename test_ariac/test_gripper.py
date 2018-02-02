@@ -27,12 +27,12 @@ class GripperTester(ExampleNodeTester):
         # Enable the gripper so that it picks up the part.
         self._test_enable_gripper()
 
-        # Move the part over the tray using a pre-defined sequence of poses.
-        self._send_arm_to_tray()
+        # Move the part over the shipping box using a pre-defined sequence of poses.
+        self._send_arm_to_shipping_box()
         self.assertTrue(
             self.comp_class.current_gripper_state.enabled, 'Gripper no longer enabled')
         self.assertTrue(
-            self.comp_class.current_gripper_state.attached, 'Part no longer attached')
+            self.comp_class.current_gripper_state.attached, 'Product no longer attached')
 
         # Disable the gripper so that it drops the part.
         self._test_disable_gripper()
@@ -46,7 +46,7 @@ class GripperTester(ExampleNodeTester):
         self.assertTrue(
             self.comp_class.current_gripper_state.enabled, 'Gripper not successfully enabled')
         self.assertTrue(
-            self.comp_class.current_gripper_state.attached, 'Part not successfully attached')
+            self.comp_class.current_gripper_state.attached, 'Product not successfully attached')
 
     def _enable_gripper(self):
         success = ariac_example.control_gripper(True)
@@ -60,7 +60,7 @@ class GripperTester(ExampleNodeTester):
         self.assertFalse(
             self.comp_class.current_gripper_state.enabled, 'Gripper not successfully disabled')
         self.assertFalse(
-            self.comp_class.current_gripper_state.attached, 'Part not successfully dettached')
+            self.comp_class.current_gripper_state.attached, 'Product not successfully dettached')
 
     def _disable_gripper(self):
         success = ariac_example.control_gripper(False)
@@ -72,7 +72,7 @@ class GripperTester(ExampleNodeTester):
         self.comp_class.send_arm_to_state(positions)
         time.sleep(1.5)
 
-    def _send_arm_to_tray(self):
+    def _send_arm_to_shipping_box(self):
         trajectory = [
             [1.76, 0.28, -1.38, 2.76, 3.27, -1.51, 0.0],
             [1.76, 0.38, -1.38, 1.5, 3.27, -1.51, 0.0],

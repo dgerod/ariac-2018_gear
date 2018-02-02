@@ -21,30 +21,30 @@
 
 namespace ariac
 {
-  /// \brief Class to store information about a kit tray.
-  class KitTray
+  /// \brief Class to store information about a shipping box.
+  class ShippingBox
   {
     /// \brief Constructor.
-    public: KitTray();
+    public: ShippingBox();
 
     /// \brief Constructor.
-    /// \param[in] _trayID ID of the tray.
-    /// \param[in] _assignedKit Kit assigned to the tray.
-    public: KitTray(std::string _trayID);
+    /// \param[in] _shippingBoxID ID of the shipping box.
+    /// \param[in] _assignedShipment Shipment assigned to the shipping box.
+    public: ShippingBox(std::string _shippingBoxID);
 
     /// \brief Destructor.
-    public: ~KitTray();
+    public: ~ShippingBox();
 
-    /// \brief Update the current state of the kit on the tray.
-    public: void UpdateKitState(const Kit & kit);
+    /// \brief Update the current state of the shipment on the shipping box.
+    public: void UpdateShipmentState(const Shipment & shipment);
 
-    /// \brief The ID of the tray.
-    public: std::string trayID;
+    /// \brief The ID of the shipping box.
+    public: std::string shippingBoxID;
 
-    /// \brief The current state of the kit on the tray.
-    public: Kit currentKit;
+    /// \brief The current state of the shipment on the shipping box.
+    public: Shipment currentShipment;
 
-    /// \brief Flag for signalling the state of the tray has changed.
-    protected: bool kitStateChanged;
+    /// \brief Flag for signalling the state of the shipping box has changed.
+    protected: bool shipmentStateChanged;
   };
 }

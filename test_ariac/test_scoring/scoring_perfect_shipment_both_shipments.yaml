@@ -1,5 +1,5 @@
 models_to_spawn:
-  # Spawn some models on the agv tray on startup
+  # Spawn some models on shipping_box_0 on startup
   shipping_box_0::box_base:
     models:
       part_0:
@@ -27,7 +27,7 @@ models_to_spawn:
         pose:
           xyz: [0.0, 0.15, 0.05]
           rpy: [0, 0, 0]
-  agv2::kit_tray_2::kit_tray_2::tray:
+  agv2::shipment_tray_2::shipment_tray_2::tray:
     models:
       part_0:
         type: order_part3

@@ -133,11 +133,11 @@ expand_snippet('shipping_box.sdf.template')
     </model>
 
 @[end if]@
-@{belt_parts_loop = True}@
-@{belt_population_cycles = options['belt_population_cycles'] if belt_parts_loop else 1}
+@{belt_models_loop = True}@
+@{belt_population_cycles = options['belt_population_cycles'] if belt_models_loop else 1}
 
 @{obj_type_index = 0}@
-@[for obj_type, spawn_times in belt_parts.items()]@
+@[for obj_type, spawn_times in belt_models.items()]@
     <!-- Pool of @(obj_type) objects -->
 @[  for index in range(1, 1 + belt_population_cycles * len(spawn_times))]@
 @[    if obj_type is 'shipping_box']@
@@ -162,25 +162,18 @@ expand_snippet('shipping_box.sdf.template')
 @{obj_type_index += 1}@
 @[end for]@
 
-@[if options['insert_agvs']]@
-@[for agv_id in [1]]@
-    <!-- AGV@(str(agv_id)) -->
-    <model name="agv@(str(agv_id))">
+    <!-- drone for delivering shipping boxes -->
+    <model name="drone">
       <pose>-1.4 -9.4 4.3 0 0 1.5707</pose>
       <include>
-        <name>agv@(str(agv_id))</name>
+        <name>drone</name>
         <uri>model://drone_with_box</uri>
       </include>
-      <plugin name="agv_plugin" filename="libROSAGVPlugin.so">
-        <submit_tray_service_name>/ariac/submit_tray</submit_tray_service_name>
-        <clear_tray_service_name>/ariac/kit_tray_@(str(agv_id))/clear_tray</clear_tray_service_name>
-        <lock_tray_service_name>/ariac/kit_tray_@(str(agv_id))/lock_models</lock_tray_service_name>
+      <plugin name="drone_plugin" filename="libROSDronePlugin.so">
+        <submit_shipment_service_name>/ariac/submit_shipment</submit_shipment_service_name>
         <waiting_box_topic>/ariac/waiting_shipping_box</waiting_box_topic>
-        <index>@(str(agv_id))</index>
       </plugin>
     </model>
-@[end for]@
-@[end if]@
 
     <!-- an invisible conveyor belt -->
       <include>
@@ -198,7 +191,7 @@ expand_snippet('shipping_box.sdf.template')
     </include>
 @[end for]@
 @[end if]@
-@[if belt_parts]@
+@[if belt_models]@
 
     <!-- Populate the conveyor belt -->
     <plugin filename="libROSPopulationPlugin.so" name="populate_conveyor">
@@ -208,10 +201,10 @@ expand_snippet('shipping_box.sdf.template')
       <state_topic>/ariac/population/state</state_topic>
       <start_index>1</start_index>
       <prefix_object_names>false</prefix_object_names>
-      <loop_forever>@("true" if belt_parts_loop else "false")</loop_forever>
+      <loop_forever>@("true" if belt_models_loop else "false")</loop_forever>
       <frame>conveyor_belt::conveyor_belt_fixed</frame>
       <object_sequence>
-@[for part_name, spawn_times in belt_parts.items()]@
+@[for part_name, spawn_times in belt_models.items()]@
   @[for spawn_time, part in spawn_times.items()]@
         <object>
           <time>@(spawn_time)</time>
@@ -233,7 +226,7 @@ expand_snippet('shipping_box.sdf.template')
       <end_competition_service_name>/ariac/end_competition</end_competition_service_name>
       <population_activate_topic>/ariac/populate_belt</population_activate_topic>
       <conveyor_control_topic>/ariac/conveyor/control</conveyor_control_topic>
-      <submit_tray_service_name>/ariac/submit_tray</submit_tray_service_name>
+      <submit_shipment_service_name>/ariac/submit_shipment</submit_shipment_service_name>
       <material_locations_service_name>/ariac/material_locations</material_locations_service_name>
       <orders_topic>/ariac/orders</orders_topic>
 @[for order_name, order in orders.items()]@
@@ -247,16 +240,16 @@ expand_snippet('shipping_box.sdf.template')
 @[if order['announcement_condition'] == 'unwanted_parts']@
         <interrupt_on_unwanted_parts>@(order['announcement_condition_value'])</interrupt_on_unwanted_parts>
 @[end if]@
-@[for kit_index in range(order['kit_count'])]
-        <kit>
-          <kit_type>@(order_name)_kit_@(kit_index)</kit_type>
+@[for shipment_index in range(order['shipment_count'])]
+        <shipment>
+          <shipment_type>@(order_name)_shipment_@(shipment_index)</shipment_type>
 @[for part in order['parts']]@
-          <object>
+          <product>
             <type>@(part.type)</type>
             <pose>@(' '.join(part.pose.xyz)) @(' '.join(part.pose.rpy))</pose>
-          </object>
+          </product>
 @[end for]@
-        </kit>
+        </shipment>
 @[end for]@
       </order>
 @[end for]@
@@ -299,12 +292,12 @@ expand_snippet('shipping_box.sdf.template')
       </link>
     </model>
 
-@[if options['fill_demo_tray'] and orders and options['insert_shipping_boxes']]@
+@[if options['fill_demo_shipment'] and orders and options['insert_shipping_boxes']]@
 @{
 order_name, order = orders.items()[0]
 count = {}
 }@
-    <!-- Populate kit tray with order parts -->
+    <!-- Populate shipping_box_0 with order parts -->
     <plugin filename="libPopulationPlugin.so" name="populate_box_0">
       <activation_topic>/ariac/populate_belt</activation_topic>
       <loop_forever>false</loop_forever>
@@ -321,7 +314,7 @@ count = {}
       </object_sequence>
     </plugin>
 
-    <!-- Insert models to fill the kit tray -->
+    <!-- Insert models to fill the shipping box -->
 @[for part in order['parts']]@
 @{
 try:

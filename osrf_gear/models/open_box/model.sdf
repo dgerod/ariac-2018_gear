@@ -17,7 +17,7 @@
         </inertia>
       </inertial>
 
-      <sensor name='kit_tray_contact' type='contact'>
+      <sensor name='shipping_box_contact' type='contact'>
         <update_rate>1</update_rate>
         <contact>
           <collision>box_base</collision>

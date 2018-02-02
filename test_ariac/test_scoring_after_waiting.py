@@ -18,16 +18,16 @@ class ScoringTester(ExampleNodeTester):
     def test(self):
         self.prepare_tester()
 
-        # Starting the competition will cause parts from the order to be spawned on AGV1
+        # Starting the competition will cause parts from the order to be spawned on shipping_box_0
         self._test_start_comp()
         time.sleep(1.0)
         self._test_order_reception()
 
-        # Sleep a long time to check that the tray is stable
+        # Sleep a long time to check that the shipping box is stable
         time.sleep(60)
 
-        # Submit the tray
-        self._test_agv_control()
+        # Submit the shipping box
+        self._test_drone_control()
         time.sleep(5.0)
 
         # Check the score

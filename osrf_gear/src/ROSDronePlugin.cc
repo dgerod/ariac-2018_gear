@@ -14,14 +14,14 @@
  * limitations under the License.
  *
 */
-#include "ROSAGVPlugin.hh"
+#include "ROSDronePlugin.hh"
 
 #include <gazebo/common/common.hh>
 #include <gazebo/common/UpdateInfo.hh>
 #include <gazebo/common/Time.hh>
 #include <gazebo/transport/transport.hh>
 #include <ignition/math.hh>
-#include <osrf_gear/SubmitTray.h>
+#include <osrf_gear/SubmitShipment.h>
 #include <std_msgs/String.h>
 #include <std_srvs/Trigger.h>
 
@@ -30,11 +30,11 @@
 namespace gazebo
 {
   /// \internal
-  /// \brief Private data for the ROSAGVPlugin class.
-  struct ROSAGVPluginPrivate
+  /// \brief Private data for the ROSDronePlugin class.
+  struct ROSDronePluginPrivate
   {
-    /// \brief Name of the AGV
-    public: std::string agvName;
+    /// \brief Name of the drone
+    public: std::string droneName;
 
     /// \brief World pointer
     public: physics::WorldPtr world;
@@ -48,11 +48,11 @@ namespace gazebo
     /// \brief ros node handle
     public: ros::NodeHandle *rosnode;
 
-    /// \brief Receives service calls for controlling the AGV
+    /// \brief Receives service calls for controlling the drone
     public: ros::ServiceServer rosService;
 
-    /// \brief Client for submitting trays for inspection
-    public: ros::ServiceClient rosSubmitTrayClient;
+    /// \brief Client for submitting shipping boxes for inspection
+    public: ros::ServiceClient rosSubmitShipmentClient;
 
     /// \brief Transportation node.
     public: transport::NodePtr gzNode;
@@ -66,69 +66,62 @@ namespace gazebo
     /// \brief Gazebo subscriber for boxes waiting to be collected.
     public: transport::SubscriberPtr waitingBoxSub;
 
-    /// \brief Client for clearing this AGV's tray
-    public: ros::ServiceClient rosClearTrayClient;
+    /// \brief Robot animation for collecting the shipment
+    public: gazebo::common::PoseAnimationPtr collectAnimation;
 
-    /// \brief Robot animation for collecting the tray
-    public: gazebo::common::PoseAnimationPtr collectTrayAnimation;
-
-    /// \brief Robot animation for the AGV returning to its base
+    /// \brief Robot animation for the drone returning to its base
     public: gazebo::common::PoseAnimationPtr returnAnimation;
 
     /// \brief Pointer to the model
     public: gazebo::physics::ModelPtr model;
 
-    /// \brief Type of kit assigned to the AGV
-    public: std::string kitType;
+    /// \brief Type of shipment assigned to the drone
+    public: std::string shipmentType;
 
-    /// \brief The state of the AGV
+    /// \brief The state of the drone
     public: std::string currentState;
 
-    /// \brief The time the last tray delivery was triggered
+    /// \brief The time the last delivery was triggered
     public: common::Time deliveryTriggerTime;
 
     /// \brief Name of the shipping box waiting to be collected ("" if none)
     public: std::string waitingBoxName;
 
-    /// \brief Flag for triggering tray delivery from the service callback
+    /// \brief Flag for triggering delivery from the service callback
     public: bool deliveryTriggered = false;
 
-    /// \brief Evaluation result of the tray (negative means that the tray was invalid)
+    /// \brief Evaluation result of the shipment (negative means invalid)
     public: int inspectionResult = -1;
 
-    /// \brief Publishes the AGV state.
+    /// \brief Publishes the drone state.
     public: ros::Publisher statePub;
   };
 }
 
 using namespace gazebo;
 
-GZ_REGISTER_MODEL_PLUGIN(ROSAGVPlugin);
+GZ_REGISTER_MODEL_PLUGIN(ROSDronePlugin);
 
 /////////////////////////////////////////////////
-ROSAGVPlugin::ROSAGVPlugin()
-  : dataPtr(new ROSAGVPluginPrivate)
+ROSDronePlugin::ROSDronePlugin()
+  : dataPtr(new ROSDronePluginPrivate)
 {
 }
 
 /////////////////////////////////////////////////
-ROSAGVPlugin::~ROSAGVPlugin()
+ROSDronePlugin::~ROSDronePlugin()
 {
   this->dataPtr->rosnode->shutdown();
 }
 
 /////////////////////////////////////////////////
-void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
+void ROSDronePlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 {
-  std::string index;
+  std::string index = "";
 
   if (_sdf->HasElement("index"))
   {
     index = _sdf->Get<std::string>("index");
-  }
-  else
-  {
-    gzerr << "AGV is missing an index. The AGV will not work.\n";
   }
 
   this->dataPtr->world = _parent->GetWorld();
@@ -150,25 +143,15 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     return;
   }
 
-  this->dataPtr->agvName = std::string("agv") + index;
+  this->dataPtr->droneName = std::string("drone") + index;
 
-  std::string agvControlTopic = "/ariac/" + this->dataPtr->agvName;
-  ROS_DEBUG_STREAM("Using AGV control service topic: " << agvControlTopic);
+  std::string droneControlTopic = "/ariac/" + this->dataPtr->droneName;
+  ROS_DEBUG_STREAM("Using drone control service topic: " << droneControlTopic);
 
-  std::string submitTrayTopic = "submit_tray";
-  if (_sdf->HasElement("submit_tray_service_name"))
-    submitTrayTopic = _sdf->Get<std::string>("submit_tray_service_name");
-  ROS_DEBUG_STREAM("Using submit tray service topic: " << submitTrayTopic);
-
-  std::string lockTrayServiceName = "lock_tray_models";
-  if (_sdf->HasElement("lock_tray_service_name"))
-    lockTrayServiceName = _sdf->Get<std::string>("lock_tray_service_name");
-  ROS_DEBUG_STREAM("Using lock tray service topic: " << lockTrayServiceName);
-
-  std::string clearTrayServiceName = "clear_tray";
-  if (_sdf->HasElement("clear_tray_service_name"))
-    clearTrayServiceName = _sdf->Get<std::string>("clear_tray_service_name");
-  ROS_DEBUG_STREAM("Using clear tray service topic: " << clearTrayServiceName);
+  std::string submitShipmentTopic = "submit_shipment";
+  if (_sdf->HasElement("submit_shipment_service_name"))
+    submitShipmentTopic = _sdf->Get<std::string>("submit_shipment_service_name");
+  ROS_DEBUG_STREAM("Using submit shipment service topic: " << submitShipmentTopic);
 
   std::string waitingBoxTopic = "waiting_shipping_box";
   if (_sdf->HasElement("waiting_box_topic"))
@@ -186,32 +169,32 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->dataPtr->clearBoxesPub =
     this->dataPtr->gzNode->Advertise<msgs::GzString>("/ariac/drone_collection_zone/activate_deletion");
   this->dataPtr->waitingBoxSub = this->dataPtr->gzNode->Subscribe(
-    waitingBoxTopic, &ROSAGVPlugin::OnWaitingBox, this);
+    waitingBoxTopic, &ROSDronePlugin::OnWaitingBox, this);
 
   double speedFactor = 0.8;
-  this->dataPtr->collectTrayAnimation.reset(
-    new gazebo::common::PoseAnimation(this->dataPtr->agvName, 4/speedFactor, false));
+  this->dataPtr->collectAnimation.reset(
+    new gazebo::common::PoseAnimation(this->dataPtr->droneName, 4/speedFactor, false));
 
   ignition::math::Vector3d off_screen_position1(-1.4, -9.4, 4.3);
   ignition::math::Vector3d off_screen_position2(5.4, -9.4, 4.3);
   ignition::math::Vector3d hover_position(1.2, -4.6, 1.6);
   ignition::math::Vector3d lower_position(1.3, -4.7, 1.3);
 
-  gazebo::common::PoseKeyFrame *key = this->dataPtr->collectTrayAnimation->CreateKeyFrame(0);
+  gazebo::common::PoseKeyFrame *key = this->dataPtr->collectAnimation->CreateKeyFrame(0);
   key->Translation(off_screen_position1);
   key->Rotation(ignition::math::Quaterniond(0, 0, 1.5707));
 
-  key = this->dataPtr->collectTrayAnimation->CreateKeyFrame(3.5/speedFactor);
+  key = this->dataPtr->collectAnimation->CreateKeyFrame(3.5/speedFactor);
   key->Translation(hover_position);
   key->Rotation(ignition::math::Quaterniond(0, 0, 0.2));
 
 
-  key = this->dataPtr->collectTrayAnimation->CreateKeyFrame(4/speedFactor);
+  key = this->dataPtr->collectAnimation->CreateKeyFrame(4/speedFactor);
   key->Translation(lower_position);
   key->Rotation(ignition::math::Quaterniond(0, 0, 0));
 
   this->dataPtr->returnAnimation.reset(
-    new gazebo::common::PoseAnimation(this->dataPtr->agvName, 4/speedFactor, false));
+    new gazebo::common::PoseAnimation(this->dataPtr->droneName, 4/speedFactor, false));
 
   key = this->dataPtr->returnAnimation->CreateKeyFrame(0);
   key->Translation(lower_position);
@@ -227,19 +210,15 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   this->dataPtr->model = _parent;
 
-  this->dataPtr->rosService = this->dataPtr->rosnode->advertiseService(agvControlTopic,
-      &ROSAGVPlugin::OnCommand, this);
+  this->dataPtr->rosService = this->dataPtr->rosnode->advertiseService(droneControlTopic,
+      &ROSDronePlugin::OnCommand, this);
 
-  // Client for submitting trays for inspection.
-  this->dataPtr->rosSubmitTrayClient =
-    this->dataPtr->rosnode->serviceClient<osrf_gear::SubmitTray>(submitTrayTopic);
+  // Client for submitting shipping boxes for inspection.
+  this->dataPtr->rosSubmitShipmentClient =
+    this->dataPtr->rosnode->serviceClient<osrf_gear::SubmitShipment>(submitShipmentTopic);
 
-  // Client for clearing trays.
-  this->dataPtr->rosClearTrayClient =
-    this->dataPtr->rosnode->serviceClient<std_srvs::Trigger>(clearTrayServiceName);
-
-  // Publisher for the status of the AGV.
-  std::string stateTopic = "/ariac/" + this->dataPtr->agvName + "/state";
+  // Publisher for the status of the drone.
+  std::string stateTopic = "/ariac/" + this->dataPtr->droneName + "/state";
   this->dataPtr->statePub = this->dataPtr->rosnode->advertise<
     std_msgs::String>(stateTopic, 1000);
 
@@ -248,11 +227,11 @@ void ROSAGVPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   this->dataPtr->updateConnection = event::Events::ConnectWorldUpdateBegin(
-    boost::bind(&ROSAGVPlugin::OnUpdate, this, _1));
+    boost::bind(&ROSDronePlugin::OnUpdate, this, _1));
 }
 
 /////////////////////////////////////////////////
-void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
+void ROSDronePlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
 {
   auto currentSimTime = this->dataPtr->world->GetSimTime();
   if (this->dataPtr->currentState == "ready_to_collect")
@@ -260,36 +239,36 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
     if (this->dataPtr->deliveryTriggered)
     {
       this->dataPtr->deliveryTriggerTime = currentSimTime;
-      // Make a service call to submit the tray for inspection.
-      // Do this before animating and clearing the AGV in case the assigned
-      // goal changes as the AGV is moving.
-      if (!this->dataPtr->rosSubmitTrayClient.exists())
+      // Make a service call to submit the shipment for inspection.
+      // Do this before animating in case the assigned
+      // goal changes as the drone is moving.
+      if (!this->dataPtr->rosSubmitShipmentClient.exists())
       {
-        this->dataPtr->rosSubmitTrayClient.waitForExistence();
+        this->dataPtr->rosSubmitShipmentClient.waitForExistence();
       }
-      osrf_gear::SubmitTray submit_srv;
-      submit_srv.request.tray_id = this->dataPtr->waitingBoxName + "::box_base";
-      submit_srv.request.kit_type = this->dataPtr->kitType;
-      this->dataPtr->rosSubmitTrayClient.call(submit_srv);
+      osrf_gear::SubmitShipment submit_srv;
+      submit_srv.request.shipping_box_id = this->dataPtr->waitingBoxName + "::box_base";
+      submit_srv.request.shipment_type = this->dataPtr->shipmentType;
+      this->dataPtr->rosSubmitShipmentClient.call(submit_srv);
       this->dataPtr->inspectionResult = -1;
       if (submit_srv.response.success)
       {
         this->dataPtr->inspectionResult = submit_srv.response.inspection_result;
       }
 
-      // Trigger the tray delivery animation
-      this->dataPtr->collectTrayAnimation->SetTime(0);
-      this->dataPtr->model->SetAnimation(this->dataPtr->collectTrayAnimation);
-      ROS_INFO_STREAM("AGV successfully triggered.");
+      // Trigger the delivery animation
+      this->dataPtr->collectAnimation->SetTime(0);
+      this->dataPtr->model->SetAnimation(this->dataPtr->collectAnimation);
+      ROS_INFO_STREAM("drone successfully triggered.");
       this->dataPtr->currentState = "collecting";
     }
     this->dataPtr->deliveryTriggered = false;
   }
   if (this->dataPtr->currentState == "collecting")
   {
-    bool collectTrayAnimationDone = this->dataPtr->collectTrayAnimation->GetTime() >= \
-      this->dataPtr->collectTrayAnimation->GetLength();
-    if (collectTrayAnimationDone)
+    bool collectAnimationDone = this->dataPtr->collectAnimation->GetTime() >= \
+      this->dataPtr->collectAnimation->GetLength();
+    if (collectAnimationDone)
     {
       // Dispose of the real box in favour of the dummy collected box visual.
       gazebo::msgs::GzString activateMsg;
@@ -301,16 +280,16 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
       toggleMsg.set_data("on");
       this->dataPtr->toggleBoxVisualPub->Publish(toggleMsg);
 
-      gzdbg << "Collect tray animation finished." << std::endl;
+      gzdbg << "Collect animation finished." << std::endl;
       this->dataPtr->currentState = "collected";
     }
   }
   if (this->dataPtr->currentState == "collected")
   {
-    // Report the result of the previously-performed tray inspection.
+    // Report the result of the previously-performed shipment inspection.
     if (this->dataPtr->inspectionResult < 0)
     {
-      ROS_ERROR_STREAM("Failed to submit tray for inspection.");
+      ROS_ERROR_STREAM("Failed to submit shipment for inspection.");
     }
     else
     {
@@ -345,31 +324,31 @@ void ROSAGVPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
 }
 
 /////////////////////////////////////////////////
-bool ROSAGVPlugin::OnCommand(
-  osrf_gear::AGVControl::Request &_req,
-  osrf_gear::AGVControl::Response &_res)
+bool ROSDronePlugin::OnCommand(
+  osrf_gear::DroneControl::Request &_req,
+  osrf_gear::DroneControl::Response &_res)
 {
   if (this->dataPtr->currentState != "ready_to_collect")
   {
-    ROS_ERROR_STREAM("AGV not successfully triggered as it was not ready to collect trays.");
+    ROS_ERROR_STREAM("Drone not successfully triggered as it was not ready to collect shipping boxes.");
     _res.success = false;
     return true;
   }
   if (this->dataPtr->waitingBoxName == "")
   {
-    ROS_ERROR_STREAM("AGV not successfully triggered as there is no shipping box to collect.");
+    ROS_ERROR_STREAM("Drone not successfully triggered as there is no shipping box to collect.");
     _res.success = false;
     return true;
   }
-  ROS_ERROR_STREAM("[INFO] AGV '" << this->dataPtr->agvName << "' collection triggered for kit: " << _req.kit_type);
-  this->dataPtr->kitType = _req.kit_type;
+  ROS_ERROR_STREAM("[INFO] Drone collection triggered for shipment: " << _req.shipment_type);
+  this->dataPtr->shipmentType = _req.shipment_type;
   this->dataPtr->deliveryTriggered = true;
   _res.success = true;
   return true;
 }
 
 /////////////////////////////////////////////////
-void ROSAGVPlugin::OnWaitingBox(ConstGzStringPtr &_msg)
+void ROSDronePlugin::OnWaitingBox(ConstGzStringPtr &_msg)
 {
   this->dataPtr->waitingBoxName = _msg->data();
 }

@@ -27,10 +27,10 @@
 #include <ros/ros.h>
 
 #include "osrf_gear/ARIAC.hh"
-#include "osrf_gear/AriacKitTray.h"
-#include <osrf_gear/KitTray.h>
+#include "osrf_gear/AriacShippingBox.h"
+#include <osrf_gear/ShippingBox.h>
 #include <osrf_gear/Order.h>
-#include <osrf_gear/TrayContents.h>
+#include <osrf_gear/ShippingBoxContents.h>
 #include "osrf_gear/VacuumGripperState.h"
 
 /// \brief A scorer for the ARIAC game.
@@ -67,39 +67,39 @@ class AriacScorer
   /// \return The score for the order.
   public: ariac::OrderScore UnassignOrder(const ariac::OrderID_t & orderID);
 
-  /// \brief Get the kit trays the scorer is monitoring.
-  /// \return Vector of kit tray states.
-  public: std::vector<ariac::KitTray> GetTrays();
+  /// \brief Get the shipping boxes the scorer is monitoring.
+  /// \return Vector of shipping box states.
+  public: std::vector<ariac::ShippingBox> GetShippingBoxes();
 
-  /// \brief Get the kit tray with the specified ID.
-  /// \param[in] trayID The ID of the tray to get.
-  /// \param[in] kitTray The kitTray found.
-  /// \return True if the tray was found, false otherwise.
-  public: bool GetTrayById(const ariac::TrayID_t & trayID, ariac::KitTray & kitTray);
+  /// \brief Get the shipping box with the specified ID.
+  /// \param[in] shippingBoxID The ID of the shipping box to get.
+  /// \param[in] shippingBox The shippingBox found.
+  /// \return True if the shipping box was found, false otherwise.
+  public: bool GetShippingBoxById(const ariac::ShippingBoxID_t & shippingBoxID, ariac::ShippingBox & shippingBox);
 
-  /// \brief Submit tray for scoring and store the result in the order score.
-  public: ariac::TrayScore SubmitTray(const ariac::KitTray & tray);
+  /// \brief Submit shipping box for scoring and store the result in the order score.
+  public: ariac::ShipmentScore SubmitShipment(const ariac::ShippingBox & shippingBox);
 
-  /// \brief Calculate the score for a tray given the type of kit being built.
-  protected: ariac::TrayScore ScoreTray(const ariac::KitTray & tray, const ariac::Kit & assignedKit);
+  /// \brief Calculate the score for a shipping box given the type of shipment being built.
+  protected: ariac::ShipmentScore ScoreShippingBox(const ariac::ShippingBox & shippingBox, const ariac::Shipment & assignedShipment);
 
-  /// \brief Helper function for filling a Kit from a tray contents ROS message.
-  public: static void FillKitFromMsg(const osrf_gear::TrayContents::ConstPtr & trayMsg, ariac::Kit & kit);
+  /// \brief Helper function for filling a Shipment from a shipping box contents ROS message.
+  public: static void FillShipmentFromMsg(const osrf_gear::ShippingBoxContents::ConstPtr & shippingBoxMsg, ariac::Shipment & shipment);
 
-  /// \brief Helper function for filling a Kit from a kit ROS message.
-  public: static void FillKitFromMsg(const osrf_gear::Kit & kitMsg, ariac::Kit & kit);
+  /// \brief Helper function for filling a Shipment from a shipment ROS message.
+  public: static void FillShipmentFromMsg(const osrf_gear::Shipment & shipmentMsg, ariac::Shipment & shipment);
 
   /// \brief Callback for receiving order message.
   public: void OnOrderReceived(const osrf_gear::Order::ConstPtr & orderMsg);
 
-  /// \brief Callback for receiving tray state message.
-  public: void OnTrayInfoReceived(const osrf_gear::TrayContents::ConstPtr & trayMsg);
+  /// \brief Callback for receiving shipping box state message.
+  public: void OnShippingBoxInfoReceived(const osrf_gear::ShippingBoxContents::ConstPtr & shippingBoxMsg);
 
   /// \brief Callback for receiving gripper state message.
   public: void OnGripperStateReceived(const osrf_gear::VacuumGripperState &stateMsg);
 
-  /// \brief The trays to monitor the score of.
-  protected: std::map<ariac::TrayID_t, ariac::KitTray> kitTrays;
+  /// \brief The shipping boxes to monitor the score of.
+  protected: std::map<ariac::ShippingBoxID_t, ariac::ShippingBox> shippingBoxes;
 
   /// \brief Mutex for protecting the orders being scored.
   protected: mutable boost::mutex mutex;
@@ -107,14 +107,14 @@ class AriacScorer
   /// \brief Collection of orders that have been announced but are not yet complete.
   protected: std::vector<ariac::Order> ordersInProgress;
 
-  /// \brief Flag for signalling new tray info to process.
-  protected: bool newTrayInfoReceived = false;
+  /// \brief Flag for signalling new shipping box info to process.
+  protected: bool newShippingBoxInfoReceived = false;
 
   /// \brief Flag for signalling new order to process.
   protected: bool newOrderReceived = false;
 
   /// \brief Whether or not there is a travelling part in the gripper.
-  protected: bool isPartTravelling = false;
+  protected: bool isProductTravelling = false;
 
   /// \brief Order receivd from order messages.
   protected: ariac::Order newOrder;

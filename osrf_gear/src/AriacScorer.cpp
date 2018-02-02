@@ -62,7 +62,7 @@ void AriacScorer::Update(double timeStep)
 {
   boost::mutex::scoped_lock mutexLock(this->mutex);
 
-  if (this->isPartTravelling)
+  if (this->isProductTravelling)
   {
     this->gameScore.partTravelTime += timeStep;
   }
@@ -84,7 +84,7 @@ void AriacScorer::Update(double timeStep)
   }
 
   this->newOrderReceived = false;
-  this->newTrayInfoReceived = false;
+  this->newShippingBoxInfoReceived = false;
 }
 
 /////////////////////////////////////////////////
@@ -96,186 +96,186 @@ bool AriacScorer::IsOrderComplete(const ariac::OrderID_t & orderID)
 }
 
 /////////////////////////////////////////////////
-std::vector<ariac::KitTray> AriacScorer::GetTrays()
+std::vector<ariac::ShippingBox> AriacScorer::GetShippingBoxes()
 {
   boost::mutex::scoped_lock mutexLock(this->mutex);
-  std::vector<ariac::KitTray> kitTraysVec;
-  for (auto const & item : this->kitTrays)
+  std::vector<ariac::ShippingBox> shippingBoxesVec;
+  for (auto const & item : this->shippingBoxes)
   {
-    kitTraysVec.push_back(item.second);
+    shippingBoxesVec.push_back(item.second);
   }
-  return kitTraysVec;
+  return shippingBoxesVec;
 }
 
 /////////////////////////////////////////////////
-bool AriacScorer::GetTrayById(const ariac::TrayID_t & trayID, ariac::KitTray & kitTray)
+bool AriacScorer::GetShippingBoxById(const ariac::ShippingBoxID_t & shippingBoxID, ariac::ShippingBox & shippingBox)
 {
   boost::mutex::scoped_lock mutexLock(this->mutex);
-  auto it = this->kitTrays.find(trayID);
-  if (it == this->kitTrays.end())
+  auto it = this->shippingBoxes.find(shippingBoxID);
+  if (it == this->shippingBoxes.end())
   {
-    gzwarn << "No known tray with ID: " << trayID << std::endl;
+    gzwarn << "No known shipping box with ID: " << shippingBoxID << std::endl;
     return false;
   }
-  kitTray = it->second;
+  shippingBox = it->second;
   return true;
 }
 
 /////////////////////////////////////////////////
-ariac::TrayScore AriacScorer::SubmitTray(const ariac::KitTray & tray)
+ariac::ShipmentScore AriacScorer::SubmitShipment(const ariac::ShippingBox & shippingBox)
 {
   boost::mutex::scoped_lock mutexLock(this->mutex);
-  ariac::TrayScore trayScore;
-  ariac::KitType_t kitType = tray.currentKit.kitType;
+  ariac::ShipmentScore shipmentScore;
+  ariac::ShipmentType_t shipmentType = shippingBox.currentShipment.shipmentType;
 
-  // Determine order and kit the tray is from
+  // Determine order and shipment the shipping box is from
   ariac::Order relevantOrder;
-  ariac::Kit assignedKit;
+  ariac::Shipment assignedShipment;
 
   for (const auto & order : this->ordersInProgress)
   {
-    auto it = find_if(order.kits.begin(), order.kits.end(),
-      [&kitType](const ariac::Kit& kit) {
-        return kit.kitType == kitType;
+    auto it = find_if(order.shipments.begin(), order.shipments.end(),
+      [&shipmentType](const ariac::Shipment& shipment) {
+        return shipment.shipmentType == shipmentType;
       });
-    if (it != order.kits.end())
+    if (it != order.shipments.end())
     {
-      assignedKit = *it;
+      assignedShipment = *it;
       relevantOrder = order;
       break;
     }
   }
 
-  // Ignore unknown trays
+  // Ignore unknown shipping boxes
   ariac::OrderID_t orderId = relevantOrder.orderID;
   if (orderId == "")
   {
-    gzdbg << "No known kit type: " << kitType << std::endl;
-    gzdbg << "Known kit types are: " << std::endl;
+    gzdbg << "No known shipment type: " << shipmentType << std::endl;
+    gzdbg << "Known shipment types are: " << std::endl;
     for (const ariac::Order & order : this->ordersInProgress)
     {
-      for (const ariac::Kit & kit : order.kits)
+      for (const ariac::Shipment & shipment : order.shipments)
       {
-        gzdbg << kit.kitType << std::endl;
+        gzdbg << shipment.shipmentType << std::endl;
       }
     }
-    return trayScore;
+    return shipmentScore;
   }
 
-  // Do not allow re-submission of trays - just return the existing score.
+  // Do not allow re-submission of shipping boxes - just return the existing score.
   auto relevantOrderScore = &this->gameScore.orderScores[orderId];
-  auto it = relevantOrderScore->trayScores.find(kitType);
-  if (it != relevantOrderScore->trayScores.end())
+  auto it = relevantOrderScore->shipmentScores.find(shipmentType);
+  if (it != relevantOrderScore->shipmentScores.end())
   {
-    trayScore = it->second;
-    if (trayScore.isSubmitted)
+    shipmentScore = it->second;
+    if (shipmentScore.isSubmitted)
     {
-      gzdbg << "Kit already submitted, not rescoring: " << kitType << std::endl;
-      return trayScore;
+      gzdbg << "Shipment already submitted, not rescoring: " << shipmentType << std::endl;
+      return shipmentScore;
     }
   }
 
-  // Evaluate the tray against the kit it contains
-  trayScore = ScoreTray(tray, assignedKit);
+  // Evaluate the shipping box against the shipment it contains
+  shipmentScore = ScoreShippingBox(shippingBox, assignedShipment);
 
-  // Mark the tray as submitted
-  trayScore.isSubmitted = true;
+  // Mark the shipment as submitted
+  shipmentScore.isSubmitted = true;
 
-  gzdbg << "Score from tray '" << tray.trayID << "': " << trayScore.total() << std::endl;
+  gzdbg << "Score from shipment '" << shippingBox.shippingBoxID << "': " << shipmentScore.total() << std::endl;
 
-  // Add the tray to the game score
-  relevantOrderScore->trayScores[kitType] = trayScore;
+  // Add the shipment to the game score
+  relevantOrderScore->shipmentScores[shipmentType] = shipmentScore;
 
-  return trayScore;
+  return shipmentScore;
 }
 
 /////////////////////////////////////////////////
-ariac::TrayScore AriacScorer::ScoreTray(const ariac::KitTray & tray, const ariac::Kit & assignedKit)
+ariac::ShipmentScore AriacScorer::ScoreShippingBox(const ariac::ShippingBox & shippingBox, const ariac::Shipment & assignedShipment)
 {
-  ariac::Kit kit = tray.currentKit;
-  ariac::KitType_t kitType = tray.currentKit.kitType;
-  ariac::TrayScore score;
-  score.trayID = kitType;
-  gzdbg << "Scoring kit: " << kit << std::endl;
+  ariac::Shipment shipment = shippingBox.currentShipment;
+  ariac::ShipmentType_t shipmentType = shippingBox.currentShipment.shipmentType;
+  ariac::ShipmentScore score;
+  score.shipmentType = shipmentType;
+  gzdbg << "Scoring shipment: " << shipment << std::endl;
 
-  auto numAssignedObjects = assignedKit.objects.size();
-  auto numCurrentObjects = kit.objects.size();
-  gzdbg << "Comparing the " << numAssignedObjects << " assigned objects with the current " << \
-    numCurrentObjects << " objects" << std::endl;
+  auto numAssignedProducts = assignedShipment.products.size();
+  auto numCurrentProducts = shipment.products.size();
+  gzdbg << "Comparing the " << numAssignedProducts << " assigned products with the current " << \
+    numCurrentProducts << " products" << std::endl;
 
-  // Count the number of each type of assigned object
-  std::map<std::string, unsigned int> assignedObjectTypeCount, currentObjectTypeCount;
-  for (const auto & obj : assignedKit.objects)
+  // Count the number of each type of assigned product
+  std::map<std::string, unsigned int> assignedProductTypeCount, currentProductTypeCount;
+  for (const auto & obj : assignedShipment.products)
   {
-    if (assignedObjectTypeCount.find(obj.type) == assignedObjectTypeCount.end())
+    if (assignedProductTypeCount.find(obj.type) == assignedProductTypeCount.end())
     {
-      assignedObjectTypeCount[obj.type] = 0;
+      assignedProductTypeCount[obj.type] = 0;
     }
-    assignedObjectTypeCount[obj.type] += 1;
+    assignedProductTypeCount[obj.type] += 1;
   }
 
-  gzdbg << "Checking object counts" << std::endl;
+  gzdbg << "Checking product counts" << std::endl;
 
-  bool assignedObjectsMissing = false;
-  for (auto & value : assignedObjectTypeCount)
+  bool assignedProductsMissing = false;
+  for (auto & value : assignedProductTypeCount)
   {
-    auto assignedObjectType = value.first;
-    auto assignedObjectCount = value.second;
-    auto currentObjectCount =
-      std::count_if(kit.objects.begin(), kit.objects.end(),
-        [assignedObjectType](ariac::KitObject k) {return !k.isFaulty && k.type == assignedObjectType;});
-    gzdbg << "Found " << currentObjectCount << \
-      " objects of type '" << assignedObjectType << "'" << std::endl;
+    auto assignedProductType = value.first;
+    auto assignedProductCount = value.second;
+    auto currentProductCount =
+      std::count_if(shipment.products.begin(), shipment.products.end(),
+        [assignedProductType](ariac::Product k) {return !k.isFaulty && k.type == assignedProductType;});
+    gzdbg << "Found " << currentProductCount << \
+      " products of type '" << assignedProductType << "'" << std::endl;
     score.partPresence +=
-      std::min(long(assignedObjectCount), currentObjectCount) * scoringParameters.objectPresence;
-    if (currentObjectCount < assignedObjectCount)
+      std::min(long(assignedProductCount), currentProductCount) * scoringParameters.productPresence;
+    if (currentProductCount < assignedProductCount)
     {
-      assignedObjectsMissing = true;
+      assignedProductsMissing = true;
     }
   }
-  if (!assignedObjectsMissing && numCurrentObjects == numAssignedObjects)
+  if (!assignedProductsMissing && numCurrentProducts == numAssignedProducts)
   {
-    gzdbg << "All objects on tray and no extra objects detected." << std::endl;
-    score.allPartsBonus += scoringParameters.allObjectsBonusFactor * numAssignedObjects;
+    gzdbg << "All products in shipment and no extra products detected." << std::endl;
+    score.allProductsBonus += scoringParameters.allProductsBonusFactor * numAssignedProducts;
   }
 
-  gzdbg << "Checking object poses" << std::endl;
-  // Keep track of which assigned objects have already been 'matched' to one on the tray.
-  // This is to prevent multiple objects being close to a single target pose both scoring points.
-  std::vector<ariac::KitObject> remainingAssignedObjects(assignedKit.objects);
+  gzdbg << "Checking product poses" << std::endl;
+  // Keep track of which assigned products have already been 'matched' to one on the shippingBox.
+  // This is to prevent multiple products being close to a single target pose both scoring points.
+  std::vector<ariac::Product> remainingAssignedProducts(assignedShipment.products);
 
-  for (const auto & currentObject : kit.objects)
+  for (const auto & currentProduct : shipment.products)
   {
-    for (auto it = remainingAssignedObjects.begin(); it != remainingAssignedObjects.end(); ++it)
+    for (auto it = remainingAssignedProducts.begin(); it != remainingAssignedProducts.end(); ++it)
     {
       // Ignore faulty parts
-      if (currentObject.isFaulty)
+      if (currentProduct.isFaulty)
         continue;
 
       // Only check poses of parts of the same type
-      auto assignedObject = *it;
-      if (assignedObject.type != currentObject.type)
+      auto assignedProduct = *it;
+      if (assignedProduct.type != currentProduct.type)
         continue;
 
-      // Check the position of the object (ignoring orientation)
-      gzdbg << "Comparing pose '" << currentObject.pose << \
-        "' with the assigned pose '" << assignedObject.pose << "'" << std::endl;
+      // Check the position of the product (ignoring orientation)
+      gzdbg << "Comparing pose '" << currentProduct.pose << \
+        "' with the assigned pose '" << assignedProduct.pose << "'" << std::endl;
       gazebo::math::Vector3 posnDiff(
-        currentObject.pose.pos.x - assignedObject.pose.pos.x,
-        currentObject.pose.pos.y - assignedObject.pose.pos.y,
+        currentProduct.pose.pos.x - assignedProduct.pose.pos.x,
+        currentProduct.pose.pos.y - assignedProduct.pose.pos.y,
         0);
       gzdbg << "Position error: " << posnDiff.GetLength() << std::endl;
       if (posnDiff.GetLength() > scoringParameters.distanceThresh)
         continue;
-      gzdbg << "Object of type '" << currentObject.type << \
+      gzdbg << "Product of type '" << currentProduct.type << \
         "' in the correct position" << std::endl;
-      score.partPose += scoringParameters.objectPosition;
+      score.partPose += scoringParameters.productPosition;
 
-      // Check the orientation of the object.
-      gazebo::math::Quaternion objOrientation = currentObject.pose.rot;
-      gazebo::math::Quaternion orderOrientation = assignedObject.pose.rot;
+      // Check the orientation of the product.
+      gazebo::math::Quaternion objOrientation = currentProduct.pose.rot;
+      gazebo::math::Quaternion orderOrientation = assignedProduct.pose.rot;
 
-      // Filter objects that aren't in the appropriate orientation (loosely).
+      // Filter products that aren't in the appropriate orientation (loosely).
       // If the quaternions represent the same orientation, q1 = +-q2 => q1.dot(q2) = +-1
       double orientationDiff = objOrientation.Dot(orderOrientation);
       // TODO: this value can probably be derived using relationships between
@@ -295,18 +295,18 @@ ariac::TrayScore AriacScorer::ScoreTray(const ariac::KitTray & tray, const ariac
         if (std::abs(std::abs(angleDiff) - 2 * M_PI) > scoringParameters.orientationThresh)
           continue;
 
-      gzdbg << "Object of type '" << currentObject.type << \
+      gzdbg << "Product of type '" << currentProduct.type << \
         "' in the correct orientation" << std::endl;
-      score.partPose += scoringParameters.objectOrientation;
+      score.partPose += scoringParameters.productOrientation;
 
       // Once a match is found, don't permit it to be matched again
-      remainingAssignedObjects.erase(it);
+      remainingAssignedProducts.erase(it);
       break;
     }
   }
 
-  // Check if all assigned objects have been matched to one on the tray
-  if (remainingAssignedObjects.empty())
+  // Check if all assigned products have been matched to one in the shipping box
+  if (remainingAssignedProducts.empty())
   {
     score.isComplete = true;
   }
@@ -315,27 +315,27 @@ ariac::TrayScore AriacScorer::ScoreTray(const ariac::KitTray & tray, const ariac
 }
 
 /////////////////////////////////////////////////
-void AriacScorer::OnTrayInfoReceived(const osrf_gear::TrayContents::ConstPtr & trayMsg)
+void AriacScorer::OnShippingBoxInfoReceived(const osrf_gear::ShippingBoxContents::ConstPtr & shippingBoxMsg)
 {
   boost::mutex::scoped_lock mutexLock(this->mutex);
 
-  // Get the ID of the tray that the message is from.
-  std::string trayID = trayMsg->tray;
+  // Get the ID of the shipping box that the message is from.
+  std::string shippingBoxID = shippingBoxMsg->shipping_box;
 
-  if (this->kitTrays.find(trayID) == this->kitTrays.end())
+  if (this->shippingBoxes.find(shippingBoxID) == this->shippingBoxes.end())
   {
-    // This is the first time we've heard from this tray: initialize it.
-    this->kitTrays[trayID] = ariac::KitTray(trayID);
+    // This is the first time we've heard from this shipping box: initialize it.
+    this->shippingBoxes[shippingBoxID] = ariac::ShippingBox(shippingBoxID);
   }
 
-  // Update the state of the tray.
+  // Update the state of the shippingBox.
   // TODO: this should be moved outside of the callback
-  // Do this even if the tray isn't part of the current order because maybe it
+  // Do this even if the shipment isn't part of the current order because maybe it
   // will be part of future orders.
-  this->newTrayInfoReceived = true;
-  ariac::Kit kitState;
-  FillKitFromMsg(trayMsg, kitState);
-  this->kitTrays[trayID].UpdateKitState(kitState);
+  this->newShippingBoxInfoReceived = true;
+  ariac::Shipment shipmentState;
+  FillShipmentFromMsg(shippingBoxMsg, shipmentState);
+  this->shippingBoxes[shippingBoxID].UpdateShipmentState(shipmentState);
 }
 
 /////////////////////////////////////////////////
@@ -347,13 +347,13 @@ void AriacScorer::OnOrderReceived(const osrf_gear::Order::ConstPtr & orderMsg)
 
   ariac::Order order;
   order.orderID = orderMsg->order_id;
-  // Initialize the name of each of the expected kits.
-  for (const auto & kitMsg : orderMsg->kits)
+  // Initialize the name of each of the expected shipments.
+  for (const auto & shipmentMsg : orderMsg->shipments)
   {
-    ariac::KitType_t kitType = kitMsg.kit_type;
-    ariac::Kit assignedKit;
-    FillKitFromMsg(kitMsg, assignedKit);
-    order.kits.push_back(assignedKit);
+    ariac::ShipmentType_t shipmentType = shipmentMsg.shipment_type;
+    ariac::Shipment assignedShipment;
+    FillShipmentFromMsg(shipmentMsg, assignedShipment);
+    order.shipments.push_back(assignedShipment);
   }
   this->newOrder = order;
 }
@@ -369,11 +369,11 @@ void AriacScorer::AssignOrder(const ariac::Order & order)
     // This is a previously unseen order: start scoring from scratch
     auto orderScore = ariac::OrderScore();
     orderScore.orderID = orderID;
-    for (auto const & kit : order.kits)
+    for (auto const & shipment : order.shipments)
     {
-      auto trayScore = ariac::TrayScore();
-      trayScore.trayID = kit.kitType;
-      orderScore.trayScores[kit.kitType] = trayScore;
+      auto shipmentScore = ariac::ShipmentScore();
+      shipmentScore.shipmentType = shipment.shipmentType;
+      orderScore.shipmentScores[shipment.shipmentType] = shipmentScore;
     }
     this->gameScore.orderScores[orderID] = orderScore;
   }
@@ -409,12 +409,12 @@ ariac::OrderScore AriacScorer::UnassignOrder(const ariac::OrderID_t & orderID)
 }
 
 /////////////////////////////////////////////////
-void AriacScorer::FillKitFromMsg(const osrf_gear::TrayContents::ConstPtr &trayMsg, ariac::Kit &kit)
+void AriacScorer::FillShipmentFromMsg(const osrf_gear::ShippingBoxContents::ConstPtr &shippingBoxMsg, ariac::Shipment &shipment)
 {
-  kit.objects.clear();
-  for (const auto & objMsg : trayMsg->objects)
+  shipment.products.clear();
+  for (const auto & objMsg : shippingBoxMsg->products)
   {
-    ariac::KitObject obj;
+    ariac::Product obj;
     obj.type = ariac::DetermineModelType(objMsg.type);
     obj.isFaulty = objMsg.is_faulty;
     geometry_msgs::Point p = objMsg.pose.position;
@@ -423,24 +423,24 @@ void AriacScorer::FillKitFromMsg(const osrf_gear::TrayContents::ConstPtr &trayMs
     gazebo::math::Quaternion objOrientation(o.w, o.x, o.y, o.z);
     objOrientation.Normalize();
     obj.pose = gazebo::math::Pose(objPosition, objOrientation);
-    kit.objects.push_back(obj);
+    shipment.products.push_back(obj);
   }
 }
 
 /////////////////////////////////////////////////
-void AriacScorer::FillKitFromMsg(const osrf_gear::Kit &kitMsg, ariac::Kit &kit)
+void AriacScorer::FillShipmentFromMsg(const osrf_gear::Shipment &shipmentMsg, ariac::Shipment &shipment)
 {
-  kit.objects.clear();
-  for (const auto & objMsg : kitMsg.objects)
+  shipment.products.clear();
+  for (const auto & objMsg : shipmentMsg.products)
   {
-    ariac::KitObject obj;
+    ariac::Product obj;
     obj.type = ariac::DetermineModelType(objMsg.type);
     geometry_msgs::Point p = objMsg.pose.position;
     geometry_msgs::Quaternion o = objMsg.pose.orientation;
     gazebo::math::Vector3 objPosition(p.x, p.y, p.z);
     gazebo::math::Quaternion objOrientation(o.w, o.x, o.y, o.z);
     obj.pose = gazebo::math::Pose(objPosition, objOrientation);
-    kit.objects.push_back(obj);
+    shipment.products.push_back(obj);
   }
 }
 
@@ -448,5 +448,5 @@ void AriacScorer::FillKitFromMsg(const osrf_gear::Kit &kitMsg, ariac::Kit &kit)
 void AriacScorer::OnGripperStateReceived(const osrf_gear::VacuumGripperState &stateMsg)
 {
   boost::mutex::scoped_lock mutexLock(this->mutex);
-  this->isPartTravelling = stateMsg.enabled && stateMsg.attached;
+  this->isProductTravelling = stateMsg.enabled && stateMsg.attached;
 }

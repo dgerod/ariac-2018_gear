@@ -15,11 +15,11 @@
  *
 */
 /*
- * Desc: Kit tray plugin
+ * Desc: shipping box plugin
  * Author: Deanna Hood
  */
-#ifndef _GAZEBO_KIT_TRAY_PLUGIN_HH_
-#define _GAZEBO_KIT_TRAY_PLUGIN_HH_
+#ifndef _GAZEBO_SHIPPING_BOX_PLUGIN_HH_
+#define _GAZEBO_SHIPPING_BOX_PLUGIN_HH_
 
 #include <string>
 
@@ -37,14 +37,14 @@
 
 namespace gazebo
 {
-  /// \brief A plugin for a contact sensor on a kit tray.
-  class GAZEBO_VISIBLE KitTrayPlugin : public SideContactPlugin
+  /// \brief A plugin for a contact sensor on a shipping box.
+  class GAZEBO_VISIBLE ShippingBoxPlugin : public SideContactPlugin
   {
     /// \brief Constructor.
-    public: KitTrayPlugin();
+    public: ShippingBoxPlugin();
 
     /// \brief Destructor.
-    public: virtual ~KitTrayPlugin();
+    public: virtual ~ShippingBoxPlugin();
 
     /// \brief Load the model plugin.
     /// \param[in] _model Pointer to the model that loaded this plugin.
@@ -54,7 +54,7 @@ namespace gazebo
     /// \brief Callback that receives the world update event
     protected: void OnUpdate(const common::UpdateInfo &_info);
 
-    /// \brief Update the kit based on which models are in contact
+    /// \brief Update the shipment based on which models are in contact
     protected: void ProcessContactingModels();
 
     /// \brief Create a fixed joint to all contacting models
@@ -63,30 +63,30 @@ namespace gazebo
     /// \brief Remove any fixed joints to contacting models
     protected: virtual void UnlockContactingModels();
 
-    /// \brief Update the kit based on which models are in contact
+    /// \brief Update the shipment based on which models are in contact
     public: std::string DetermineModelType(const std::string &modelName);
 
-    /// \brief Callback for when a new subscriber connects to the Kit ROS publisher
+    /// \brief Callback for when a new subscriber connects to the Shipment ROS publisher
     /// This will check that only the /gazebo node is subscribed during the competition
     protected: void OnSubscriberConnect(const ros::SingleSubscriberPublisher& pub);
 
-    /// \brief Publish the Kit ROS message
-    protected: void PublishKitMsg();
+    /// \brief Publish the Shipment ROS message
+    protected: void PublishShipmentMsg();
 
-    /// \brief Service for locking the models to the tray and disabling updates
+    /// \brief Service for locking the models to the shipping box and disabling updates
     protected: bool HandleLockModelsService(
       ros::ServiceEvent<std_srvs::Trigger::Request, std_srvs::Trigger::Response>& event);
     protected: void HandleLockModelsRequest(ConstGzStringPtr &_msg);
 
-    /// \brief Service for clearing the tray
+    /// \brief Service for clearing the shipping box
     protected: bool HandleClearService(
       ros::ServiceEvent<std_srvs::Trigger::Request, std_srvs::Trigger::Response>& event);
 
-    /// \brief Kit which is currently on the tray
-    protected: ariac::Kit currentKit;
+    /// \brief Shipment which is currently on the shipping box
+    protected: ariac::Shipment currentShipment;
 
-    /// \brief ID of tray
-    protected: std::string trayID;
+    /// \brief ID of shipping box
+    protected: std::string shippingBoxID;
 
     /// \brief Fixed joints to lock contacting models
     protected: std::vector<physics::JointPtr> fixedJoints;
@@ -97,17 +97,17 @@ namespace gazebo
     /// \brief Gazebo node for communication
     protected: transport::NodePtr gzNode;
 
-    /// \brief Publisher for the kit state
-    protected: ros::Publisher currentKitPub;
+    /// \brief Publisher for the shipment state
+    protected: ros::Publisher currentShipmentPub;
 
-    /// \brief Whether or not the Kit ROS topic is enabled
+    /// \brief Whether or not the Shipment ROS topic is enabled
     /// If unpermitted subscribers connect during the competition, publishing is disabled
     protected: bool publishingEnabled;
 
-    /// \brief Whether or not the Kit will be used as part of a nested animation (requires workarounds).
+    /// \brief Whether or not the Shipment will be used as part of a nested animation (requires workarounds).
     protected: bool nestedAnimation = false;
 
-    /// \brief Whether or not the Kit will lock toggle its visuals at a particular pose.
+    /// \brief Whether or not the Shipment will lock toggle its visuals at a particular pose.
     protected: bool toggleVisualsAtPose = false;
 
     /// \brief The pose at which visuals should be toggled.
@@ -116,22 +116,22 @@ namespace gazebo
     /// \brief Publisher for toggling the visuals.
     protected: transport::PublisherPtr toggleVisualsPub;
 
-    /// \brief Whether or not the Kit will lock the models at a particular pose.
+    /// \brief Whether or not the Shipment will lock the models at a particular pose.
     protected: bool lockModelsAtPose = false;
 
     /// \brief The pose at which models should be locked.
     protected: math::Vector3 lockModelsAt;
 
-    /// \brief Service that locks models to the tray
+    /// \brief Service that locks models to the shipping box
     public: ros::ServiceServer lockModelsServer;
 
-    /// \brief ROS service that clears the tray
-    public: ros::ServiceServer clearTrayServer;
+    /// \brief ROS service that clears the shipping box
+    public: ros::ServiceServer clearShippingBoxServer;
 
-    /// \brief Parts to ignore (will be published as faulty in tray msgs)
+    /// \brief Products to ignore (will be published as faulty in shipping box msgs)
     /// The namespace of the part (e.g. bin7) is ignored.
     /// e.g. if model_name1 is faulty, either bin7|model_name1 or bin6|model_name1 will be considered faulty
-    protected: std::vector<std::string> faultyPartNames;
+    protected: std::vector<std::string> faultyProductNames;
 
     /// \brief Gazebo subscriber to the lock models topic
     protected: transport::SubscriberPtr lockModelsSub;

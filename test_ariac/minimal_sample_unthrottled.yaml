@@ -3,9 +3,8 @@
 options:
   unthrottled_physics_update: true
   insert_models_over_bins: true
-  insert_agvs: false
   insert_shipping_boxes: false
-  fill_demo_tray: false
+  fill_demo_shipment: false
 
 orders:
   order_0:

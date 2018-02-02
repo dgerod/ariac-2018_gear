@@ -28,41 +28,41 @@ namespace ariac
 {
   using namespace gazebo;
 
-  typedef std::string KitType_t;
-  typedef std::string TrayID_t;
+  typedef std::string ShipmentType_t;
+  typedef std::string ShippingBoxID_t;
   typedef std::string OrderID_t;
 
-  /// \brief The score of a tray.
-  class TrayScore
+  /// \brief The score of a shipment.
+  class ShipmentScore
   {
     /// \brief Stream insertion operator.
     /// \param[in] _out output stream.
-    /// \param[in] _obj TrayScore object to output.
+    /// \param[in] _obj ShipmentScore object to output.
     /// \return The output stream
     public: friend std::ostream &operator<<(std::ostream &_out,
-                                            const TrayScore &_obj)
+                                            const ShipmentScore &_obj)
     {
-      _out << "<tray_score " << _obj.trayID << ">" << std::endl;
+      _out << "<shipment_score " << _obj.shipmentType << ">" << std::endl;
       _out << "Completion score: [" << _obj.total() << "]" << std::endl;
       _out << "Complete: [" << (_obj.isComplete ? "true" : "false") << "]" << std::endl;
       _out << "Submitted: [" << (_obj.isSubmitted ? "true" : "false") << "]" << std::endl;
-      _out << "Part presence score: [" << _obj.partPresence << "]" << std::endl;
-      _out << "All parts bonus: [" << _obj.allPartsBonus << "]" << std::endl;
-      _out << "Part pose score: [" << _obj.partPose << "]" << std::endl;
-      _out << "</tray_score>" << std::endl;
+      _out << "Product presence score: [" << _obj.partPresence << "]" << std::endl;
+      _out << "All parts bonus: [" << _obj.allProductsBonus << "]" << std::endl;
+      _out << "Product pose score: [" << _obj.partPose << "]" << std::endl;
+      _out << "</shipment_score>" << std::endl;
       return _out;
     }
-    public: TrayID_t trayID;
+    public: ShipmentType_t shipmentType;
             double partPresence = 0.0;
-            double allPartsBonus = 0.0;
+            double allProductsBonus = 0.0;
             double partPose = 0.0;
-            bool isComplete = false;  // all parts on the tray
-            bool isSubmitted = false;  // the tray has been submitted for evaluation
+            bool isComplete = false;  // all parts present
+            bool isSubmitted = false;  // the shipment has been submitted for evaluation
 
             /// \brief Calculate the total score.
             double total() const
             {
-              return partPresence + allPartsBonus + partPose;
+              return partPresence + allProductsBonus + partPose;
             }
   };
 
@@ -80,7 +80,7 @@ namespace ariac
       _out << "Total order score: [" << _obj.total() << "]" << std::endl;
       _out << "Time taken: [" << _obj.timeTaken << "]" << std::endl;
       _out << "Complete: [" << (_obj.isComplete() ? "true" : "false") << "]" << std::endl;
-      for (const auto & item : _obj.trayScores)
+      for (const auto & item : _obj.shipmentScores)
       {
         _out << item.second << std::endl;
       }
@@ -88,8 +88,8 @@ namespace ariac
       return _out;
     }
 
-    /// \brief Mapping between tray IDs and scores.
-    public: std::map<TrayID_t, TrayScore> trayScores;
+    /// \brief Mapping between shipment IDs and scores.
+    public: std::map<ShipmentType_t, ShipmentScore> shipmentScores;
 
             /// \brief ID of the order being scored.
             OrderID_t orderID;
@@ -98,12 +98,12 @@ namespace ariac
             double timeTaken = 0.0;
 
             /// \brief Calculate if the order is complete.
-            /// \return True if all trays have been submitted.
-            ///   Will return false if there are no trays in the order.
+            /// \return True if all shipping boxes have been submitted.
+            ///   Will return false if there are no shipping boxes in the order.
             bool isComplete() const
             {
-              bool isOrderComplete = !this->trayScores.empty();
-              for (const auto & item : this->trayScores)
+              bool isOrderComplete = !this->shipmentScores.empty();
+              for (const auto & item : this->shipmentScores)
               {
                 isOrderComplete &= item.second.isSubmitted;
                 if (!isOrderComplete)
@@ -118,7 +118,7 @@ namespace ariac
             double total() const
             {
               double total = 0.0;
-              for (const auto & item : this->trayScores)
+              for (const auto & item : this->shipmentScores)
               {
                 total += item.second.total();
               }
@@ -139,7 +139,7 @@ namespace ariac
       _out << "<game_score>" << std::endl;
       _out << "Total game score: [" << _obj.total() << "]" << std::endl;
       _out << "Total process time: [" << _obj.totalProcessTime << "]" << std::endl;
-      _out << "Part travel time: [" << _obj.partTravelTime << "]" << std::endl;
+      _out << "Product travel time: [" << _obj.partTravelTime << "]" << std::endl;
       for (const auto & item : _obj.orderScores)
       {
         _out << item.second << std::endl;
@@ -188,10 +188,10 @@ namespace ariac
     public: friend bool operator==(const ScoringParameters &sp1, const ScoringParameters &sp2)
     {
       return (
-        sp1.objectPresence == sp2.objectPresence &&
-        sp1.objectPosition == sp2.objectPosition &&
-        sp1.objectOrientation == sp2.objectOrientation &&
-        sp1.allObjectsBonusFactor == sp2.allObjectsBonusFactor &&
+        sp1.productPresence == sp2.productPresence &&
+        sp1.productPosition == sp2.productPosition &&
+        sp1.productOrientation == sp2.productOrientation &&
+        sp1.allProductsBonusFactor == sp2.allProductsBonusFactor &&
         sp1.distanceThresh == sp2.distanceThresh);
     }
 
@@ -204,20 +204,20 @@ namespace ariac
       return !(sp1 == sp2);
     }
 
-    public: double objectPresence = 1.0;
-    public: double objectPosition = 0.0;
-    public: double objectOrientation = 1.0;
+    public: double productPresence = 1.0;
+    public: double productPosition = 0.0;
+    public: double productOrientation = 1.0;
 
-    // Bonus when all objects in the tray: factor * (number of objects)
-    public: double allObjectsBonusFactor = 1.0;
+    // Bonus when all products in the shipment: factor * (number of products)
+    public: double allProductsBonusFactor = 1.0;
 
-    // Acceptable distance in meters to object's target position.
+    // Acceptable distance in meters to product's target position.
     // The measured distance is between the center of the model and its target,
-    // projected onto the tray.
+    // projected onto the shipping box.
     public: double distanceThresh = 0.03;
 
-    // Acceptable difference in radians to object's target orientation.
-    // The measured difference is from a top-down view of the tray, but only if
+    // Acceptable difference in radians to product's target orientation.
+    // The measured difference is from a top-down view of the shipping box, but only if
     // the quaternions are aligned.
     public: double orientationThresh = 0.1;
   };
@@ -252,58 +252,58 @@ namespace ariac
     return modelType;
   }
 
-  /// \brief Class to store information about each object contained in a kit.
-  class KitObject
+  /// \brief Class to store information about each product contained in a shipment.
+  class Product
   {
     /// \brief Stream insertion operator.
     /// \param[in] _out output stream.
-    /// \param[in] _obj Kit object to output.
+    /// \param[in] _obj Shipment object to output.
     /// \return The output stream
     public: friend std::ostream &operator<<(std::ostream &_out,
-                                            const KitObject &_obj)
+                                            const Product &_obj)
     {
-      _out << "<object>" << std::endl;
+      _out << "<product>" << std::endl;
       _out << "Type: [" << _obj.type << "]" << std::endl;
       _out << "Faulty: [" << (_obj.isFaulty ? "true" : "false") << "]" << std::endl;
       _out << "Pose: [" << _obj.pose << "]" << std::endl;
-      _out << "</object>" << std::endl;
+      _out << "</product>" << std::endl;
       return _out;
     }
 
-    /// \brief Object type.
+    /// \brief Product type.
     public: std::string type;
 
-    /// \brief Whether or not the object is faulty.
+    /// \brief Whether or not the product is faulty.
     public: bool isFaulty;
 
-    /// \brief Pose in which the object should be placed.
+    /// \brief Pose in which the product should be placed.
     public: math::Pose pose;
 
   };
 
-  /// \brief Class to store information about a kit.
-  class Kit
+  /// \brief Class to store information about a shipment.
+  class Shipment
   {
     /// \brief Stream insertion operator.
     /// \param[in] _out output stream.
-    /// \param[in] _kit kit to output.
+    /// \param[in] _shipment shipment to output.
     /// \return The output stream.
     public: friend std::ostream &operator<<(std::ostream &_out,
-                                            const Kit &_kit)
+                                            const Shipment &_shipment)
     {
-      _out << "<kit type='" << _kit.kitType << "'>";
-      for (const auto & obj : _kit.objects)
+      _out << "<shipment type='" << _shipment.shipmentType << "'>";
+      for (const auto & obj : _shipment.products)
         _out << std::endl << obj;
-      _out << std::endl << "</kit>" << std::endl;
+      _out << std::endl << "</shipment>" << std::endl;
 
       return _out;
     }
 
-    /// \brief The type of the kit.
-    public: KitType_t kitType;
+    /// \brief The type of the shipment.
+    public: ShipmentType_t shipmentType;
 
-    /// \brief A kit is composed of multiple objects.
-    public: std::vector<KitObject> objects;
+    /// \brief A shipment is composed of multiple products.
+    public: std::vector<Product> products;
   };
 
   /// \brief Class to store information about an order.
@@ -326,8 +326,8 @@ namespace ariac
     {
       _out << "<Order>" << std::endl;
       _out << "Start time: [" << _order.startTime << "]" << std::endl;
-      _out << "Kits:" << std::endl;
-      for (const auto & item : _order.kits)
+      _out << "Shipments:" << std::endl;
+      for (const auto & item : _order.shipments)
       {
         _out << item << std::endl;
       }
@@ -343,17 +343,17 @@ namespace ariac
     public: double startTime;
 
     /// \brief After how many unwanted parts to interrupt the previous order (-1 for never).
-    public: int interruptOnUnwantedParts;
+    public: int interruptOnUnwantedProducts;
 
     /// \brief After how many wanted parts to interrupt the previous order (-1 for never).
-    public: int interruptOnWantedParts;
+    public: int interruptOnWantedProducts;
 
     /// \brief Simulation time in seconds permitted for the order to be
     /// completed before cancelling it. Infinite by default.
     public: double allowedTime;
 
-    /// \brief An order is composed of multiple kits of different types.
-    public: std::vector<Kit> kits;
+    /// \brief An order is composed of multiple shipments of different types.
+    public: std::vector<Shipment> shipments;
 
     /// \brief Simulation time in seconds spent on this order.
     public: double timeTaken;
