@@ -11,15 +11,17 @@ topics:
     num_publishers: 1
     num_subscribers: -1
 
+# TODO(dhood): understand why this went from 1 subscriber to 0 between 2017 and 2018
   - topic: /rosout
     type: rosgraph_msgs/Log
     num_publishers: -1
-    num_subscribers: 1
+    num_subscribers: 0
 
-  - topic: /rosout_agg
-    type: rosgraph_msgs/Log
-    num_publishers: 1
-    num_subscribers: -1
+# TODO(dhood): understand why this stopped appearing between 2017 and 2018
+#  - topic: /rosout_agg
+#    type: rosgraph_msgs/Log
+#    num_publishers: 1
+#    num_subscribers: -1
 
   - topic: /tf
     type: tf2_msgs/TFMessage
