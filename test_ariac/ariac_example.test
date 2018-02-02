@@ -4,6 +4,7 @@
   <node name="ariac_sim" pkg="osrf_gear" type="gear.py"
         args="-f
               $(find osrf_gear)/config/sample.yaml
+              $(find osrf_gear)/config/sample_user_config.yaml
               $(find test_ariac)/test/fill_demo_shipment.yaml
               --verbose --no-gui"/>
   <test pkg="test_ariac" type="test_example_node.py" test-name="ariac_example"
