@@ -50,6 +50,7 @@ arm_configs = {
 }
 sensor_configs = {
     'break_beam': None,
+    'camera': None,
     'proximity_sensor': None,
     'logical_camera': None,
     'laser_profiler': None,
