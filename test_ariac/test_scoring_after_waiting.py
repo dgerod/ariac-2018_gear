@@ -5,9 +5,9 @@ from __future__ import print_function
 import sys
 import time
 
-from test_example_node import ExampleNodeTester
 import rospy
 import rostest
+from test_example_node import ExampleNodeTester
 
 
 class ScoringTester(ExampleNodeTester):
