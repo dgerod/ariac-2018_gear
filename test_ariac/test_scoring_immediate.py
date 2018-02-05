@@ -23,7 +23,7 @@ class ScoringTester(ExampleNodeTester):
 
         # Submit the shipping box as soon as the parts are spawned on the shipping box
         time.sleep(2.5)  # OK, give a little bit of leeway because that's what teams would do
-        self._test_drone_control()
+        self._test_submit_shipment()
         time.sleep(5.0)
 
         # Check the score
@@ -31,7 +31,7 @@ class ScoringTester(ExampleNodeTester):
 
 
 if __name__ == '__main__':
-    rospy.init_node('test_scoring_after_waiting', anonymous=True)
+    rospy.init_node('test_scoring_immediate', anonymous=True)
 
     # Wait until /clock is being published; this can take an unpredictable
     # amount of time when we're downloading models.
@@ -42,4 +42,4 @@ if __name__ == '__main__':
     time.sleep(10.0)
     print('OK, starting test.')
 
-    rostest.run('test_ariac', 'test_scoring_after_waiting', ScoringTester, sys.argv)
+    rostest.run('test_ariac', 'test_scoring_immediate', ScoringTester, sys.argv)

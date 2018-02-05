@@ -4,11 +4,8 @@ from __future__ import print_function
 
 import sys
 import time
-import unittest
 
 from test_example_node import ExampleNodeTester
-from ariac_example import ariac_example
-from std_msgs.msg import Float32
 import rospy
 import rostest
 
@@ -27,7 +24,7 @@ class ScoringTester(ExampleNodeTester):
         time.sleep(60)
 
         # Submit the shipping box
-        self._test_drone_control()
+        self._test_submit_shipment()
         time.sleep(5.0)
 
         # Check the score

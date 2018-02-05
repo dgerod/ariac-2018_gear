@@ -33,7 +33,7 @@ class ScoringTester(ExampleNodeTester):
             '''
         else:
             # Submit the tray on shipping_box_0
-            self._test_drone_control()
+            self._test_submit_shipment()
             time.sleep(5.0)
             ''' commented because only one drone supported
             # Submit the tray on AGV2
@@ -48,7 +48,7 @@ class ScoringTester(ExampleNodeTester):
 
 
 if __name__ == '__main__':
-    rospy.init_node('test_scoring_after_waiting', anonymous=True)
+    rospy.init_node('test_scoring_against_expected_score', anonymous=True)
 
     # Wait until /clock is being published; this can take an unpredictable
     # amount of time when we're downloading models.
@@ -59,4 +59,4 @@ if __name__ == '__main__':
     time.sleep(10.0)
     print('OK, starting test.')
 
-    rostest.run('test_ariac', 'test_scoring_after_waiting', ScoringTester, sys.argv)
+    rostest.run('test_ariac', 'test_scoring_against_expected_score', ScoringTester, sys.argv)

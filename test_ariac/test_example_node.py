@@ -7,6 +7,7 @@ import time
 import unittest
 
 from ariac_example import ariac_example
+from osrf_gear.srv import SubmitShipment
 from std_msgs.msg import Float32
 import rospy
 import rostest
@@ -37,8 +38,9 @@ class ExampleNodeTester(unittest.TestCase):
         time.sleep(5.0)
         self._test_order_reception()
 
-        self._test_drone_control()
-        time.sleep(10.0)
+        self._test_submit_shipment()
+        time.sleep(5.0)
+
         self._test_comp_end()
 
     def _test_start_comp(self):
@@ -65,6 +67,28 @@ class ExampleNodeTester(unittest.TestCase):
             error += abs(position - 0.0)
         self.assertTrue(error < 0.5, 'Arm was not properly sent to zero state')
 
+    def _test_submit_shipment(self, shipping_box_index=0, shipment_id='order_0_shipment_0'):
+        # This is a development mode cheat, so it is not in the ariac example itself.
+
+        rospy.loginfo("Waiting for submit shipment service to be ready...")
+        name = '/ariac/submit_shipment'
+        rospy.wait_for_service(name)
+        rospy.loginfo("Requesting shipment submission...")
+
+        try:
+            submit_shipment_srv = rospy.ServiceProxy(name, SubmitShipment)
+            response = submit_shipment_srv(
+                shipping_box_id='shipping_box_{0}::box_base'.format(shipping_box_index),
+                shipment_type=shipment_id)
+        except rospy.ServiceException as exc:
+            rospy.logerr("Failed to submit the shipment: %s" % exc)
+            return False
+        if not response.success:
+            rospy.logerr("Failed to submit the shipment: %s" % response)
+        else:
+            rospy.loginfo("Shipment submitted successfully")
+        self.assertTrue(response.success, 'Failed to control drone')
+
     def _test_drone_control(self, index=1, shipment_id='order_0_shipment_0'):
         success = ariac_example.control_drone(index, shipment_id)
         self.assertTrue(success, 'Failed to control drone')
@@ -79,10 +103,11 @@ class ExampleNodeTester(unittest.TestCase):
             # If there were more shipments expected, the order won't be done
             self.assertTrue(
                 self.comp_class.current_comp_state == 'go', 'Competition not in "go" state')
-        num_parts_in_order = len(self.comp_class.received_orders[0].shipments[0].objects)
+        num_products_in_order = len(self.comp_class.received_orders[0].shipments[0].products)
         self.assertTrue(
-            # Expect to have a point for each part, the all parts bonus, and a point for each part's pose
-            self.current_comp_score == 3 * num_parts_in_order,
+            # Expect to have a point for each product, the all products bonus, and a point for
+            # each product's pose
+            self.current_comp_score == 3 * num_products_in_order,
             'Something went wrong in the scoring. Current score: ' + str(self.current_comp_score))
 
 
@@ -95,7 +120,7 @@ if __name__ == '__main__':
         print('Waiting for Gazebo to start...')
         time.sleep(1.0)
     # Take an extra nap, to allow plugins to be loaded
-    time.sleep(10.0)
+    time.sleep(20.0)
     print('OK, starting test.')
 
     rostest.run('osrf_gear', 'test_example_node', ExampleNodeTester, sys.argv)
