@@ -176,29 +176,29 @@ void ROSDronePlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     new gazebo::common::PoseAnimation(this->dataPtr->droneName, 4/speedFactor, false));
 
   ignition::math::Vector3d off_screen_position1(-1.4, -9.4, 4.3);
-  ignition::math::Vector3d off_screen_position2(5.4, -9.4, 4.3);
-  ignition::math::Vector3d hover_position(1.2, -4.6, 1.6);
-  ignition::math::Vector3d lower_position(1.3, -4.7, 1.3);
+  ignition::math::Vector3d off_screen_position2(6.4, -12.4, 4.3);
+  ignition::math::Vector3d hover_position(1.5, -6.2, 1.2);
+  ignition::math::Vector3d lower_position(1.4, -6.0, 0.8);
 
   gazebo::common::PoseKeyFrame *key = this->dataPtr->collectAnimation->CreateKeyFrame(0);
   key->Translation(off_screen_position1);
-  key->Rotation(ignition::math::Quaterniond(0, 0, 1.5707));
+  key->Rotation(ignition::math::Quaterniond(0, 0, 0));
 
   key = this->dataPtr->collectAnimation->CreateKeyFrame(3.5/speedFactor);
   key->Translation(hover_position);
-  key->Rotation(ignition::math::Quaterniond(0, 0, 0.2));
+  key->Rotation(ignition::math::Quaterniond(0, 0, 1.3));
 
 
   key = this->dataPtr->collectAnimation->CreateKeyFrame(4/speedFactor);
   key->Translation(lower_position);
-  key->Rotation(ignition::math::Quaterniond(0, 0, 0));
+  key->Rotation(ignition::math::Quaterniond(0, 0, 1.5707));
 
   this->dataPtr->returnAnimation.reset(
     new gazebo::common::PoseAnimation(this->dataPtr->droneName, 4/speedFactor, false));
 
   key = this->dataPtr->returnAnimation->CreateKeyFrame(0);
   key->Translation(lower_position);
-  key->Rotation(ignition::math::Quaterniond(0, 0, 0));
+  key->Rotation(ignition::math::Quaterniond(0, 0, 1.5707));
 
   key = this->dataPtr->returnAnimation->CreateKeyFrame(0.6/speedFactor);
   key->Translation(hover_position);
