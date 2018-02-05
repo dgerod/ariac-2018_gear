@@ -208,14 +208,17 @@ void SideContactPlugin::CalculateContactingModels()
 void SideContactPlugin::ClearContactingModels()
 {
   boost::mutex::scoped_lock lock(this->mutex);
-  int index = 0;
+
+  // Static because multiple plugin instances may exist, and we want them to share the state
+  static int index = 0;
+
   for (auto model : this->contactingModels)
   {
     gzdbg << "Teleporting model: " << model->GetScopedName() << std::endl;
     model->SetAutoDisable(true);
     model->SetGravityMode(true);
     model->SetStatic(true);
-    model->SetWorldPose(math::Pose(0 + 0.25*index++, 0, -1, 0, 0, 0));
+    model->SetWorldPose(math::Pose(0 + 0.25*index++, 0, -5, 0, 0, 0));
   }
 }
 
