@@ -126,7 +126,11 @@ expand_snippet('laser_profiler.sdf.template')
     <!-- start with a box on the belt -->
 @{shipping_box_name = 'shipping_box_0'}@
     <model name="@(shipping_box_name)">
+@[if options['start_box_at_belt_center']]@
+      <pose>1.16 0.9 0.45 0 0 0</pose>
+@[else]
       <pose>1.16 4.0 0.9 0 0 0</pose>
+@[end if]@
 @{
 expand_snippet('shipping_box.sdf.template')
 }@

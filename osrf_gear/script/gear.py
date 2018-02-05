@@ -96,6 +96,7 @@ default_bin_origins = {
 configurable_options = {
     'insert_shipping_boxes': True,
     'insert_models_over_bins': False,
+    'start_box_at_belt_center': False,
     'disable_shadows': False,
     'fill_demo_shipment': False,
     'belt_population_cycles': 5,
