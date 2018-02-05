@@ -52,11 +52,11 @@ void ShippingBoxPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->toggleVisualsPub = this->node->Advertise<msgs::GzString>(topicName);
   }
 
-  if (_sdf->HasElement("lock_models_at"))
+  if (_sdf->HasElement("clear_models_at"))
   {
-    sdf::ElementPtr lockModelsAtElem = _sdf->GetElement("lock_models_at");
-    this->lockModelsAtPose = true;
-    this->lockModelsAt = lockModelsAtElem->Get<math::Vector3>();
+    sdf::ElementPtr clearModelsAtElem = _sdf->GetElement("clear_models_at");
+    this->clearModelsAtPose = true;
+    this->clearModelsAt = clearModelsAtElem->Get<math::Vector3>();
   }
 
   if (_sdf->HasElement("trigger_animation_at"))
@@ -172,11 +172,13 @@ void ShippingBoxPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
     this->toggleVisualsAtPose = false;
   }
 
-  if (this->lockModelsAtPose && this->model->GetWorldPose().pos.Distance(this->lockModelsAt) < 0.3)
+  if (this->clearModelsAtPose && this->model->GetWorldPose().pos.Distance(this->clearModelsAt) < 0.3)
   {
-    gzdbg << "Locking models: " << this->model->GetName() << std::endl;
-    this->LockContactingModels();
-    this->lockModelsAtPose = false;
+    gzdbg << "Clearing models: " << this->model->GetName() << std::endl;
+    this->ClearContactingModels();
+    this->clearModelsAtPose = false;
+    // Stop publishing so that the previous state is the last one known to the scorer.
+    this->publishingEnabled = false;
   }
 
   if (this->triggerAnimationAtPose && this->model->GetWorldPose().pos.Distance(this->triggerAnimationAt) < 0.3)

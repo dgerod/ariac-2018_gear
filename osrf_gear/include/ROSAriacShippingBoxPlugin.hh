@@ -116,11 +116,11 @@ namespace gazebo
     /// \brief Publisher for toggling the visuals.
     protected: transport::PublisherPtr toggleVisualsPub;
 
-    /// \brief Whether or not the Shipment will lock the models at a particular pose.
-    protected: bool lockModelsAtPose = false;
+    /// \brief Whether or not the Shipment will clear the models at a particular pose.
+    protected: bool clearModelsAtPose = false;
 
-    /// \brief The pose at which models should be locked.
-    protected: math::Vector3 lockModelsAt;
+    /// \brief The pose at which models should be cleared.
+    protected: math::Vector3 clearModelsAt;
 
     /// \brief Service that locks models to the shipping box
     public: ros::ServiceServer lockModelsServer;
