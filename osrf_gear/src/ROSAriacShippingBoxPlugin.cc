@@ -52,11 +52,18 @@ void ShippingBoxPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->toggleVisualsPub = this->node->Advertise<msgs::GzString>(topicName);
   }
 
-  if (_sdf->HasElement("lock_models_at"))
+  if (_sdf->HasElement("clear_models_at"))
   {
-    sdf::ElementPtr lockModelsAtElem = _sdf->GetElement("lock_models_at");
-    this->lockModelsAtPose = true;
-    this->lockModelsAt = lockModelsAtElem->Get<math::Vector3>();
+    sdf::ElementPtr clearModelsAtElem = _sdf->GetElement("clear_models_at");
+    this->clearModelsAtPose = true;
+    this->clearModelsAt = clearModelsAtElem->Get<math::Vector3>();
+  }
+
+  if (_sdf->HasElement("trigger_animation_at"))
+  {
+    sdf::ElementPtr triggerAnimationAtElem = _sdf->GetElement("trigger_animation_at");
+    this->triggerAnimationAtPose = true;
+    this->triggerAnimationAt = triggerAnimationAtElem->Get<math::Vector3>();
   }
 
   if (_sdf->HasElement("nested_animation"))
@@ -122,6 +129,28 @@ void ShippingBoxPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   // ROS service for locking the shipping box
   this->lockModelsServer =
     this->rosNode->advertiseService(lockModelsServiceName, &ShippingBoxPlugin::HandleLockModelsService, this);
+
+  double speedFactor = 1.0;
+  this->rampAnimation.reset(
+    new gazebo::common::PoseAnimation(this->shippingBoxID, 3/speedFactor, false));
+
+  ignition::math::Vector3d end_position(1.16, -5.74, 0.054);
+  ignition::math::Vector3d off_screen_position2(5.4, -9.4, 4.3);
+  ignition::math::Vector3d hover_position(1.2, -4.6, 1.6);
+  ignition::math::Vector3d lower_position(1.3, -4.7, 1.3);
+
+  gazebo::common::PoseKeyFrame *key = this->rampAnimation->CreateKeyFrame(1.0/speedFactor);
+  key->Translation(ignition::math::Vector3d(1.16, -4.96, 0.24));
+  key->Rotation(ignition::math::Quaterniond(0.18, 0, 0));
+
+  key = this->rampAnimation->CreateKeyFrame(2.0/speedFactor);
+  key->Translation(ignition::math::Vector3d(1.16, -5.37, 0.19));
+  key->Rotation(ignition::math::Quaterniond(0.07, 0, 0));
+
+  key = this->rampAnimation->CreateKeyFrame(3.0/speedFactor);
+  key->Translation(end_position);
+  key->Rotation(ignition::math::Quaterniond(0, 0, 0));
+
 }
 
 /////////////////////////////////////////////////
@@ -143,11 +172,30 @@ void ShippingBoxPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
     this->toggleVisualsAtPose = false;
   }
 
-  if (this->lockModelsAtPose && this->model->GetWorldPose().pos.Distance(this->lockModelsAt) < 0.3)
+  if (this->clearModelsAtPose && this->model->GetWorldPose().pos.Distance(this->clearModelsAt) < 0.3)
   {
-    gzdbg << "Locking models: " << this->model->GetName() << std::endl;
-    this->LockContactingModels();
-    this->lockModelsAtPose = false;
+    gzdbg << "Clearing models: " << this->model->GetName() << std::endl;
+    this->ClearContactingModels();
+    this->clearModelsAtPose = false;
+    // Stop publishing so that the previous state is the last one known to the scorer.
+    this->publishingEnabled = false;
+  }
+
+  if (this->triggerAnimationAtPose && this->model->GetWorldPose().pos.Distance(this->triggerAnimationAt) < 0.3)
+  {
+    gzdbg << "Triggering ramp animation: " << this->model->GetName() << std::endl;
+
+    // Make the current pose the first key frame of the animation (appears smoother).
+    gazebo::common::PoseKeyFrame *key = this->rampAnimation->CreateKeyFrame(0.0);
+    gazebo::math::Vector3 pos = this->model->GetWorldPose().pos;
+    gazebo::math::Quaternion ori = this->model->GetWorldPose().rot;
+    key->Translation(ignition::math::Vector3d(pos.x, pos.y, pos.z));
+    key->Rotation(ignition::math::Quaterniond(ori.w, ori.x, ori.y, ori.z));
+
+    // Trigger the animation.
+    this->rampAnimation->SetTime(0);
+    this->model->SetAnimation(this->rampAnimation);
+    this->triggerAnimationAt = false;
   }
 
   if (!this->newMsg)

@@ -236,7 +236,8 @@
         <clear_shipping_box_service_name>/ariac/@(shipping_box_name)/clear_shipping_box</clear_shipping_box_service_name>
         <lock_models_service_name>/ariac/@(shipping_box_name)/lock_models</lock_models_service_name>
         <toggle_visuals_at>1.2 -4.35 0.4</toggle_visuals_at>
-        <lock_models_at>1.2 -3.3 0.4</lock_models_at>
+        <clear_models_at>1.2 -4.35 0.4</clear_models_at>
+        <trigger_animation_at>1.2 -4.5 0.4</trigger_animation_at>
         <update_rate>20</update_rate>
         <faulty_parts>
 @[for part_name, part_info in faulty_parts.items()]@

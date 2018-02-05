@@ -41,7 +41,7 @@ def expand_snippet(filename, data=locals()):
       <specular>0.1 0.1 0.1 1</specular>
       <direction>0 0 -1</direction>
       <attenuation>
-        <range>20</range>
+        <range>50</range>
         <constant>0.5</constant>
         <linear>0.01</linear>
         <quadratic>0.001</quadratic>
@@ -58,7 +58,7 @@ def expand_snippet(filename, data=locals()):
     <include>
       <name>drone_collection_zone</name>
       <uri>model://drone_collection_zone</uri>
-      <pose>1.15 -5.1 -0.1 0 1.5707 0</pose>
+      <pose>0.73 -5.8 0.005 0 1.5707 0</pose>
     </include>
 
     <!-- the workcell -->
@@ -289,6 +289,29 @@ expand_snippet('shipping_box.sdf.template')
             </friction>
           </surface>
         </collision>
+      </link>
+    </model>
+
+    <!-- A ground plane to hide the under_workcell_plane -->
+    <model name="ground_plane">
+      <static>true</static>
+      <pose>-50 50 0 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>150 150</size>
+            </plane>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Grey</name>
+            </script>
+          </material>
+        </visual>
       </link>
     </model>
 
