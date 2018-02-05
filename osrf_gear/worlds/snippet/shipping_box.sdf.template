@@ -23,8 +23,10 @@
           </contact>
         </sensor>
 
+        <!-- This collision will detect products in the box.
+             It must be lifted so that parts can't touch the box_underneath collision. -->
         <collision name="box_base">
-          <pose>0.0 0 0.0015 0 0 0</pose>
+          <pose>0.0 0 0.0025 0 0 0</pose>
           <max_contacts>10</max_contacts>
           <surface>
             <contact>
@@ -41,6 +43,7 @@
           </geometry>
         </collision>
 
+        <!-- This collision prevents the box_base collision from detecting the surface the box is on. -->
         <collision name="box_underneath">
           <pose>0.0 0 0.001 0 0 0</pose>
           <max_contacts>10</max_contacts>
