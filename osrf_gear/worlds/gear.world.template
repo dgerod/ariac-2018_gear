@@ -58,7 +58,7 @@ def expand_snippet(filename, data=locals()):
     <include>
       <name>drone_collection_zone</name>
       <uri>model://drone_collection_zone</uri>
-      <pose>1.15 -5.1 -0.1 0 1.5707 0</pose>
+      <pose>0.73 -5.8 0.005 0 1.5707 0</pose>
     </include>
 
     <!-- the workcell -->

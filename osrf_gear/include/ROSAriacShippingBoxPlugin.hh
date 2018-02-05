@@ -135,6 +135,15 @@ namespace gazebo
 
     /// \brief Gazebo subscriber to the lock models topic
     protected: transport::SubscriberPtr lockModelsSub;
+
+    /// \brief Whether or not the animation will be triggered at a particular pose.
+    protected: bool triggerAnimationAtPose = false;
+
+    /// \brief The pose at which the animation should be triggered.
+    protected: math::Vector3 triggerAnimationAt;
+
+    /// \brief Animation for going down the ramp
+    public: gazebo::common::PoseAnimationPtr rampAnimation;
   };
 }
 #endif
