@@ -546,10 +546,8 @@ def main(sysargv=None):
     ]
     if args.verbose:
         cmd += ['verbose:=true']
-    '''
     if args.no_gui:
         cmd += ['gui:=false']
-    '''
 
     if not args.development_mode:
         os.environ['ARIAC_COMPETITION'] = '1'
