@@ -38,9 +38,14 @@ class ExampleNodeTester(unittest.TestCase):
         time.sleep(5.0)
         self._test_order_reception()
 
-        self._test_submit_shipment()
+        # Wait for the box to reach the end of the belt
+        time.sleep(60)
+
+        # Submit the shipping box
+        self._test_drone_control()
         time.sleep(5.0)
 
+        # Check the score
         self._test_comp_end()
 
     def _test_start_comp(self):
@@ -89,8 +94,8 @@ class ExampleNodeTester(unittest.TestCase):
             rospy.loginfo("Shipment submitted successfully")
         self.assertTrue(response.success, 'Failed to control drone')
 
-    def _test_drone_control(self, index=1, shipment_id='order_0_shipment_0'):
-        success = ariac_example.control_drone(index, shipment_id)
+    def _test_drone_control(self, shipment_id='order_0_shipment_0'):
+        success = ariac_example.control_drone(shipment_id)
         self.assertTrue(success, 'Failed to control drone')
 
     def _test_comp_end(self):

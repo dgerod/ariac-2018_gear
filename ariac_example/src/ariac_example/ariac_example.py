@@ -68,7 +68,7 @@ def control_gripper(enabled):
     return response.success
 
 
-def control_drone(index, shipment_type):
+def control_drone(shipment_type):
     rospy.loginfo("Waiting for drone control to be ready...")
     name = '/ariac/drone'
     rospy.wait_for_service(name)
