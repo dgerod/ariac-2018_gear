@@ -177,8 +177,8 @@ void ROSDronePlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   ignition::math::Vector3d off_screen_position1(-1.4, -9.4, 4.3);
   ignition::math::Vector3d off_screen_position2(6.4, -12.4, 4.3);
-  ignition::math::Vector3d hover_position(1.5, -6.2, 1.2);
-  ignition::math::Vector3d lower_position(1.4, -6.0, 0.8);
+  ignition::math::Vector3d lower_position(1.4, -4.4, 0.8);
+  ignition::math::Vector3d hover_position = lower_position + ignition::math::Vector3d(0.1, -0.2, 0.4);
 
   gazebo::common::PoseKeyFrame *key = this->dataPtr->collectAnimation->CreateKeyFrame(0);
   key->Translation(off_screen_position1);

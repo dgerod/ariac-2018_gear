@@ -12,7 +12,7 @@ def expand_snippet(filename, data=locals()):
     <!-- Set the initial camera pose to be looking at the workspace. -->
     <gui>
       <camera name="user_camera">
-        <pose>9.69 -6.94 6.81 0 0.47 2.54</pose>
+        <pose>7.75 -5.6 5.3 0 0.5 2.46</pose>
       </camera>
     </gui>
 
@@ -36,7 +36,7 @@ def expand_snippet(filename, data=locals()):
 
     <!-- A directed light source -->
     <light name="camera_spot_light" type='spot'>
-      <pose>15 -2.3 3.05 -1.55 0.0 -1.62</pose>
+      <pose>14 -3.0 3.0 -1.55 0.0 -1.62</pose>
       <diffuse>0.5 0.5 0.5 1</diffuse>
       <specular>0.1 0.1 0.1 1</specular>
       <direction>0 0 -1</direction>
@@ -58,7 +58,7 @@ def expand_snippet(filename, data=locals()):
     <include>
       <name>drone_collection_zone</name>
       <uri>model://drone_collection_zone</uri>
-      <pose>0.73 -5.8 0.005 0 1.5707 0</pose>
+      <pose>1.0 -4.6 0.005 0 1.5707 0</pose>
     </include>
 
     <!-- the workcell -->
@@ -126,7 +126,7 @@ expand_snippet('laser_profiler.sdf.template')
     <!-- start with a box on the belt -->
 @{shipping_box_name = 'shipping_box_0'}@
     <model name="@(shipping_box_name)">
-      <pose>1.16 6.5 0.9 0 0 0</pose>
+      <pose>1.16 4.0 0.9 0 0 0</pose>
 @{
 expand_snippet('shipping_box.sdf.template')
 }@
@@ -359,7 +359,7 @@ count[part.type] = id + 1
 
     <!-- Plugin to stop the belt when congestion is detected. -->
     <!-- There's a `congestion_sensor` at the end of the belt that's a break beam.
-      If this detects a model, and the `drone_collection_pad` detects a box waiting,
+      If this detects a model, and the `drone_collection_zone` detects a box waiting,
       then this plugin will set the belt power to 0 and disable conveyor belt control.
       Control will be reenabled when the waiting box gets collected (power left at 0). -->
     <plugin filename="libROSConveyorCongestionPlugin.so" name="congestion_controller">
