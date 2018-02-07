@@ -134,17 +134,15 @@ void ShippingBoxPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->rampAnimation.reset(
     new gazebo::common::PoseAnimation(this->shippingBoxID, 3/speedFactor, false));
 
-  ignition::math::Vector3d end_position(1.16, -5.74, 0.054);
-  ignition::math::Vector3d off_screen_position2(5.4, -9.4, 4.3);
-  ignition::math::Vector3d hover_position(1.2, -4.6, 1.6);
-  ignition::math::Vector3d lower_position(1.3, -4.7, 1.3);
+  ignition::math::Vector3d end_position(1.16, -4.4, 0.1);
+  ignition::math::Vector3d start_position(this->triggerAnimationAt.x, this->triggerAnimationAt.y, this->triggerAnimationAt.z);
 
   gazebo::common::PoseKeyFrame *key = this->rampAnimation->CreateKeyFrame(1.0/speedFactor);
-  key->Translation(ignition::math::Vector3d(1.16, -4.96, 0.24));
+  key->Translation(end_position + ignition::math::Vector3d(0, 0.3, 0.2));
   key->Rotation(ignition::math::Quaterniond(0.18, 0, 0));
 
   key = this->rampAnimation->CreateKeyFrame(2.0/speedFactor);
-  key->Translation(ignition::math::Vector3d(1.16, -5.37, 0.19));
+  key->Translation(end_position + ignition::math::Vector3d(0, 0.1, 0.18));
   key->Rotation(ignition::math::Quaterniond(0.07, 0, 0));
 
   key = this->rampAnimation->CreateKeyFrame(3.0/speedFactor);

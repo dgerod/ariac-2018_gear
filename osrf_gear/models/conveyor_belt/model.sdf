@@ -4,7 +4,7 @@
       <!-- Fixed frame that can be used to refer to the belt's global pose -->
       <model name="conveyor_belt_fixed">
         <static>true</static>
-        <pose>1.16 6.5 0.8 0 0 -1.57079</pose>
+        <pose>1.16 4.2 0.8 0 0 -1.57079</pose>
         <link name="link">
           <pose>0 0 0 0 0 0</pose>
         </link>
@@ -13,7 +13,7 @@
       <!-- Moving component that extends and resets a prismatic joint -->
       <model name="conveyor_belt_moving">
         <static>false</static>
-        <pose>1.16 -3.5 0.35 0 0 -1.57079</pose>
+        <pose>1.16 -4.12 0.35 0 0 -1.57079</pose>
         <link name="belt">
           <pose>-5 0 0 0 0 0</pose>
           <inertial>
@@ -32,7 +32,7 @@
           <visual name="belt_visual">
             <geometry>
               <box>
-                <size>11.62206 0.75461 0.18862</size>
+                <size>7.5 0.75461 0.18862</size>
               </box>
             </geometry>
           </visual>
@@ -40,7 +40,7 @@
           <collision name="belt_collision">
             <geometry>
               <box>
-                <size>11.62206 0.75461 0.18862</size>
+                <size>7.5 0.75461 0.18862</size>
               </box>
             </geometry>
             <surface>

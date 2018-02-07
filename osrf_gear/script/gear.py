@@ -59,7 +59,7 @@ default_sensors = {
     'congestion_sensor': {
         'type': 'break_beam',
         'pose': {
-            'xyz': [0.645, -4.25, 0.5],
+            'xyz': [0.645, -3.05, 0.5],
             'rpy': [0.0, 0.0, 0.0]
         }
     }
@@ -75,10 +75,10 @@ default_belt_models = {
     },
 }
 n_bins = 5
-bin1_x = -0.86
-bin1_y = -1.49
-binN_x = -0.8
-binN_y = bin1_y + n_bins * 1.17
+bin1_x = -0.85
+bin1_y = -1.3
+binN_x = -0.85
+binN_y = bin1_y + n_bins * 0.81
 bin_width = 0.6
 bin_depth = 0.25
 bin_height = 0.96
