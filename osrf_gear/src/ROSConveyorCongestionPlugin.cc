@@ -121,7 +121,7 @@ class ROSConveyorCongestionPlugin : public WorldPlugin
     {
       if (this->beltEnabled)
       {
-        fprintf(stderr, "Disabling belt\n");
+        gzdbg << "Disabling belt" << std::endl;
         gazebo::msgs::GzString msg;
         msg.set_data("disabled");
         this->gzConveyorEnablePub->Publish(msg);
@@ -131,7 +131,7 @@ class ROSConveyorCongestionPlugin : public WorldPlugin
     {
       if (!this->beltEnabled)
       {
-        fprintf(stderr, "Enabling belt\n");
+        gzdbg << "Enabling belt" << std::endl;
         gazebo::msgs::GzString msg;
         msg.set_data("enabled");
         this->gzConveyorEnablePub->Publish(msg);
