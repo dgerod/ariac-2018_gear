@@ -50,6 +50,9 @@ namespace gazebo
       osrf_gear::ConveyorBeltControl::Request,
       osrf_gear::ConveyorBeltControl::Response> & event);
 
+    // Documentation inherited.
+    private: virtual void Publish() const;
+
     /// \brief for setting ROS name space
     private: std::string robotNamespace_;
 
@@ -58,6 +61,9 @@ namespace gazebo
 
     /// \brief Receives service calls to control the conveyor belt.
     public: ros::ServiceServer controlService_;
+
+    /// \brief Publishes the state of the conveyor.
+    public: ros::Publisher statePub;
   };
 }
 #endif

@@ -119,6 +119,8 @@ void ConveyorBeltPlugin::OnUpdate()
     const math::Pose newChildLinkPose(1.20997, 2.98, 0.8126, 0, 0, -1.57);
     this->link->MoveFrame(childLinkPose, newChildLinkPose);
   }
+
+  this->Publish()
 }
 
 /////////////////////////////////////////////////
@@ -178,4 +180,9 @@ void ConveyorBeltPlugin::OnEnabled(ConstGzStringPtr &_msg)
   {
     gzerr << "Unknown activation command [" << _msg->data() << "]" << std::endl;
   }
+}
+
+/////////////////////////////////////////////////
+void ConveyorBeltPlugin::Publish() const
+{
 }

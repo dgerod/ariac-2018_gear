@@ -15,6 +15,7 @@
  *
 */
 #include "ROSConveyorBeltPlugin.hh"
+#include "osrf_gear/ConveyorBeltState.h"
 
 #include <cstdlib>
 #include <string>
@@ -54,16 +55,33 @@ void ROSConveyorBeltPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf
     return;
   }
 
-  std::string topic = "conveyor/control";
-  if (_sdf->HasElement("topic"))
-    topic = _sdf->Get<std::string>("topic");
+  std::string controlTopic = "conveyor/control";
+  if (_sdf->HasElement("control_topic"))
+    controlTopic = _sdf->Get<std::string>("control_topic");
+
+  std::string stateTopic = "conveyor/state";
+  if (_sdf->HasElement("state_topic"))
+    stateTopic = _sdf->Get<std::string>("state_topic");
 
   ConveyorBeltPlugin::Load(_parent, _sdf);
 
   this->rosnode_ = new ros::NodeHandle(this->robotNamespace_);
 
-  this->controlService_ = this->rosnode_->advertiseService(topic,
+  this->controlService_ = this->rosnode_->advertiseService(controlTopic,
     &ROSConveyorBeltPlugin::OnControlCommand, this);
+
+  // Message used for publishing the state of the conveyor.
+  this->dataPtr->statePub = this->dataPtr->rosnode->advertise<
+    osrf_gear::ConveyorState>(stateTopic, 1000);
+}
+
+/////////////////////////////////////////////////
+void ROSConveyorBeltPlugin::Publish()
+{
+  osrf_gear::ConveyorState stateMsg;
+  stateMsg.enabled = this->IsEnabled();
+  stateMsg.power = this->Power();
+  this->dataPtr->statePub.publish(stateMsg);
 }
 
 /////////////////////////////////////////////////
