@@ -13,5 +13,5 @@
           $(arg gui_args)
           -f $(find osrf_gear)/config/sample.yaml
           $(find osrf_gear)/config/sample_user_config.yaml
-          " output="screen" />
+          " required="true" output="screen" />
 </launch>

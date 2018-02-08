@@ -259,7 +259,7 @@ def create_pose_info(pose_dict):
     return PoseInfo(xyz, rpy)
 
 
-def create_sensor_info(name, sensor_data):
+def create_sensor_info(name, sensor_data, allow_protected_sensors=False):
     sensor_type = get_required_field(name, sensor_data, 'type')
     pose_dict = get_required_field(name, sensor_data, 'pose')
     for key in sensor_data:
@@ -267,16 +267,20 @@ def create_sensor_info(name, sensor_data):
             print("Warning: ignoring unknown entry in '{0}': {1}"
                   .format(name, key), file=sys.stderr)
     if sensor_type not in sensor_configs:
-        print("Error: given sensor type '{0}' is not one of the known sensor types: {1}"
-              .format(sensor_type, sensor_configs.keys()), file=sys.stderr)
+        if not allow_protected_sensors:
+            print("Error: given sensor type '{0}' is not one of the known sensor types: {1}"
+                  .format(sensor_type, sensor_configs.keys()), file=sys.stderr)
+            sys.exit(1)
     pose_info = create_pose_info(pose_dict)
     return SensorInfo(name, sensor_type, pose_info)
 
 
-def create_sensor_infos(sensors_dict):
+def create_sensor_infos(sensors_dict, allow_protected_sensors=False):
     sensor_infos = {}
     for name, sensor_data in sensors_dict.items():
-        sensor_infos[name] = create_sensor_info(name, sensor_data)
+        sensor_infos[name] = create_sensor_info(
+            name, sensor_data,
+            allow_protected_sensors=allow_protected_sensors)
     return sensor_infos
 
 
@@ -460,7 +464,7 @@ def create_options_info(options_dict):
 def prepare_template_data(config_dict, args):
     template_data = {
         'arm': create_arm_info(default_arm),
-        'sensors': create_sensor_infos(default_sensors),
+        'sensors': create_sensor_infos(default_sensors, allow_protected_sensors=True),
         'models_to_insert': {},
         'models_to_spawn': {},
         'belt_models': create_belt_model_infos(default_belt_models),
