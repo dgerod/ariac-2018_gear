@@ -19,16 +19,6 @@ sensors:
     pose:
       xyz: [1.2, 2.25, 1.185]
       rpy: ['-pi/2', 'pi/2', '-pi']
-  quality_control_sensor_1:
-    type: quality_control
-    pose:
-      xyz: [1.2, 1.0, 1.2]
-      rpy: ['-pi/2', 'pi/2', '-pi']
-  quality_control_sensor_2:
-    type: quality_control
-    pose:
-      xyz: [1.2, -0.7, 1.2]
-      rpy: ['-pi/2', 'pi/2', 'pi']
   depth_camera_1:
     type: depth_camera
     pose:

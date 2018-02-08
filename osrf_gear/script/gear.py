@@ -67,7 +67,21 @@ default_sensors = {
             'xyz': [0.645, -3.05, 0.5],
             'rpy': [0.0, 0.0, 0.0]
         }
-    }
+    },
+    'quality_control_sensor_1': {
+        'type': 'quality_control',
+        'pose': {
+            'xyz': [1.2, 1.0, 1.2],
+            'rpy': [-1.5707, 1.5707, -3.1416]
+        }
+    },
+    'quality_control_sensor_2': {
+        'type': 'quality_control',
+        'pose': {
+            'xyz': [1.2, -0.7, 1.2],
+            'rpy': [-1.5707, 1.5707, -3.1416]
+        }
+    },
 }
 default_belt_models = {
     'shipping_box': {
