@@ -1,4 +1,5 @@
     <model name="@(name)">
+      <static>true</static>
       <pose>@(' '.join(sensor.pose.xyz)) @(' '.join(sensor.pose.rpy))</pose>
       <plugin name="ros_logical_camera" filename="libROSLogicalCameraPlugin.so">
         <robotNamespace>ariac</robotNamespace>
