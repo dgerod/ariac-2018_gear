@@ -120,7 +120,7 @@ void ConveyorBeltPlugin::OnUpdate()
     this->link->MoveFrame(childLinkPose, newChildLinkPose);
   }
 
-  this->Publish()
+  this->Publish();
 }
 
 /////////////////////////////////////////////////

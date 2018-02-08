@@ -143,6 +143,10 @@ namespace gazebo
     /// \param[in] _power Power of the belt as a percentage (0-100).
     protected: void SetPower(const double _power);
 
+    /// \brief Overwrite this method for sending periodic updates with the
+    /// conveyor state.
+    private: virtual void Publish() const;
+
     /// \brief Call back for enable/disable messaged.
     protected: void OnEnabled(ConstGzStringPtr &_msg);
 

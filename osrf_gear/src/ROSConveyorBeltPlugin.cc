@@ -71,17 +71,17 @@ void ROSConveyorBeltPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf
     &ROSConveyorBeltPlugin::OnControlCommand, this);
 
   // Message used for publishing the state of the conveyor.
-  this->dataPtr->statePub = this->dataPtr->rosnode->advertise<
-    osrf_gear::ConveyorState>(stateTopic, 1000);
+  this->statePub = this->rosnode_->advertise<
+    osrf_gear::ConveyorBeltState>(stateTopic, 1000);
 }
 
 /////////////////////////////////////////////////
-void ROSConveyorBeltPlugin::Publish()
+void ROSConveyorBeltPlugin::Publish() const
 {
-  osrf_gear::ConveyorState stateMsg;
+  osrf_gear::ConveyorBeltState stateMsg;
   stateMsg.enabled = this->IsEnabled();
   stateMsg.power = this->Power();
-  this->dataPtr->statePub.publish(stateMsg);
+  this->statePub.publish(stateMsg);
 }
 
 /////////////////////////////////////////////////
