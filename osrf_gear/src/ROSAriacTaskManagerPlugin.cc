@@ -40,8 +40,7 @@
 #include "osrf_gear/ARIAC.hh"
 #include "osrf_gear/ROSAriacTaskManagerPlugin.hh"
 #include "osrf_gear/AriacScorer.h"
-#include <osrf_gear/ConveyorBeltControl.h>
-#include <osrf_gear/ConveyorBeltState.h>
+#include "osrf_gear/ConveyorBeltControl.h"
 #include "osrf_gear/Shipment.h"
 #include "osrf_gear/Product.h"
 #include "osrf_gear/Order.h"
@@ -803,10 +802,8 @@ void ROSAriacTaskManagerPlugin::ControlConveyorBelt(double power)
   }
 
   // Make a service call to set the velocity of the belt
-  osrf_gear::ConveyorBeltState controlMsg;
-  controlMsg.power = power;
   osrf_gear::ConveyorBeltControl srv;
-  srv.request.state = controlMsg;
+  srv.request.power = power;
   this->dataPtr->conveyorControlClient.call(srv);
   if (!srv.response.success) {
     std::string errStr = "Failed to control conveyor.";

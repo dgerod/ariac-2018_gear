@@ -21,10 +21,6 @@
 #include <string>
 
 // ROS
-#include <osrf_gear/ConveyorBeltControl.h>
-#include <osrf_gear/ConveyorBeltState.h>
-#include <osrf_gear/LogicalCameraImage.h>
-#include <osrf_gear/Model.h>
 #include <osrf_gear/Proximity.h>
 #include <ros/ros.h>
 

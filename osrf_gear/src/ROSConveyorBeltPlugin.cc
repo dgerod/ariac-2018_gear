@@ -72,14 +72,14 @@ bool ROSConveyorBeltPlugin::OnControlCommand(ros::ServiceEvent<
 {
   const osrf_gear::ConveyorBeltControl::Request& req = event.getRequest();
   osrf_gear::ConveyorBeltControl::Response& res = event.getResponse();
-  gzdbg << "Conveyor control service called with: " << req.state.power << std::endl;
+  gzdbg << "Conveyor control service called with: " << req.power << std::endl;
 
   const std::string& callerName = event.getCallerName();
   gzdbg << "Conveyor control service called by: " << callerName << std::endl;
 
   if (this->IsEnabled())
   {
-    this->SetPower(req.state.power);
+    this->SetPower(req.power);
     res.success = true;
   } else {
     std::string errStr = "Belt is not currently enabled so power cannot be set. It may be congested.";
