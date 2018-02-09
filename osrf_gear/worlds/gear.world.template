@@ -97,13 +97,6 @@ expand_snippet('proximity_sensor.sdf.template')
 }@
 
 @[end if]@
-@[if sensor.type == "camera"]@
-    <!-- an optical camera called @(name) -->
-@{
-expand_snippet('camera.sdf.template')
-}@
-
-@[end if]@
 @[if sensor.type == "logical_camera"]@
     <!-- a logical camera called @(name) -->
     <include>
