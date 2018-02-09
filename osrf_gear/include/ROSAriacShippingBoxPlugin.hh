@@ -74,8 +74,6 @@ namespace gazebo
     protected: void PublishShipmentMsg();
 
     /// \brief Service for locking the models to the shipping box and disabling updates
-    protected: bool HandleLockModelsService(
-      ros::ServiceEvent<std_srvs::Trigger::Request, std_srvs::Trigger::Response>& event);
     protected: void HandleLockModelsRequest(ConstGzStringPtr &_msg);
 
     /// \brief Service for clearing the shipping box
