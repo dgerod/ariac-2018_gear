@@ -99,12 +99,9 @@ expand_snippet('proximity_sensor.sdf.template')
 @[end if]@
 @[if sensor.type == "logical_camera"]@
     <!-- a logical camera called @(name) -->
-    <include>
-      <uri>model://logical_camera</uri>
-      <name>@(name)</name>
-      <pose>@(' '.join(sensor.pose.xyz)) @(' '.join(sensor.pose.rpy))</pose>
-      <static>true</static>
-    </include>
+@{
+expand_snippet('logical_camera.sdf.template')
+}@
 
 @[end if]@
 @[if sensor.type == "depth_camera"]@
