@@ -113,8 +113,14 @@ void ShippingBoxPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   std::string clearServiceName = "clear";
   if (_sdf->HasElement("clear_shipping_box_service_name"))
     clearServiceName = _sdf->Get<std::string>("clear_shipping_box_service_name");
-  this->clearShippingBoxServer =
-    this->rosNode->advertiseService(clearServiceName, &ShippingBoxPlugin::HandleClearService, this);
+
+  // During the competition, this environment variable will be set.
+  auto compRunning = std::getenv("ARIAC_COMPETITION");
+  if (!compRunning)
+  {
+    this->clearShippingBoxServer =
+      this->rosNode->advertiseService(clearServiceName, &ShippingBoxPlugin::HandleClearService, this);
+  }
 
   // Initialize Gazebo transport
   this->gzNode = transport::NodePtr(new transport::Node());
@@ -368,17 +374,6 @@ bool ShippingBoxPlugin::HandleClearService(
 
   const std::string& callerName = event.getCallerName();
   gzdbg << this->shippingBoxID << ": Handle clear shipping box service called by: " << callerName << std::endl;
-
-  // During the competition, this environment variable will be set.
-  auto compRunning = std::getenv("ARIAC_COMPETITION");
-  if (compRunning && callerName.compare("/gazebo") != 0)
-  {
-    std::string errStr = "Competition is running so this service is not enabled.";
-    gzerr << errStr << std::endl;
-    ROS_ERROR_STREAM(errStr);
-    res.success = false;
-    return true;
-  }
 
   this->UnlockContactingModels();
   this->ClearContactingModels();
