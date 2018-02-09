@@ -57,6 +57,7 @@ sensor_configs = {
     'proximity_sensor': None,
     'logical_camera': None,
     'laser_profiler': None,
+    'depth_camera': None,
     'quality_control': None,
 }
 default_sensors = {

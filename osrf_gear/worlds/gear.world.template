@@ -114,6 +114,12 @@ expand_snippet('camera.sdf.template')
     </include>
 
 @[end if]@
+@[if sensor.type == "depth_camera"]@
+    <!-- a laser profiler called @(name) -->
+@{
+expand_snippet('depth_camera.sdf.template')
+}@
+@[end if]@
 @[if sensor.type == "laser_profiler"]@
     <!-- a laser profiler called @(name) -->
 @{
