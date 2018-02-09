@@ -168,8 +168,6 @@ void ObjectDisposalPlugin::ActOnContactingModels()
 /////////////////////////////////////////////////
 void ObjectDisposalPlugin::OnActivation(ConstGzStringPtr &_msg)
 {
-  fprintf(stderr, "ObjectDisposalPlugin: received activation request: %s\n", _msg->data().c_str());
-
   if (_msg->data() == "activate_once")
   {
     this->active = true;
