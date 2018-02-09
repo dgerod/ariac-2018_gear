@@ -340,7 +340,7 @@ bool ROSDronePlugin::OnCommand(
     _res.success = false;
     return true;
   }
-  ROS_ERROR_STREAM("[INFO] Drone collection triggered for shipment: " << _req.shipment_type);
+  ROS_INFO_STREAM("Drone collection triggered for shipment: " << _req.shipment_type);
   this->dataPtr->shipmentType = _req.shipment_type;
   this->dataPtr->deliveryTriggered = true;
   _res.success = true;
