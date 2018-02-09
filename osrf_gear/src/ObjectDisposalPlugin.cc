@@ -73,7 +73,6 @@ void ObjectDisposalPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     return;
   }
   this->disposalPose = _sdf->Get<math::Pose>("disposal_pose");
-  fprintf(stderr, "ObjectDisposalPlugin: finished loading");
 
   std::string currentBoxTopic = "/ariac/" +  this->model->GetName() + "/contacting_box";
   if (_sdf->HasElement("contacting_box_topic"))

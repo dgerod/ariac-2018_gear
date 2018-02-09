@@ -48,8 +48,12 @@ arm_configs = {
         }
     },
 }
+default_arm = {
+    'type': 'ur10'
+}
 sensor_configs = {
     'break_beam': None,
+    'camera': None,
     'proximity_sensor': None,
     'logical_camera': None,
     'laser_profiler': None,
@@ -92,6 +96,7 @@ default_bin_origins = {
 configurable_options = {
     'insert_shipping_boxes': True,
     'insert_models_over_bins': False,
+    'start_box_at_belt_center': False,
     'disable_shadows': False,
     'fill_demo_shipment': False,
     'belt_population_cycles': 5,
@@ -439,7 +444,7 @@ def create_options_info(options_dict):
 
 def prepare_template_data(config_dict, args):
     template_data = {
-        'arm': None,
+        'arm': create_arm_info(default_arm),
         'sensors': create_sensor_infos(default_sensors),
         'models_to_insert': {},
         'models_to_spawn': {},
@@ -461,7 +466,7 @@ def prepare_template_data(config_dict, args):
     models_over_bins = {}
     for key, value in config_dict.items():
         if key == 'arm':
-            template_data['arm'] = create_arm_info(value)
+            print("Warning: ignoring 'arm' entry (ur10 is always used).", file=sys.stderr)
         elif key == 'sensors':
             template_data['sensors'].update(
                 create_sensor_infos(value))

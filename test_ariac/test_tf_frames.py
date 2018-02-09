@@ -5,15 +5,15 @@ from __future__ import print_function
 import sys
 import time
 
-from test_example_node import ExampleNodeTester
+import geometry_msgs.msg
 import rospy
 import rostest
+from test_example_node import ExampleNodeTester
 
-import geometry_msgs.msg
 import tf
+import tf2_geometry_msgs  # noqa
 import tf2_py as tf2
 import tf2_ros
-import tf2_geometry_msgs  # import support for transforming geometry_msgs stamped msgs
 
 
 class TfTester(ExampleNodeTester):
@@ -31,7 +31,7 @@ class TfTester(ExampleNodeTester):
 
     def _test_shipping_box_pose(self):
         self._test_pose(
-            [1.21, 5.0, 0.91],
+            [1.16, 0.9, 0.45],
             tf.transformations.quaternion_from_euler(0, 0, 0),
             self.camera_above_box0 + '_shipping_box_0_frame'
         )
@@ -73,7 +73,7 @@ class TfTester(ExampleNodeTester):
         expected_pose.header.frame_id = parent_frame_id
 
         # Ensure that the transform is available.
-        trans = self.tfBuffer.lookup_transform(
+        self.tfBuffer.lookup_transform(
             expected_pose.header.frame_id, frame_id, rospy.Time(), rospy.Duration(1.0)
         )
 
@@ -90,7 +90,8 @@ class TfTester(ExampleNodeTester):
         q.z /= length
         q.w /= length
 
-        rospy.loginfo('Checking pose of "' + frame_id + '" in frame "' + expected_pose.header.frame_id + '"')
+        rospy.loginfo(
+            'Checking pose of "' + frame_id + '" in frame "' + expected_pose.header.frame_id + '"')
         rospy.loginfo('Expected:')
         rospy.loginfo(str(expected_pose))
         rospy.loginfo('Calculated:')
@@ -98,14 +99,30 @@ class TfTester(ExampleNodeTester):
 
         # Check that the transformed pose is as expected.
         tol = 0.05
-        self.assertTrue(world_pose.header.frame_id == expected_pose.header.frame_id, 'transform frame_id incorrect')
-        self.assertTrue(abs(world_pose.pose.position.x - expected_pose.pose.position.x) < tol, 'x position incorrect')
-        self.assertTrue(abs(world_pose.pose.position.y - expected_pose.pose.position.y) < tol, 'y position incorrect')
-        self.assertTrue(abs(world_pose.pose.position.z - expected_pose.pose.position.z) < tol, 'z position incorrect')
-        self.assertTrue(abs(world_pose.pose.orientation.x - expected_pose.pose.orientation.x) < tol, 'x orientation incorrect')
-        self.assertTrue(abs(world_pose.pose.orientation.y - expected_pose.pose.orientation.y) < tol, 'y orientation incorrect')
-        self.assertTrue(abs(world_pose.pose.orientation.z - expected_pose.pose.orientation.z) < tol, 'z orientation incorrect')
-        self.assertTrue(abs(world_pose.pose.orientation.w - expected_pose.pose.orientation.w) < tol, 'w orientation incorrect')
+        self.assertTrue(
+            world_pose.header.frame_id == expected_pose.header.frame_id,
+            'transform frame_id incorrect')
+        self.assertTrue(
+            abs(world_pose.pose.position.x - expected_pose.pose.position.x) < tol,
+            'x position incorrect')
+        self.assertTrue(
+            abs(world_pose.pose.position.y - expected_pose.pose.position.y) < tol,
+            'y position incorrect')
+        self.assertTrue(
+            abs(world_pose.pose.position.z - expected_pose.pose.position.z) < tol,
+            'z position incorrect')
+        self.assertTrue(
+            abs(world_pose.pose.orientation.x - expected_pose.pose.orientation.x) < tol,
+            'x orientation incorrect')
+        self.assertTrue(
+            abs(world_pose.pose.orientation.y - expected_pose.pose.orientation.y) < tol,
+            'y orientation incorrect')
+        self.assertTrue(
+            abs(world_pose.pose.orientation.z - expected_pose.pose.orientation.z) < tol,
+            'z orientation incorrect')
+        self.assertTrue(
+            abs(world_pose.pose.orientation.w - expected_pose.pose.orientation.w) < tol,
+            'w orientation incorrect')
 
 
 if __name__ == '__main__':

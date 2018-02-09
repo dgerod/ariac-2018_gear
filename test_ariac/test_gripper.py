@@ -68,16 +68,21 @@ class GripperTester(ExampleNodeTester):
         return success
 
     def _send_arm_to_part(self):
-        positions = [2.4, 0.5, -1.35, 3.14, 3.59, -1.61, 0.0]
-        self.comp_class.send_arm_to_state(positions)
-        time.sleep(1.5)
+        trajectory = [
+            [1.5, -0.5, -2.0, 3.1, 4.15, -1.51, 0.0],
+            [1.5, -0.5, -1.0, 3.1, 4.15, -1.51, 0.0],
+            [1.5, -0.55, 0.0, 3.1, 4.15, -1.51, 0.0],
+            [1.5, -0.55, 5.91, 3.1, 4.15, -1.51, 0.0],
+        ]
+        for positions in trajectory:
+            self.comp_class.send_arm_to_state(positions)
+            time.sleep(1.5)
 
     def _send_arm_to_shipping_box(self):
         trajectory = [
-            [1.76, 0.28, -1.38, 2.76, 3.27, -1.51, 0.0],
-            [1.76, 0.38, -1.38, 1.5, 3.27, -1.51, 0.0],
-            [1.76, 2.06, -1.38, 1.5, 3.27, -1.51, 0.0],
-            [1.76, 2.06, -0.63, 1.5, 3.27, -1.51, 0.0],
+            [1.5, -0.5, -1.8, 3.1, 4.15, -1.51, 0.0],
+            [1.5, -0.5, -1.8, 0, 4.15, -1.51, 0.0],
+            [1.5, -0.5, -0.38, 0, 3.39, -1.51, 0.0],
         ]
         for positions in trajectory:
             self.comp_class.send_arm_to_state(positions)

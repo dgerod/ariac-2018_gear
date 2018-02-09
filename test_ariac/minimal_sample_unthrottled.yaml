@@ -33,6 +33,3 @@ models_over_bins:
         num_models_y: 5
 
 time_limit: -1
-
-arm:
-  type: ur10

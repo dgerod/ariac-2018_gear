@@ -1,5 +1,3 @@
-arm:
-  type: ur10
 sensors:
   break_beam_1:
     type: break_beam
