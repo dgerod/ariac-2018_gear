@@ -11,6 +11,7 @@
         args="--development-mode
           $(arg state_logging_args)
           $(arg gui_args)
+          --visualize-sensor-views
           -f $(find osrf_gear)/config/sample.yaml
           $(find osrf_gear)/config/sample_user_config.yaml
           " required="true" output="screen" />

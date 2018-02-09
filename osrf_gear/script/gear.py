@@ -159,6 +159,8 @@ def prepare_arguments(parser):
         help='generate gazebo state logs (will override config file option)')
     add('--log-to-file', action='store_true', default=False,
         help='direct the output of the gazebo ros node to log file instead of the console')
+    add('--visualize-sensor-views', action='store_true', default=False,
+        help='visualize the views of sensors in gazebo')
     mex_group = parser.add_mutually_exclusive_group(required=False)
     add = mex_group.add_argument
     add('config', nargs='?', metavar='CONFIG',
@@ -499,6 +501,8 @@ def prepare_template_data(config_dict, args):
     template_data['options'].update(create_options_info(options_dict))
     if args.state_logging is not None:
         template_data['options']['gazebo_state_logging'] = args.state_logging
+    if args.visualize_sensor_views:
+        template_data['options']['visualize_sensor_views'] = True
 
     models_over_bins = {}
     for key, value in config_dict.items():
