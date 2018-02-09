@@ -157,7 +157,7 @@ def prepare_arguments(parser):
         help="don't run the gazebo client gui")
     add('-l', '--state-logging', action='store',
         help='generate gazebo state logs (will override config file option)')
-    add('--log-output', action='store_true', default=False,
+    add('--log-to-file', action='store_true', default=False,
         help='direct the output of the gazebo ros node to log file instead of the console')
     mex_group = parser.add_mutually_exclusive_group(required=False)
     add = mex_group.add_argument
@@ -587,7 +587,7 @@ def main(sysargv=None):
         'world_path:=' + os.path.join(args.output, 'gear.world'),
         'gear_urdf_xacro:=' + os.path.join(args.output, 'gear.urdf.xacro'),
     ]
-    if args.log_output:
+    if args.log_to_file:
         cmd.append('gazebo_ros_output:=log')
     if args.verbose:
         cmd += ['verbose:=true']
