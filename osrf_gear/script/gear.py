@@ -122,6 +122,7 @@ configurable_options = {
         'belt_model_type1': 'part1',
         'belt_model_type2': 'part2',
     },
+    'visualize_sensor_views': False,
 }
 default_time_limit = 500  # seconds
 global_model_count = {}  # the global count of how many times a model type has been created

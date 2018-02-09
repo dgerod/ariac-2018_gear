@@ -56,7 +56,7 @@
           </ray>
 
           <always_on>1</always_on>
-          <visualize>true</visualize>
+          <visualize>@(options['visualize_sensor_views'])</visualize>
         </sensor>
         <gravity>false</gravity>
         <inertial>
