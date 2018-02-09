@@ -61,15 +61,35 @@ topics:
     num_publishers: 1
     num_subscribers: 0
 
-#   - topic: /ariac/quality_control_sensor_1
-#     type: osrf_gear/LogicalCameraImage
-#     num_publishers: 1
-#     num_subscribers: 0
-#
-#   - topic: /ariac/quality_control_sensor_2
-#     type: osrf_gear/LogicalCameraImage
-#     num_publishers: 1
-#     num_subscribers: 0
+  - topic: /ariac/quality_control_sensor_1
+    type: osrf_gear/LogicalCameraImage
+    num_publishers: 1
+    num_subscribers: 0
+
+  - topic: /ariac/quality_control_sensor_2
+    type: osrf_gear/LogicalCameraImage
+    num_publishers: 1
+    num_subscribers: 0
+
+  - topic: /ariac/congestion_sensor
+    type: osrf_gear/Proximity
+    num_publishers: 1
+    num_subscribers: 1
+
+  - topic: /ariac/congestion_sensor_change
+    type: osrf_gear/Proximity
+    num_publishers: 1
+    num_subscribers: 0
+
+  - topic: /ariac/conveyor/state
+    type: osrf_gear/ConveyorBeltState
+    num_publishers: 1
+    num_subscribers: 0
+
+  - topic: /ariac/drone/state
+    type: std_msgs/String
+    num_publishers: 1
+    num_subscribers: 0
 
 
   #####################################
@@ -109,6 +129,11 @@ topics:
 
   - topic: /ariac/laser_profiler_1
     type: sensor_msgs/LaserScan
+    num_publishers: 1
+    num_subscribers: 0
+
+  - topic: /ariac/depth_camera_1
+    type: sensor_msgs/PointCloud
     num_publishers: 1
     num_subscribers: 0
 
