@@ -51,6 +51,21 @@ arm_configs = {
 default_arm = {
     'type': 'ur10'
 }
+possible_products = [
+    'part1',
+    'part2',
+    'part3',
+    'part4',
+    'arm_part',
+    'cross_joint_part',
+    'disk_part',
+    'gasket_part',
+    'gear_part',
+    'piston_rod_part',
+    'pulley_part',
+    't_brace_part',
+    'u_joint_part',
+]
 sensor_configs = {
     'break_beam': None,
     'camera': None,
@@ -518,6 +533,7 @@ def prepare_template_data(config_dict, args):
         template_data['belt_models'] or {},
         models_over_bins,
     )
+    template_data['possible_products'] = possible_products
     return template_data
 
 

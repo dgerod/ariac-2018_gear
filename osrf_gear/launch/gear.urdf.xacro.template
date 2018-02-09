@@ -13,6 +13,11 @@
   <xacro:include filename="$(find osrf_gear)/launch/vacuum_gripper/vacuum_gripper.urdf.xacro" />
 
   <xacro:create_vacuum_gripper wrist_link="${wrist_link}" >
+    <grippable_model_types>
+@[for model_name in possible_products]@
+        <type>@(model_name)</type>
+@[end for]@
+    </grippable_model_types>
     <drops_info>
 @[if drops]@
       <drops>
