@@ -36,8 +36,10 @@
   </include>
 
   <!-- load the URDF (it will include the robot arm model) -->
+  <!--
   <param name="robot_description"
          command="$(find xacro)/xacro --inorder '$(arg gear_urdf_xacro)' use_effort_interface:=true" />
+  -->
 
 @[if arm]@
 @{
@@ -51,6 +53,14 @@ initial_joint_states_string = \
     <arg name="limited" value="$(arg limited)" />
     <arg name="extra_spawn_model_args" value="@(initial_joint_states_string)" />
     <arg name="set_robot_description" value="false" />
+  </include>
+
+@[end if]@
+@[if arm.type == 'iiwa']@
+  <!-- load iiwa -->
+  <include file="$(find iiwa_gazebo)/launch/iiwa_gazebo.launch">
+    <arg name="hardware_interface" value="EffortJointInterface" />
+  />
   </include>
 @[end if]@
 @[end if]@

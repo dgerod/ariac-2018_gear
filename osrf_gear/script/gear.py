@@ -37,6 +37,17 @@ template_files = [
     os.path.join(launch_dir, 'gear.urdf.xacro.template'),
 ]
 arm_configs = {
+    'iiwa': {
+        'default_initial_joint_states': {
+            'elbow_joint': 2.14,
+            'linear_arm_actuator_joint': 0,
+            'shoulder_lift_joint': -2.0,
+            'shoulder_pan_joint': 3.14,
+            'wrist_1_joint': 3.27,
+            'wrist_2_joint': -1.51,
+            'wrist_3_joint': 0,
+        },
+    },
     'ur10': {
         'pose': {
             'xyz': [0.3, 1.0, 0.7],
@@ -55,7 +66,7 @@ arm_configs = {
     },
 }
 default_arm = {
-    'type': 'ur10'
+    'type': 'iiwa'
 }
 possible_products = [
     'part1',
