@@ -505,8 +505,7 @@ void ROSAriacTaskManagerPlugin::OnUpdate()
     this->dataPtr->gameStartTime = currentSimTime;
     this->dataPtr->currentState = "go";
 
-    // TODO(dhood): only start the belt if there are belt parts specified
-    this->ControlConveyorBelt(100);
+    this->ControlConveyorBelt(0);
     this->PopulateConveyorBelt();
   }
   else if (this->dataPtr->currentState == "go")
