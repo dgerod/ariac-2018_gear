@@ -33,10 +33,9 @@ set(rostests
   test_scoring/ariac_scoring_correct_parts_plus_faulty.test
   test_scoring/ariac_scoring_correct_parts_not_flipped.test
   test_scoring/ariac_scoring_missing_parts.test
-  # these need agv2
-  #test_scoring/ariac_scoring_low_priority_order.test
-  #test_scoring/ariac_scoring_interrupted.test
-  #test_scoring/ariac_scoring_not_interrupted.test
+  test_scoring/ariac_scoring_low_priority_order.test
+  test_scoring/ariac_scoring_interrupted.test
+  test_scoring/ariac_scoring_not_interrupted.test
   test_scoring/ariac_scoring_faulty_parts.test
 )
 
