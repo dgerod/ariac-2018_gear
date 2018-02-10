@@ -20,6 +20,7 @@ catkin_package(
 
 set(rostests
   ariac_rosapi.test
+  ariac_rosapi_development_mode.test
   ariac_example.test
   ariac_tf_frames.test
   gripper.test
@@ -54,6 +55,7 @@ endforeach()
 install(FILES
   ${rostests}
   ariac_rosapi.yaml
+  ariac_rosapi_development_mode.yaml
   fill_demo_shipment.yaml
   minimal_sample_unthrottled.yaml
   tf_sensors.yaml
