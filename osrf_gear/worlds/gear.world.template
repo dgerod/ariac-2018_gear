@@ -118,31 +118,42 @@ expand_snippet('laser_profiler.sdf.template')
 @[end if]@
 @[end for]@
 
+@{shipping_boxes_on_belt = 0}@
 @[if options['insert_shipping_boxes']]@
-    <!-- start with a box on the belt -->
-@{shipping_box_name = 'shipping_box_0'}@
+@[  if options['start_box_at_belt_center']]@
+    <!-- start with an extra box in the middle of the belt -->
+@{shipping_box_name = 'shipping_box_' + str(shipping_boxes_on_belt)}@
     <model name="@(shipping_box_name)">
-@[if options['start_box_at_belt_center']]@
       <pose>1.16 0.9 0.45 0 0 0</pose>
-@[else]
-      <pose>1.16 4.0 0.9 0 0 0</pose>
-@[end if]@
 @{
 expand_snippet('shipping_box.sdf.template')
 }@
     </model>
+@{shipping_boxes_on_belt += 1}@
+@[  end if]@
+
+    <!-- start with a box on the belt -->
+@{shipping_box_name = 'shipping_box_' + str(shipping_boxes_on_belt)}@
+    <model name="@(shipping_box_name)">
+      <pose>1.16 4.0 0.9 0 0 0</pose>
+@{
+expand_snippet('shipping_box.sdf.template')
+}@
+    </model>
+@{shipping_boxes_on_belt += 1}@
 
 @[end if]@
+
 @{belt_models_loop = True}@
 @{belt_population_cycles = options['belt_population_cycles'] if belt_models_loop else 1}
 
 @{obj_type_index = 0}@
 @[for obj_type, spawn_times in belt_models.items()]@
     <!-- Pool of @(obj_type) objects -->
-@[  for index in range(1, 1 + belt_population_cycles * len(spawn_times))]@
+@[  for index in range(belt_population_cycles * len(spawn_times))]@
 @[    if obj_type is 'shipping_box']@
 @[      if options['insert_shipping_boxes']]@
-@{shipping_box_name = 'shipping_box_' + str(index)}@
+@{shipping_box_name = 'shipping_box_' + str(index + shipping_boxes_on_belt)}@
     <model name="@(shipping_box_name)">
       <pose>@(7.5 + 1.25 * obj_type_index) @(-9.8 + 1.25 * index) -4.9 0 0 0</pose>
 @{
@@ -199,7 +210,7 @@ expand_snippet('shipping_box.sdf.template')
       <rate_modifier_topic>/ariac/population/rate_modifier</rate_modifier_topic>
       <control_topic>/ariac/population/control</control_topic>
       <state_topic>/ariac/population/state</state_topic>
-      <start_index>1</start_index>
+      <start_index>@(shipping_boxes_on_belt)</start_index>
       <prefix_object_names>false</prefix_object_names>
       <loop_forever>@("true" if belt_models_loop else "false")</loop_forever>
       <frame>conveyor_belt::conveyor_belt_fixed</frame>
