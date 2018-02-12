@@ -7,10 +7,15 @@
   <arg unless="$(arg no_gui)" name="gui_args" value="" />
   <arg     if="$(arg no_gui)" name="gui_args" value="--no-gui" />
 
+  <arg name="fill_demo_shipment" default="false" />
+  <arg unless="$(arg fill_demo_shipment)" name="fill_demo_shipment_args" value="" />
+  <arg     if="$(arg fill_demo_shipment)" name="fill_demo_shipment_args" value="--fill-demo-shipment" />
+
   <node name="ariac_sim" pkg="osrf_gear" type="gear.py"
         args="--development-mode
           $(arg state_logging_args)
           $(arg gui_args)
+          $(arg fill_demo_shipment_args)
           --visualize-sensor-views
           -f $(find osrf_gear)/config/sample.yaml
           $(find osrf_gear)/config/sample_user_config.yaml
