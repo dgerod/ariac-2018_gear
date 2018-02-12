@@ -21,20 +21,20 @@ class GripperTester(ExampleNodeTester):
         # Pre-defined initial pose because sometimes the arm starts "droopy"
         self._send_arm_to_initial_pose()
 
-        # Pre-defined pose that puts the gripper in contact with a part.
-        self._send_arm_to_part()
+        # Pre-defined pose that puts the gripper in contact with a product.
+        self._send_arm_to_product()
 
-        # Enable the gripper so that it picks up the part.
+        # Enable the gripper so that it picks up the product.
         self._test_enable_gripper()
 
-        # Move the part over the shipping box using a pre-defined sequence of poses.
+        # Move the product over the shipping box using a pre-defined sequence of poses.
         self._send_arm_to_shipping_box()
         self.assertTrue(
             self.comp_class.current_gripper_state.enabled, 'Gripper no longer enabled')
         self.assertTrue(
             self.comp_class.current_gripper_state.attached, 'Product no longer attached')
 
-        # Disable the gripper so that it drops the part.
+        # Disable the gripper so that it drops the product.
         self._test_disable_gripper()
 
         time.sleep(1.0)
@@ -67,7 +67,7 @@ class GripperTester(ExampleNodeTester):
         time.sleep(0.5)
         return success
 
-    def _send_arm_to_part(self):
+    def _send_arm_to_product(self):
         trajectory = [
             [1.5, -0.5, -2.0, 3.1, 4.15, -1.51, 0.0],
             [1.5, -0.5, -1.0, 3.1, 4.15, -1.51, 0.0],

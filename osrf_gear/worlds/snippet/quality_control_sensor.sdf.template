@@ -18,8 +18,8 @@
           </noise>
         </orientation_noise>
         <known_model_names>
-@[for part_name, part_info in faulty_parts.items()]@
-          <name>@(part_name)</name>
+@[for product_name, product_info in faulty_products.items()]@
+          <name>@(product_name)</name>
 @[end for]@
         </known_model_names>
       </plugin>

@@ -12,7 +12,7 @@ orders:
     announcement_condition: time
     announcement_condition_value: 0.0
     shipment_count: 2
-    parts:
+    products:
       part_0:
         type: order_part1
         pose:

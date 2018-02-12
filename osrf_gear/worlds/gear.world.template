@@ -216,12 +216,12 @@ expand_snippet('shipping_box.sdf.template')
       <loop_forever>@("true" if belt_models_loop else "false")</loop_forever>
       <frame>conveyor_belt::conveyor_belt_fixed</frame>
       <object_sequence>
-@[for part_name, spawn_times in belt_models.items()]@
-  @[for spawn_time, part in spawn_times.items()]@
+@[for product_name, spawn_times in belt_models.items()]@
+  @[for spawn_time, product in spawn_times.items()]@
         <object>
           <time>@(spawn_time)</time>
-          <type>@(part.type)</type>
-          <pose>@(' '.join(part.pose.xyz)) @(' '.join(part.pose.rpy))</pose>
+          <type>@(product.type)</type>
+          <pose>@(' '.join(product.pose.xyz)) @(' '.join(product.pose.rpy))</pose>
         </object>
   @[end for]@
 @[end for]@
@@ -246,19 +246,19 @@ expand_snippet('shipping_box.sdf.template')
 @[if order['announcement_condition'] == 'time']@
         <start_time>@(order['announcement_condition_value'])</start_time>
 @[end if]@
-@[if order['announcement_condition'] == 'wanted_parts']@
-        <interrupt_on_wanted_parts>@(order['announcement_condition_value'])</interrupt_on_wanted_parts>
+@[if order['announcement_condition'] == 'wanted_products']@
+        <interrupt_on_wanted_products>@(order['announcement_condition_value'])</interrupt_on_wanted_products>
 @[end if]@
-@[if order['announcement_condition'] == 'unwanted_parts']@
-        <interrupt_on_unwanted_parts>@(order['announcement_condition_value'])</interrupt_on_unwanted_parts>
+@[if order['announcement_condition'] == 'unwanted_products']@
+        <interrupt_on_unwanted_products>@(order['announcement_condition_value'])</interrupt_on_unwanted_products>
 @[end if]@
 @[for shipment_index in range(order['shipment_count'])]
         <shipment>
           <shipment_type>@(order_name)_shipment_@(shipment_index)</shipment_type>
-@[for part in order['parts']]@
+@[for product in order['products']]@
           <product>
-            <type>@(part.type)</type>
-            <pose>@(' '.join(part.pose.xyz)) @(' '.join(part.pose.rpy))</pose>
+            <type>@(product.type)</type>
+            <pose>@(' '.join(product.pose.xyz)) @(' '.join(product.pose.rpy))</pose>
           </product>
 @[end for]@
         </shipment>
@@ -333,18 +333,18 @@ expand_snippet('shipping_box.sdf.template')
 order_name, order = orders.items()[0]
 count = {}
 }@
-    <!-- Populate shipping_box_0 with order parts -->
+    <!-- Populate shipping_box_0 with order products -->
     <plugin filename="libPopulationPlugin.so" name="populate_box_0">
       <activation_topic>/ariac/populate_belt</activation_topic>
       <loop_forever>false</loop_forever>
       <prefix_object_names>true</prefix_object_names>
       <frame>shipping_box_0::box_base</frame>
       <object_sequence>
-@[for part in order['parts']]@
+@[for product in order['products']]@
         <object>
           <time>0.0</time>
-          <type>@(part.type)</type>
-          <pose>@(' '.join(part.pose.xyz[0:-1])) 0.00 @(' '.join(part.pose.rpy))</pose>
+          <type>@(product.type)</type>
+          <pose>@(' '.join(product.pose.xyz[0:-1])) 0.00 @(' '.join(product.pose.rpy))</pose>
         </object>
 @[end for]@
       </object_sequence>
@@ -352,20 +352,20 @@ count = {}
     </plugin>
 
     <!-- Insert models to fill the shipping box -->
-@[for part in order['parts']]@
+@[for product in order['products']]@
 @{
 try:
-    id = count[part.type]
+    id = count[product.type]
 except:
     id = 0
 }@
     <include>
-      <name>populate_box_0|@(part.type)_@(id)</name>
-      <uri>model://@(part.type)_ariac</uri>
+      <name>populate_box_0|@(product.type)_@(id)</name>
+      <uri>model://@(product.type)_ariac</uri>
       <pose>-7.5 -3 -1.0 0 0 0</pose>
     </include>
 @{
-count[part.type] = id + 1
+count[product.type] = id + 1
 }@
 @[end for]@
 

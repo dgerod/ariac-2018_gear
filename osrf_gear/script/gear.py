@@ -409,10 +409,10 @@ def create_drops_info(drops_dict):
         drop_region_max_xyz = get_required_field('max', drop_region_max, 'xyz')
         destination_info = get_required_field('drop_region', drop_region_dict, 'destination')
         destination = create_pose_info(destination_info)
-        part_type = get_required_field('drop_region', drop_region_dict, 'part_type_to_drop')
-        part_type = replace_type_aliases(part_type)
+        product_type = get_required_field('drop_region', drop_region_dict, 'product_type_to_drop')
+        product_type = replace_type_aliases(product_type)
         drop_region_infos.append(
-            DropRegionInfo(drop_region_min_xyz, drop_region_max_xyz, destination, part_type))
+            DropRegionInfo(drop_region_min_xyz, drop_region_max_xyz, destination, product_type))
     drops_info['drop_regions'] = drop_region_infos
     return drops_info
 
@@ -422,14 +422,14 @@ def create_order_info(name, order_dict):
     announcement_condition = get_required_field(name, order_dict, 'announcement_condition')
     announcement_condition_value = get_required_field(
         name, order_dict, 'announcement_condition_value')
-    parts_dict = get_required_field(name, order_dict, 'parts')
-    parts = []
-    for part_name, part_dict in parts_dict.items():
-        parts.append(create_model_info(part_name, part_dict))
+    products_dict = get_required_field(name, order_dict, 'products')
+    products = []
+    for product_name, product_dict in products_dict.items():
+        products.append(create_model_info(product_name, product_dict))
     return {
         'announcement_condition': announcement_condition,
         'announcement_condition_value': announcement_condition_value,
-        'parts': parts,
+        'products': products,
         'shipment_count': shipment_count,
     }
 
@@ -441,11 +441,11 @@ def create_order_infos(orders_dict):
     return order_infos
 
 
-def create_faulty_parts_info(faulty_parts_dict):
-    faulty_part_infos = {}
-    for part_name in faulty_parts_dict:
-        faulty_part_infos[part_name] = part_name  # no other info for now
-    return faulty_part_infos
+def create_faulty_products_info(faulty_products_dict):
+    faulty_product_infos = {}
+    for product_name in faulty_products_dict:
+        faulty_product_infos[product_name] = product_name  # no other info for now
+    return faulty_product_infos
 
 
 def create_bin_infos():
@@ -458,20 +458,20 @@ def create_bin_infos():
 def create_material_location_info(belt_models, models_over_bins):
     material_locations = {}
 
-    # Specify that belt parts can be found on the conveyor belt
+    # Specify that belt products can be found on the conveyor belt
     for _, spawn_times in belt_models.items():
-        for spawn_time, part in spawn_times.items():
-            if part.type in material_locations:
-                material_locations[part.type].update(['belt'])
+        for spawn_time, product in spawn_times.items():
+            if product.type in material_locations:
+                material_locations[product.type].update(['belt'])
             else:
-                material_locations[part.type] = {'belt'}
+                material_locations[product.type] = {'belt'}
 
-    # Specify in which bin the different bin parts can be found
-    for part_name, part in models_over_bins.items():
-        if part.type in material_locations:
-            material_locations[part.type].update([part.bin])
+    # Specify in which bin the different bin products can be found
+    for product_name, product in models_over_bins.items():
+        if product.type in material_locations:
+            material_locations[product.type].update([product.bin])
         else:
-            material_locations[part.type] = {part.bin}
+            material_locations[product.type] = {product.bin}
 
     return material_locations
 
@@ -490,7 +490,7 @@ def prepare_template_data(config_dict, args):
         'models_to_insert': {},
         'models_to_spawn': {},
         'belt_models': create_belt_model_infos(default_belt_models),
-        'faulty_parts': {},
+        'faulty_products': {},
         'drops': {},
         'orders': {},
         'options': {},
@@ -522,8 +522,8 @@ def prepare_template_data(config_dict, args):
             template_data['belt_models'].update(create_belt_model_infos(value))
         elif key == 'drops':
             template_data['drops'].update(create_drops_info(value))
-        elif key == 'faulty_parts':
-            template_data['faulty_parts'].update(create_faulty_parts_info(value))
+        elif key == 'faulty_products':
+            template_data['faulty_products'].update(create_faulty_products_info(value))
         elif key == 'orders':
             template_data['orders'].update(create_order_infos(value))
         elif key == 'options':

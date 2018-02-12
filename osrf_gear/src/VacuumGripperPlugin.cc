@@ -548,7 +548,7 @@ void VacuumGripperPlugin::HandleAttach()
 
   auto modelPtr = this->dataPtr->modelCollision->GetLink()->GetModel();
   auto name = modelPtr->GetName();
-  gzdbg << "Part attached to gripper: " << name << std::endl;
+  gzdbg << "Product attached to gripper: " << name << std::endl;
 
   // Check if the object should drop.
   std::string objectType = ariac::DetermineModelType(name);
@@ -577,7 +577,7 @@ void VacuumGripperPlugin::HandleAttach()
 /////////////////////////////////////////////////
 void VacuumGripperPlugin::HandleDetach()
 {
-  gzdbg << "Detaching part from gripper." << std::endl;
+  gzdbg << "Detaching product from gripper." << std::endl;
   this->dataPtr->attached = false;
   this->dataPtr->fixedJoint->Detach();
 }
@@ -616,7 +616,7 @@ bool VacuumGripperPlugin::CheckModelContact()
       // Only attach whitelisted models
       auto modelPtr = this->dataPtr->modelCollision->GetLink()->GetModel();
       auto modelName = modelPtr->GetName();
-      gzdbg << "Part in contact with gripper: " << modelName << std::endl;
+      gzdbg << "Product in contact with gripper: " << modelName << std::endl;
       std::string modelType = ariac::DetermineModelType(modelName);
       auto it = std::find(this->dataPtr->grippableModelTypes.begin(), this->dataPtr->grippableModelTypes.end(), modelType);
       bool grippableModel = it != this->dataPtr->grippableModelTypes.end();

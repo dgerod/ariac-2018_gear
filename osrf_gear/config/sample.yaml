@@ -9,7 +9,7 @@ orders:
   order_0:
     announcement_condition: time
     announcement_condition_value: 0.0
-    parts:
+    products:
       part_0:
         type: piston_rod_part
         pose:
@@ -52,7 +52,7 @@ models_over_bins:
         num_models_x: 3
         num_models_y: 3
 
-faulty_parts:
-  - piston_rod_part_0  # this part gets spawned in the tutorial
+faulty_products:
+  - piston_rod_part_0  # this product gets spawned in the tutorial
 
 time_limit: -1

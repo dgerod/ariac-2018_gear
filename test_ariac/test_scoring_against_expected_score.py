@@ -19,7 +19,7 @@ class ScoringTester(ExampleNodeTester):
             self.shipping_box_1_first = sys.argv[2] == '--shipping-box-1-first'
         self.prepare_tester()
 
-        # Starting the competition will cause parts from the order to be spawned on shipping_box_0
+        # Starting the competition will cause products from the order to be spawned on shipping_box_0
         self._test_start_comp()
 
         if self.shipping_box_1_first:

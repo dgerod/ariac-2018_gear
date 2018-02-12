@@ -71,10 +71,10 @@ void ShippingBoxPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->nestedAnimation = _sdf->Get<bool>("nested_animation");
   }
 
-  if (_sdf->HasElement("faulty_parts"))
+  if (_sdf->HasElement("faulty_products"))
   {
     this->faultyProductNames.clear();
-    sdf::ElementPtr faultyProductNamesElem = _sdf->GetElement("faulty_parts");
+    sdf::ElementPtr faultyProductNamesElem = _sdf->GetElement("faulty_products");
     if (faultyProductNamesElem->HasElement("name"))
     {
       sdf::ElementPtr faultyProductElem = faultyProductNamesElem->GetElement("name");
@@ -82,7 +82,7 @@ void ShippingBoxPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
       {
         std::string faultyProductName = faultyProductElem->Get<std::string>();
 
-        ROS_DEBUG_STREAM("Ignoring part: " << faultyProductName);
+        ROS_DEBUG_STREAM("Ignoring product: " << faultyProductName);
         this->faultyProductNames.push_back(faultyProductName);
         faultyProductElem = faultyProductElem->GetNextElement("name");
       }
@@ -346,7 +346,7 @@ void ShippingBoxPlugin::LockContactingModels()
     model->SetGravityMode(false);
     link->SetGravityMode(false);
 
-    // Lift the part slightly because it will fall through the shipping box if the shipping box is animated
+    // Lift the product slightly because it will fall through the shipping box if the shipping box is animated
     model->SetWorldPose(model->GetWorldPose() + math::Pose(0,0,0.01,0,0,0));
   }
 

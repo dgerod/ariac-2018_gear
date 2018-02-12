@@ -33,7 +33,7 @@ class ExampleNodeTester(unittest.TestCase):
         self.prepare_tester()
         self._test_send_arm_to_zero_state()
 
-        # Starting the competition will cause parts from the order to be spawned on shipping_box_0
+        # Starting the competition will cause products from the order to be spawned on shipping_box_0
         self._test_start_comp()
         time.sleep(5.0)
         self._test_order_reception()
