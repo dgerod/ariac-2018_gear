@@ -13,13 +13,18 @@ orders:
       part_0:
         type: piston_rod_part
         pose:
-          xyz: [0.1, 0, 0]
+          xyz: [0.1, -0.1, 0]
           rpy: [0, 0, 0]
       part_1:
         type: gear_part
         pose:
           xyz: [-0.1, 0, 0]
           rpy: [0, 0, 'pi']
+      part_2:
+        type: gear_part
+        pose:
+          xyz: [-0.1, 0.15, 0]
+          rpy: [0, 0, 0]
 
 models_over_bins:
   bin3:
