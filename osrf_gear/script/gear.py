@@ -86,7 +86,7 @@ default_sensors = {
     'quality_control_sensor_1': {
         'type': 'quality_control',
         'pose': {
-            'xyz': [1.2, 1.0, 1.2],
+            'xyz': [1.2, 1.1, 1.2],
             'rpy': [-1.5707, 1.5707, -3.1416]
         }
     },
