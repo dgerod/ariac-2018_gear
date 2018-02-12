@@ -21,10 +21,6 @@
 #include <string>
 
 // ROS
-#include <osrf_gear/ConveyorBeltControl.h>
-#include <osrf_gear/ConveyorBeltState.h>
-#include <osrf_gear/LogicalCameraImage.h>
-#include <osrf_gear/Model.h>
 #include <osrf_gear/Proximity.h>
 #include <ros/ros.h>
 
@@ -121,7 +117,10 @@ class ROSConveyorCongestionPlugin : public WorldPlugin
     {
       if (this->beltEnabled)
       {
-        gzdbg << "Disabling belt" << std::endl;
+        std::string logMessage;
+        logMessage = "Disabling belt due to congestion";
+        ROS_INFO_STREAM(logMessage.c_str());
+        gzdbg << logMessage << std::endl;
         gazebo::msgs::GzString msg;
         msg.set_data("disabled");
         this->gzConveyorEnablePub->Publish(msg);
@@ -131,7 +130,10 @@ class ROSConveyorCongestionPlugin : public WorldPlugin
     {
       if (!this->beltEnabled)
       {
-        gzdbg << "Enabling belt" << std::endl;
+        std::string logMessage;
+        logMessage = "Re-enabling belt because it's no longer congested";
+        ROS_INFO_STREAM(logMessage.c_str());
+        gzdbg << logMessage << std::endl;
         gazebo::msgs::GzString msg;
         msg.set_data("enabled");
         this->gzConveyorEnablePub->Publish(msg);

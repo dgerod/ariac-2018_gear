@@ -1,4 +1,4 @@
-faulty_parts:
+faulty_products:
   - gear_part_4
   - gear_part_5
 models_to_spawn:

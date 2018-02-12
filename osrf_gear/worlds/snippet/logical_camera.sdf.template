@@ -17,11 +17,12 @@
             <stddev>0.01</stddev>
           </noise>
         </orientation_noise>
-        <known_model_names>
-@[for product_name, product_info in faulty_products.items()]@
-          <name>@(product_name)</name>
+        <known_model_types>
+@[for model_name in possible_products]@
+          <type>@(model_name)</type>
 @[end for]@
-        </known_model_names>
+          <type>shipping_box</type>
+        </known_model_types>
       </plugin>
       <link name="link">
         <gravity>false</gravity>
@@ -53,11 +54,12 @@
         </visual>
 
         <sensor name="logical_camera" type="logical_camera">
+
           <logical_camera>
-            <near>0.73</near>
-            <far>0.78</far>
-            <horizontal_fov>0.7</horizontal_fov>
-            <aspect_ratio>0.35</aspect_ratio>
+            <near>0.2</near>
+            <far>0.75</far>
+            <horizontal_fov>1.1</horizontal_fov>
+            <aspect_ratio>1.5</aspect_ratio>
           </logical_camera>
 
           <visualize>@(options['visualize_sensor_views'])</visualize>

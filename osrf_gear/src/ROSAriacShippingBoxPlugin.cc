@@ -71,10 +71,10 @@ void ShippingBoxPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->nestedAnimation = _sdf->Get<bool>("nested_animation");
   }
 
-  if (_sdf->HasElement("faulty_parts"))
+  if (_sdf->HasElement("faulty_products"))
   {
     this->faultyProductNames.clear();
-    sdf::ElementPtr faultyProductNamesElem = _sdf->GetElement("faulty_parts");
+    sdf::ElementPtr faultyProductNamesElem = _sdf->GetElement("faulty_products");
     if (faultyProductNamesElem->HasElement("name"))
     {
       sdf::ElementPtr faultyProductElem = faultyProductNamesElem->GetElement("name");
@@ -82,7 +82,7 @@ void ShippingBoxPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
       {
         std::string faultyProductName = faultyProductElem->Get<std::string>();
 
-        ROS_DEBUG_STREAM("Ignoring part: " << faultyProductName);
+        ROS_DEBUG_STREAM("Ignoring product: " << faultyProductName);
         this->faultyProductNames.push_back(faultyProductName);
         faultyProductElem = faultyProductElem->GetNextElement("name");
       }
@@ -113,8 +113,14 @@ void ShippingBoxPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   std::string clearServiceName = "clear";
   if (_sdf->HasElement("clear_shipping_box_service_name"))
     clearServiceName = _sdf->Get<std::string>("clear_shipping_box_service_name");
-  this->clearShippingBoxServer =
-    this->rosNode->advertiseService(clearServiceName, &ShippingBoxPlugin::HandleClearService, this);
+
+  // During the competition, this environment variable will be set.
+  auto compRunning = std::getenv("ARIAC_COMPETITION");
+  if (!compRunning)
+  {
+    this->clearShippingBoxServer =
+      this->rosNode->advertiseService(clearServiceName, &ShippingBoxPlugin::HandleClearService, this);
+  }
 
   // Initialize Gazebo transport
   this->gzNode = transport::NodePtr(new transport::Node());
@@ -126,9 +132,6 @@ void ShippingBoxPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     lockModelsServiceName = _sdf->Get<std::string>("lock_models_service_name");
   this->lockModelsSub = this->gzNode->Subscribe(
     lockModelsServiceName, &ShippingBoxPlugin::HandleLockModelsRequest, this);
-  // ROS service for locking the shipping box
-  this->lockModelsServer =
-    this->rosNode->advertiseService(lockModelsServiceName, &ShippingBoxPlugin::HandleLockModelsService, this);
 
   double speedFactor = 1.0;
   this->rampAnimation.reset(
@@ -343,7 +346,7 @@ void ShippingBoxPlugin::LockContactingModels()
     model->SetGravityMode(false);
     link->SetGravityMode(false);
 
-    // Lift the part slightly because it will fall through the shipping box if the shipping box is animated
+    // Lift the product slightly because it will fall through the shipping box if the shipping box is animated
     model->SetWorldPose(model->GetWorldPose() + math::Pose(0,0,0.01,0,0,0));
   }
 
@@ -353,31 +356,6 @@ void ShippingBoxPlugin::LockContactingModels()
   this->fixedJoints.push_back(fixedJoint);
   model->SetAutoDisable(true);
   }
-}
-
-/////////////////////////////////////////////////
-bool ShippingBoxPlugin::HandleLockModelsService(
-  ros::ServiceEvent<std_srvs::Trigger::Request, std_srvs::Trigger::Response>& event)
-{
-  std_srvs::Trigger::Response& res = event.getResponse();
-
-  const std::string& callerName = event.getCallerName();
-  gzdbg << this->shippingBoxID << ": Handle lock models service called by: " << callerName << std::endl;
-
-  // During the competition, this environment variable will be set.
-  auto compRunning = std::getenv("ARIAC_COMPETITION");
-  if (compRunning && callerName.compare("/gazebo") != 0)
-  {
-    std::string errStr = "Competition is running so this service is not enabled.";
-    gzerr << errStr << std::endl;
-    ROS_ERROR_STREAM(errStr);
-    res.success = false;
-    return true;
-  }
-
-  this->LockContactingModels();
-  res.success = true;
-  return true;
 }
 
 /////////////////////////////////////////////////
@@ -396,17 +374,6 @@ bool ShippingBoxPlugin::HandleClearService(
 
   const std::string& callerName = event.getCallerName();
   gzdbg << this->shippingBoxID << ": Handle clear shipping box service called by: " << callerName << std::endl;
-
-  // During the competition, this environment variable will be set.
-  auto compRunning = std::getenv("ARIAC_COMPETITION");
-  if (compRunning && callerName.compare("/gazebo") != 0)
-  {
-    std::string errStr = "Competition is running so this service is not enabled.";
-    gzerr << errStr << std::endl;
-    ROS_ERROR_STREAM(errStr);
-    res.success = false;
-    return true;
-  }
 
   this->UnlockContactingModels();
   this->ClearContactingModels();

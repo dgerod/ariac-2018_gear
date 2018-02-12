@@ -40,8 +40,7 @@
 #include "osrf_gear/ARIAC.hh"
 #include "osrf_gear/ROSAriacTaskManagerPlugin.hh"
 #include "osrf_gear/AriacScorer.h"
-#include <osrf_gear/ConveyorBeltControl.h>
-#include <osrf_gear/ConveyorBeltState.h>
+#include "osrf_gear/ConveyorBeltControl.h"
 #include "osrf_gear/Shipment.h"
 #include "osrf_gear/Product.h"
 #include "osrf_gear/Order.h"
@@ -275,15 +274,15 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
 
     // Parse the interruption criteria.
     int interruptOnUnwantedProducts = -1;
-    if (orderElem->HasElement("interrupt_on_unwanted_parts"))
+    if (orderElem->HasElement("interrupt_on_unwanted_products"))
     {
-      sdf::ElementPtr interruptOnUnwantedProductsElem = orderElem->GetElement("interrupt_on_unwanted_parts");
+      sdf::ElementPtr interruptOnUnwantedProductsElem = orderElem->GetElement("interrupt_on_unwanted_products");
       interruptOnUnwantedProducts = interruptOnUnwantedProductsElem->Get<int>();
     }
     int interruptOnWantedProducts = -1;
-    if (orderElem->HasElement("interrupt_on_wanted_parts"))
+    if (orderElem->HasElement("interrupt_on_wanted_products"))
     {
-      sdf::ElementPtr interruptOnWantedProductsElem = orderElem->GetElement("interrupt_on_wanted_parts");
+      sdf::ElementPtr interruptOnWantedProductsElem = orderElem->GetElement("interrupt_on_wanted_products");
       interruptOnWantedProducts = interruptOnWantedProductsElem->Get<int>();
     }
 
@@ -353,7 +352,7 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
         math::Pose pose = poseElement->Get<math::Pose>();
 
         // Add the product to the shipment.
-        bool isFaulty = false;  // We never want to request faulty parts.
+        bool isFaulty = false;  // We never want to request faulty products.
         ariac::Product obj = {type, isFaulty, pose};
         shipment.products.push_back(obj);
 
@@ -506,8 +505,7 @@ void ROSAriacTaskManagerPlugin::OnUpdate()
     this->dataPtr->gameStartTime = currentSimTime;
     this->dataPtr->currentState = "go";
 
-    // TODO(dhood): only start the belt if there are belt parts specified
-    this->ControlConveyorBelt(100);
+    this->ControlConveyorBelt(0);
     this->PopulateConveyorBelt();
   }
   else if (this->dataPtr->currentState == "go")
@@ -541,7 +539,7 @@ void ROSAriacTaskManagerPlugin::OnUpdate()
       {
         std::ostringstream logMessage;
         logMessage << "Order complete: " << orderID;
-        ROS_ERROR_STREAM(("[INFO] " + logMessage.str()).c_str());
+        ROS_INFO_STREAM(logMessage.str().c_str());
         gzdbg << logMessage.str() << std::endl;
         this->StopCurrentOrder();
       }
@@ -552,7 +550,7 @@ void ROSAriacTaskManagerPlugin::OnUpdate()
         {
           std::ostringstream logMessage;
           logMessage << "Order timed out: " << orderID;
-          ROS_ERROR_STREAM(("[INFO] " + logMessage.str()).c_str());
+          ROS_INFO_STREAM(logMessage.str().c_str());
           gzdbg << logMessage.str() << std::endl;
           this->StopCurrentOrder();
         }
@@ -577,7 +575,7 @@ void ROSAriacTaskManagerPlugin::OnUpdate()
     logMessage << "End of trial. Final score: " << \
       this->dataPtr->currentGameScore.total() << "\nScore breakdown:\n" << \
       this->dataPtr->currentGameScore;
-    ROS_ERROR_STREAM(("[INFO] " + logMessage.str()).c_str());
+    ROS_INFO_STREAM(logMessage.str().c_str());
     gzdbg << logMessage.str() << std::endl;
     this->dataPtr->currentState = "done";
 
@@ -630,42 +628,42 @@ void ROSAriacTaskManagerPlugin::ProcessOrdersToAnnounce()
   // Check if it's time to interrupt (skip if we're already interrupting anyway)
   if (!announceNextOrder && (interruptOnWantedProducts || interruptOnUnwantedProducts))
   {
-    // Check if the parts in the shipping boxes are enough to interrupt the current order
+    // Check if the products in the shipping boxes are enough to interrupt the current order
 
-    // Determine what parts are in the next order
-    std::vector<std::string> partsInNextOrder;
+    // Determine what products are in the next order
+    std::vector<std::string> productsInNextOrder;
     for (const auto & shipment : nextOrder.shipments)
     {
-      for (const auto & part : shipment.products)
+      for (const auto & product : shipment.products)
       {
-        partsInNextOrder.push_back(part.type);
+        productsInNextOrder.push_back(product.type);
       }
     }
 
-    // Check the shipping boxes for parts from the pending order
+    // Check the shipping boxes for products from the pending order
     std::vector<int> numUnwantedProductsInShippingBoxes;
     std::vector<int> numWantedProductsInShippingBoxes;
     for (const auto & shippingBox : this->dataPtr->ariacScorer.GetShippingBoxes())
     {
       int numUnwantedProductsInShippingBox = 0;
       int numWantedProductsInShippingBox = 0;
-      std::vector<std::string> partsInNextOrder_copy(partsInNextOrder);
-      for (const auto part : shippingBox.currentShipment.products)
+      std::vector<std::string> productsInNextOrder_copy(productsInNextOrder);
+      for (const auto product : shippingBox.currentShipment.products)
       {
-        // Don't count faulty parts, because they have to be removed anyway.
-        if (part.isFaulty)
+        // Don't count faulty products, because they have to be removed anyway.
+        if (product.isFaulty)
         {
           continue;
         }
-        auto it = std::find(partsInNextOrder_copy.begin(), partsInNextOrder_copy.end(), part.type);
-        if (it == partsInNextOrder_copy.end())
+        auto it = std::find(productsInNextOrder_copy.begin(), productsInNextOrder_copy.end(), product.type);
+        if (it == productsInNextOrder_copy.end())
         {
           numUnwantedProductsInShippingBox += 1;
         }
         else
         {
           numWantedProductsInShippingBox += 1;
-          partsInNextOrder_copy.erase(it);
+          productsInNextOrder_copy.erase(it);
         }
       }
       numUnwantedProductsInShippingBoxes.push_back(numUnwantedProductsInShippingBox);
@@ -674,7 +672,7 @@ void ROSAriacTaskManagerPlugin::ProcessOrdersToAnnounce()
     maxNumUnwantedProducts = *std::max_element(numUnwantedProductsInShippingBoxes.begin(), numUnwantedProductsInShippingBoxes.end());
     maxNumWantedProducts = *std::max_element(numWantedProductsInShippingBoxes.begin(), numWantedProductsInShippingBoxes.end());
 
-    // Announce next order if the appropriate number of wanted/unwanted parts are detected
+    // Announce next order if the appropriate number of wanted/unwanted products are detected
     announceNextOrder |= interruptOnWantedProducts && (maxNumWantedProducts >= nextOrder.interruptOnWantedProducts);
     announceNextOrder |= interruptOnUnwantedProducts && (maxNumUnwantedProducts >= nextOrder.interruptOnUnwantedProducts);
   }
@@ -803,10 +801,8 @@ void ROSAriacTaskManagerPlugin::ControlConveyorBelt(double power)
   }
 
   // Make a service call to set the velocity of the belt
-  osrf_gear::ConveyorBeltState controlMsg;
-  controlMsg.power = power;
   osrf_gear::ConveyorBeltControl srv;
-  srv.request.state = controlMsg;
+  srv.request.power = power;
   this->dataPtr->conveyorControlClient.call(srv);
   if (!srv.response.success) {
     std::string errStr = "Failed to control conveyor.";
@@ -831,9 +827,8 @@ void ROSAriacTaskManagerPlugin::AssignOrder(const ariac::Order & order)
     // Publish the order to ROS topic
     std::ostringstream logMessage;
     logMessage << "Announcing order: " << order.orderID << std::endl;
-    ROS_ERROR_STREAM(("[INFO] " + logMessage.str()).c_str());
+    ROS_INFO_STREAM(logMessage.str().c_str());
     gzdbg << logMessage.str() << std::endl;
-
     osrf_gear::Order orderMsg;
     fillOrderMsg(order, orderMsg);
     this->dataPtr->orderPub.publish(orderMsg);

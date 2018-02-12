@@ -10,5 +10,5 @@
               --development-mode --verbose --no-gui"/>
   <test pkg="test_ariac" type="test_scoring_against_expected_score.py"
         test-name="test_scoring_interrupted_order"
-        time-limit="60.0" args="27 --agv2-first"/> <!-- 15 + 12 -->
+        time-limit="60.0" args="27 --shipping-box-1-first"/> <!-- 15 + 12 -->
 </launch>

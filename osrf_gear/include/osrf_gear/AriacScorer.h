@@ -113,7 +113,7 @@ class AriacScorer
   /// \brief Flag for signalling new order to process.
   protected: bool newOrderReceived = false;
 
-  /// \brief Whether or not there is a travelling part in the gripper.
+  /// \brief Whether or not there is a travelling product in the gripper.
   protected: bool isProductTravelling = false;
 
   /// \brief Order receivd from order messages.

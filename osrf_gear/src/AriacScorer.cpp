@@ -64,7 +64,7 @@ void AriacScorer::Update(double timeStep)
 
   if (this->isProductTravelling)
   {
-    this->gameScore.partTravelTime += timeStep;
+    this->gameScore.productTravelTime += timeStep;
   }
 
   if (this->newOrderReceived)
@@ -226,7 +226,7 @@ ariac::ShipmentScore AriacScorer::ScoreShippingBox(const ariac::ShippingBox & sh
         [assignedProductType](ariac::Product k) {return !k.isFaulty && k.type == assignedProductType;});
     gzdbg << "Found " << currentProductCount << \
       " products of type '" << assignedProductType << "'" << std::endl;
-    score.partPresence +=
+    score.productPresence +=
       std::min(long(assignedProductCount), currentProductCount) * scoringParameters.productPresence;
     if (currentProductCount < assignedProductCount)
     {
@@ -248,11 +248,11 @@ ariac::ShipmentScore AriacScorer::ScoreShippingBox(const ariac::ShippingBox & sh
   {
     for (auto it = remainingAssignedProducts.begin(); it != remainingAssignedProducts.end(); ++it)
     {
-      // Ignore faulty parts
+      // Ignore faulty products
       if (currentProduct.isFaulty)
         continue;
 
-      // Only check poses of parts of the same type
+      // Only check poses of products of the same type
       auto assignedProduct = *it;
       if (assignedProduct.type != currentProduct.type)
         continue;
@@ -269,7 +269,7 @@ ariac::ShipmentScore AriacScorer::ScoreShippingBox(const ariac::ShippingBox & sh
         continue;
       gzdbg << "Product of type '" << currentProduct.type << \
         "' in the correct position" << std::endl;
-      score.partPose += scoringParameters.productPosition;
+      score.productPose += scoringParameters.productPosition;
 
       // Check the orientation of the product.
       gazebo::math::Quaternion objOrientation = currentProduct.pose.rot;
@@ -297,7 +297,7 @@ ariac::ShipmentScore AriacScorer::ScoreShippingBox(const ariac::ShippingBox & sh
 
       gzdbg << "Product of type '" << currentProduct.type << \
         "' in the correct orientation" << std::endl;
-      score.partPose += scoringParameters.productOrientation;
+      score.productPose += scoringParameters.productOrientation;
 
       // Once a match is found, don't permit it to be matched again
       remainingAssignedProducts.erase(it);
@@ -330,8 +330,8 @@ void AriacScorer::OnShippingBoxInfoReceived(const osrf_gear::ShippingBoxContents
 
   // Update the state of the shippingBox.
   // TODO: this should be moved outside of the callback
-  // Do this even if the shipment isn't part of the current order because maybe it
-  // will be part of future orders.
+  // Do this even if the shipment isn't product of the current order because maybe it
+  // will be product of future orders.
   this->newShippingBoxInfoReceived = true;
   ariac::Shipment shipmentState;
   FillShipmentFromMsg(shippingBoxMsg, shipmentState);

@@ -98,7 +98,7 @@ void ObjectDisposalPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
 void ObjectDisposalPlugin::ActOnContactingModels()
 {
   // Publish if there's a detected box.
-  // Don't publish all detected models because parts will be detected too.
+  // Don't publish all detected models because products will be detected too.
   gazebo::msgs::GzString currentBoxMsg;
   currentBoxMsg.set_data("");
   for (auto model : this->contactingModels)
@@ -168,8 +168,6 @@ void ObjectDisposalPlugin::ActOnContactingModels()
 /////////////////////////////////////////////////
 void ObjectDisposalPlugin::OnActivation(ConstGzStringPtr &_msg)
 {
-  fprintf(stderr, "ObjectDisposalPlugin: received activation request: %s\n", _msg->data().c_str());
-
   if (_msg->data() == "activate_once")
   {
     this->active = true;

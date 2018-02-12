@@ -164,6 +164,12 @@ namespace gazebo
     /// \brief Whether there's an ongoing drop.
     public: bool dropPending = false;
 
+    /// \brief Whether to grip all models or only specific types.
+    public: bool onlyGrippableModels = false;
+
+    /// \brief Whitelist of the grippable model types to detect
+    public: std::vector<std::string> grippableModelTypes;
+
     /// \brief Attached model type.
     public: std::string attachedObjType;
 
@@ -234,6 +240,29 @@ void VacuumGripperPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     gzerr << "Suction cup link [" << suctionCupLinkElem->Get<std::string>()
           << "] not found!\n";
     return;
+  }
+
+  this->dataPtr->onlyGrippableModels = false;
+  if (_sdf->HasElement("grippable_model_types"))
+  {
+    this->dataPtr->onlyGrippableModels = true;
+    this->dataPtr->grippableModelTypes.clear();
+    sdf::ElementPtr grippableModelTypesElem = _sdf->GetElement("grippable_model_types");
+    if (!grippableModelTypesElem->HasElement("type"))
+    {
+      gzerr << "Unable to find <type> elements in the <grippable_model_types> section\n";
+      return;
+    }
+    sdf::ElementPtr grippableModelTypeElem = grippableModelTypesElem->GetElement("type");
+    while (grippableModelTypeElem)
+    {
+      // Parse the model type, which is encoded in model names.
+      std::string type = grippableModelTypeElem->Get<std::string>();
+
+      gzdbg << "New grippable model type: " << type << "\n";
+      this->dataPtr->grippableModelTypes.push_back(type);
+      grippableModelTypeElem = grippableModelTypeElem->GetNextElement("type");
+    }
   }
 
   if (_sdf->HasElement("drops"))
@@ -519,7 +548,7 @@ void VacuumGripperPlugin::HandleAttach()
 
   auto modelPtr = this->dataPtr->modelCollision->GetLink()->GetModel();
   auto name = modelPtr->GetName();
-  gzdbg << "Part attached to gripper: " << name << std::endl;
+  gzdbg << "Product attached to gripper: " << name << std::endl;
 
   // Check if the object should drop.
   std::string objectType = ariac::DetermineModelType(name);
@@ -548,7 +577,7 @@ void VacuumGripperPlugin::HandleAttach()
 /////////////////////////////////////////////////
 void VacuumGripperPlugin::HandleDetach()
 {
-  gzdbg << "Detaching part from gripper." << std::endl;
+  gzdbg << "Detaching product from gripper." << std::endl;
   this->dataPtr->attached = false;
   this->dataPtr->fixedJoint->Detach();
 }
@@ -576,10 +605,28 @@ bool VacuumGripperPlugin::CheckModelContact()
   if (this->dataPtr->posCount > this->dataPtr->attachSteps &&
       !this->dataPtr->attached)
   {
+
     if (!this->GetContactNormal())
     {
       return false;
     }
+
+    if (this->dataPtr->onlyGrippableModels)
+    {
+      // Only attach whitelisted models
+      auto modelPtr = this->dataPtr->modelCollision->GetLink()->GetModel();
+      auto modelName = modelPtr->GetName();
+      gzdbg << "Product in contact with gripper: " << modelName << std::endl;
+      std::string modelType = ariac::DetermineModelType(modelName);
+      auto it = std::find(this->dataPtr->grippableModelTypes.begin(), this->dataPtr->grippableModelTypes.end(), modelType);
+      bool grippableModel = it != this->dataPtr->grippableModelTypes.end();
+      if (!grippableModel)
+      {
+        gzdbg << "Not a grippable type." << std::endl;
+        return false;
+      }
+    }
+
     // Only consider models with collision normals aligned with the normal of the gripper
     auto gripperLinkPose = this->dataPtr->suctionCupLink->GetWorldPose().Ign();
     math::Vector3 gripperLinkNormal =

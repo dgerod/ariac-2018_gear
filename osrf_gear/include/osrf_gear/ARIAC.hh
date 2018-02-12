@@ -46,23 +46,23 @@ namespace ariac
       _out << "Completion score: [" << _obj.total() << "]" << std::endl;
       _out << "Complete: [" << (_obj.isComplete ? "true" : "false") << "]" << std::endl;
       _out << "Submitted: [" << (_obj.isSubmitted ? "true" : "false") << "]" << std::endl;
-      _out << "Product presence score: [" << _obj.partPresence << "]" << std::endl;
-      _out << "All parts bonus: [" << _obj.allProductsBonus << "]" << std::endl;
-      _out << "Product pose score: [" << _obj.partPose << "]" << std::endl;
+      _out << "Product presence score: [" << _obj.productPresence << "]" << std::endl;
+      _out << "All products bonus: [" << _obj.allProductsBonus << "]" << std::endl;
+      _out << "Product pose score: [" << _obj.productPose << "]" << std::endl;
       _out << "</shipment_score>" << std::endl;
       return _out;
     }
     public: ShipmentType_t shipmentType;
-            double partPresence = 0.0;
+            double productPresence = 0.0;
             double allProductsBonus = 0.0;
-            double partPose = 0.0;
-            bool isComplete = false;  // all parts present
+            double productPose = 0.0;
+            bool isComplete = false;  // All products present
             bool isSubmitted = false;  // the shipment has been submitted for evaluation
 
             /// \brief Calculate the total score.
             double total() const
             {
-              return partPresence + allProductsBonus + partPose;
+              return productPresence + allProductsBonus + productPose;
             }
   };
 
@@ -139,7 +139,7 @@ namespace ariac
       _out << "<game_score>" << std::endl;
       _out << "Total game score: [" << _obj.total() << "]" << std::endl;
       _out << "Total process time: [" << _obj.totalProcessTime << "]" << std::endl;
-      _out << "Product travel time: [" << _obj.partTravelTime << "]" << std::endl;
+      _out << "Product travel time: [" << _obj.productTravelTime << "]" << std::endl;
       for (const auto & item : _obj.orderScores)
       {
         _out << item.second << std::endl;
@@ -149,9 +149,9 @@ namespace ariac
     }
 
     public: double totalProcessTime = 0.0;
-            double partTravelTime = 0.0;
+            double productTravelTime = 0.0;
             double planningTime = 0.0;
-            double partTravelDistance = 0.0;
+            double productTravelDistance = 0.0;
             double manipulatorTravelDistance = 0.0;
 
             // The score of each of the orders during the game.
@@ -163,9 +163,9 @@ namespace ariac
               double total = 0;
               /*
               total += totalProcessTime;
-              total += partTravelTime;
+              total += productTravelTime;
               total += planningTime;
-              total += partTravelDistance;
+              total += productTravelDistance;
               total += manipulatorTravelDistance;
               */
 
@@ -342,10 +342,10 @@ namespace ariac
     /// \brief Simulation time in which the order should be triggered.
     public: double startTime;
 
-    /// \brief After how many unwanted parts to interrupt the previous order (-1 for never).
+    /// \brief After how many unwanted products to interrupt the previous order (-1 for never).
     public: int interruptOnUnwantedProducts;
 
-    /// \brief After how many wanted parts to interrupt the previous order (-1 for never).
+    /// \brief After how many wanted products to interrupt the previous order (-1 for never).
     public: int interruptOnWantedProducts;
 
     /// \brief Simulation time in seconds permitted for the order to be

@@ -7,7 +7,7 @@ models_to_spawn:
         pose:
           xyz: [0.1, -0.2, 0.05]
           rpy: [0, 0, 0]
-  agv2::shipment_tray_2::shipment_tray_2::tray:
+  shipping_box_1::box_base:
     models:
       part_2:
         type: order_part4

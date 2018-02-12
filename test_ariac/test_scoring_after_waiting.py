@@ -13,9 +13,11 @@ from test_example_node import ExampleNodeTester
 class ScoringTester(ExampleNodeTester):
 
     def test(self):
+        expectedScore = float(sys.argv[1])
+        rospy.loginfo('Using expected score of: ' + str(expectedScore))
         self.prepare_tester()
 
-        # Starting the competition will cause parts from the order to be spawned on shipping_box_0
+        # Starting the competition will cause products from the order to be spawned on shipping_box_0
         self._test_start_comp()
         time.sleep(1.0)
         self._test_order_reception()
@@ -28,7 +30,10 @@ class ScoringTester(ExampleNodeTester):
         time.sleep(5.0)
 
         # Check the score
-        self._test_comp_end()
+        self.assertTrue(
+            self.current_comp_score == expectedScore,
+            'Something went wrong in the scoring. Expected score of ' + str(expectedScore) +
+            ' but received: ' + str(self.current_comp_score))
 
 
 if __name__ == '__main__':

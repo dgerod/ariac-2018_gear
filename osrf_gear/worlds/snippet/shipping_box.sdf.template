@@ -24,7 +24,7 @@
         </sensor>
 
         <!-- This collision will detect products in the box.
-             It must be lifted so that parts can't touch the box_underneath collision. -->
+             It must be lifted so that products can't touch the box_underneath collision. -->
         <collision name="box_base">
           <pose>0.0 0 0.0025 0 0 0</pose>
           <max_contacts>10</max_contacts>
@@ -242,9 +242,9 @@
         <clear_models_at>1.2 -3.2 0.4</clear_models_at>
         <trigger_animation_at>1.2 -3.2 0.4</trigger_animation_at>
         <update_rate>20</update_rate>
-        <faulty_parts>
-@[for part_name, part_info in faulty_parts.items()]@
-          <name>@(part_name)</name>
+        <faulty_products>
+@[for product_name, product_info in faulty_products.items()]@
+          <name>@(product_name)</name>
 @[end for]@
-        </faulty_parts>
+        </faulty_products>
       </plugin>

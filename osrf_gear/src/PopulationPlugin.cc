@@ -123,6 +123,9 @@ namespace gazebo
     /// update rate is disabled. The plugin will execute at the physics rate.
     public: double updateRate = -1;
 
+    /// \brief Equivalent time since last object spawning, taking rate modifier into account.
+    public: double elapsedEquivalentTime = 0.0;
+
     /// \brief Rate modifier of the populating: 1.0 will populate at the standard rate,
     /// other values will scale the populating frequency.
     public: double rateModifier = 1.0;
@@ -314,6 +317,7 @@ void PopulationPlugin::Resume()
 void PopulationPlugin::Restart()
 {
   this->dataPtr->enabled = true;
+  this->dataPtr->elapsedEquivalentTime = 0;
   this->dataPtr->startTime = this->dataPtr->world->GetSimTime();
   this->dataPtr->objects = this->dataPtr->initialObjects;
 
@@ -344,8 +348,11 @@ void PopulationPlugin::OnUpdate()
   }
 
   // Check whether spawn a new object from the list.
-  auto elapsed = this->dataPtr->world->GetSimTime() - this->dataPtr->startTime;
-  if (elapsed.Double() * this->dataPtr->rateModifier >= this->dataPtr->objects.front().time)
+  auto elapsedTime = this->dataPtr->world->GetSimTime() - this->dataPtr->lastUpdateTime;
+  // The rate modifier has the effect of slowing down sim time in this plugin.
+  // If the rate modifier is 0.5, we will wait for twice as much time before spawning a new object.
+  this->dataPtr->elapsedEquivalentTime += elapsedTime.Double() * this->dataPtr->rateModifier;
+  if (this->dataPtr->elapsedEquivalentTime >= this->dataPtr->objects.front().time)
   {
     auto obj = this->dataPtr->objects.front();
     if (this->dataPtr->frame)
@@ -387,7 +394,9 @@ void PopulationPlugin::OnUpdate()
     }
 
     this->dataPtr->objects.erase(this->dataPtr->objects.begin());
+    this->dataPtr->elapsedEquivalentTime = 0.0;
   }
+    this->dataPtr->lastUpdateTime = this->dataPtr->world->GetSimTime();
 }
 
 /////////////////////////////////////////////////
@@ -437,11 +446,11 @@ void PopulationPlugin::Publish() const
 /////////////////////////////////////////////////
 bool PopulationPlugin::TimeToExecute()
 {
+  gazebo::common::Time curTime = this->dataPtr->world->GetSimTime();
   // We're using a custom update rate.
   if (this->dataPtr->updateRate <= 0)
     return true;
 
-  gazebo::common::Time curTime = this->dataPtr->world->GetSimTime();
   auto dt = (curTime - this->dataPtr->lastUpdateTime).Double();
   if (dt < 0)
   {
@@ -454,6 +463,5 @@ bool PopulationPlugin::TimeToExecute()
   if (dt < (1.0 / this->dataPtr->updateRate))
     return false;
 
-  this->dataPtr->lastUpdateTime = curTime;
   return true;
 }

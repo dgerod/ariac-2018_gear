@@ -15,6 +15,7 @@
  *
 */
 #include "ROSConveyorBeltPlugin.hh"
+#include "osrf_gear/ConveyorBeltState.h"
 
 #include <cstdlib>
 #include <string>
@@ -54,16 +55,33 @@ void ROSConveyorBeltPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf
     return;
   }
 
-  std::string topic = "conveyor/control";
-  if (_sdf->HasElement("topic"))
-    topic = _sdf->Get<std::string>("topic");
+  std::string controlTopic = "conveyor/control";
+  if (_sdf->HasElement("control_topic"))
+    controlTopic = _sdf->Get<std::string>("control_topic");
+
+  std::string stateTopic = "conveyor/state";
+  if (_sdf->HasElement("state_topic"))
+    stateTopic = _sdf->Get<std::string>("state_topic");
 
   ConveyorBeltPlugin::Load(_parent, _sdf);
 
   this->rosnode_ = new ros::NodeHandle(this->robotNamespace_);
 
-  this->controlService_ = this->rosnode_->advertiseService(topic,
+  this->controlService_ = this->rosnode_->advertiseService(controlTopic,
     &ROSConveyorBeltPlugin::OnControlCommand, this);
+
+  // Message used for publishing the state of the conveyor.
+  this->statePub = this->rosnode_->advertise<
+    osrf_gear::ConveyorBeltState>(stateTopic, 1000);
+}
+
+/////////////////////////////////////////////////
+void ROSConveyorBeltPlugin::Publish() const
+{
+  osrf_gear::ConveyorBeltState stateMsg;
+  stateMsg.enabled = this->IsEnabled();
+  stateMsg.power = this->Power();
+  this->statePub.publish(stateMsg);
 }
 
 /////////////////////////////////////////////////
@@ -72,20 +90,30 @@ bool ROSConveyorBeltPlugin::OnControlCommand(ros::ServiceEvent<
 {
   const osrf_gear::ConveyorBeltControl::Request& req = event.getRequest();
   osrf_gear::ConveyorBeltControl::Response& res = event.getResponse();
-  gzdbg << "Conveyor control service called with: " << req.state.power << std::endl;
+  gzdbg << "Conveyor control service called with: " << req.power << std::endl;
 
   const std::string& callerName = event.getCallerName();
   gzdbg << "Conveyor control service called by: " << callerName << std::endl;
 
-  if (this->IsEnabled())
+  if (!this->IsEnabled())
   {
-    this->SetPower(req.state.power);
-    res.success = true;
-  } else {
     std::string errStr = "Belt is not currently enabled so power cannot be set. It may be congested.";
     gzerr << errStr << std::endl;
     ROS_ERROR_STREAM(errStr);
     res.success = false;
+    return true;
   }
+
+  if (!(0 == req.power || (req.power >= 50 && req.power <= 100)))
+  {
+    std::string errStr = "Requested belt power is invalid. Accepted values are 0 or in the range [50, 100].";
+    gzerr << errStr << std::endl;
+    ROS_ERROR_STREAM(errStr);
+    res.success = false;
+    return true;
+  }
+
+  this->SetPower(req.power);
+  res.success = true;
   return true;
 }

@@ -13,7 +13,7 @@ orders:
     announcement_condition: time
     announcement_condition_value: 0.0
     shipment_count: 1
-    parts:
+    products:
       part_0:
         type: order_part1
         pose:
@@ -40,10 +40,10 @@ orders:
           xyz: [0.0, 0.15, 0]
           rpy: [0, 0, 0]
   order_1:
-    announcement_condition: unwanted_parts
+    announcement_condition: unwanted_products
     announcement_condition_value: 2
     shipment_count: 1
-    parts:
+    products:
       part_0:
         type: order_part3
         pose:

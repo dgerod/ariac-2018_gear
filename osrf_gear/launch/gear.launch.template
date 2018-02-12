@@ -12,6 +12,7 @@
   <arg name="gui" default="true"/>
   <arg name="debug" default="false"/>
   <arg name="verbose" default="false"/>
+  <arg name="gazebo_ros_output" default="screen"/>
   <arg name="world_path" />
   <arg name="gear_urdf_xacro" />
   <arg name="state_log_dir" value="$(env HOME)/.ariac/log/gazebo" />
@@ -31,11 +32,12 @@
     <arg name="extra_gazebo_args" value="@('-r --record_path=$(arg state_log_dir)' if options['gazebo_state_logging'] else '')" />
     <arg name="debug" value="$(arg debug)" />
     <arg name="verbose" value="$(arg verbose)" />
+    <arg name="output" value="$(arg gazebo_ros_output)" />
   </include>
 
   <!-- load the URDF (it will include the robot arm model) -->
   <param name="robot_description"
-         command="$(find xacro)/xacro.py '$(arg gear_urdf_xacro)' use_effort_interface:=true" />
+         command="$(find xacro)/xacro --inorder '$(arg gear_urdf_xacro)' use_effort_interface:=true" />
 
 @[if arm]@
 @{

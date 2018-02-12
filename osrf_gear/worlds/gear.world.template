@@ -97,21 +97,11 @@ expand_snippet('proximity_sensor.sdf.template')
 }@
 
 @[end if]@
-@[if sensor.type == "camera"]@
-    <!-- an optical camera called @(name) -->
-@{
-expand_snippet('camera.sdf.template')
-}@
-
-@[end if]@
 @[if sensor.type == "logical_camera"]@
     <!-- a logical camera called @(name) -->
-    <include>
-      <uri>model://logical_camera</uri>
-      <name>@(name)</name>
-      <pose>@(' '.join(sensor.pose.xyz)) @(' '.join(sensor.pose.rpy))</pose>
-      <static>true</static>
-    </include>
+@{
+expand_snippet('logical_camera.sdf.template')
+}@
 
 @[end if]@
 @[if sensor.type == "depth_camera"]@
@@ -128,31 +118,42 @@ expand_snippet('laser_profiler.sdf.template')
 @[end if]@
 @[end for]@
 
+@{shipping_boxes_on_belt = 0}@
 @[if options['insert_shipping_boxes']]@
-    <!-- start with a box on the belt -->
-@{shipping_box_name = 'shipping_box_0'}@
+@[  if options['start_box_at_belt_center']]@
+    <!-- start with an extra box in the middle of the belt -->
+@{shipping_box_name = 'shipping_box_' + str(shipping_boxes_on_belt)}@
     <model name="@(shipping_box_name)">
-@[if options['start_box_at_belt_center']]@
       <pose>1.16 0.9 0.45 0 0 0</pose>
-@[else]
-      <pose>1.16 4.0 0.9 0 0 0</pose>
-@[end if]@
 @{
 expand_snippet('shipping_box.sdf.template')
 }@
     </model>
+@{shipping_boxes_on_belt += 1}@
+@[  end if]@
+
+    <!-- start with a box on the belt -->
+@{shipping_box_name = 'shipping_box_' + str(shipping_boxes_on_belt)}@
+    <model name="@(shipping_box_name)">
+      <pose>1.16 4.0 0.9 0 0 0</pose>
+@{
+expand_snippet('shipping_box.sdf.template')
+}@
+    </model>
+@{shipping_boxes_on_belt += 1}@
 
 @[end if]@
+
 @{belt_models_loop = True}@
 @{belt_population_cycles = options['belt_population_cycles'] if belt_models_loop else 1}
 
 @{obj_type_index = 0}@
 @[for obj_type, spawn_times in belt_models.items()]@
     <!-- Pool of @(obj_type) objects -->
-@[  for index in range(1, 1 + belt_population_cycles * len(spawn_times))]@
+@[  for index in range(belt_population_cycles * len(spawn_times))]@
 @[    if obj_type is 'shipping_box']@
 @[      if options['insert_shipping_boxes']]@
-@{shipping_box_name = 'shipping_box_' + str(index)}@
+@{shipping_box_name = 'shipping_box_' + str(index + shipping_boxes_on_belt)}@
     <model name="@(shipping_box_name)">
       <pose>@(7.5 + 1.25 * obj_type_index) @(-9.8 + 1.25 * index) -4.9 0 0 0</pose>
 @{
@@ -180,6 +181,7 @@ expand_snippet('shipping_box.sdf.template')
         <uri>model://drone_with_box</uri>
       </include>
       <plugin name="drone_plugin" filename="libROSDronePlugin.so">
+        <update_rate>10</update_rate>
         <submit_shipment_service_name>/ariac/submit_shipment</submit_shipment_service_name>
         <waiting_box_topic>/ariac/waiting_shipping_box</waiting_box_topic>
       </plugin>
@@ -209,17 +211,17 @@ expand_snippet('shipping_box.sdf.template')
       <rate_modifier_topic>/ariac/population/rate_modifier</rate_modifier_topic>
       <control_topic>/ariac/population/control</control_topic>
       <state_topic>/ariac/population/state</state_topic>
-      <start_index>1</start_index>
+      <start_index>@(shipping_boxes_on_belt)</start_index>
       <prefix_object_names>false</prefix_object_names>
       <loop_forever>@("true" if belt_models_loop else "false")</loop_forever>
       <frame>conveyor_belt::conveyor_belt_fixed</frame>
       <object_sequence>
-@[for part_name, spawn_times in belt_models.items()]@
-  @[for spawn_time, part in spawn_times.items()]@
+@[for product_name, spawn_times in belt_models.items()]@
+  @[for spawn_time, product in spawn_times.items()]@
         <object>
           <time>@(spawn_time)</time>
-          <type>@(part.type)</type>
-          <pose>@(' '.join(part.pose.xyz)) @(' '.join(part.pose.rpy))</pose>
+          <type>@(product.type)</type>
+          <pose>@(' '.join(product.pose.xyz)) @(' '.join(product.pose.rpy))</pose>
         </object>
   @[end for]@
 @[end for]@
@@ -244,19 +246,19 @@ expand_snippet('shipping_box.sdf.template')
 @[if order['announcement_condition'] == 'time']@
         <start_time>@(order['announcement_condition_value'])</start_time>
 @[end if]@
-@[if order['announcement_condition'] == 'wanted_parts']@
-        <interrupt_on_wanted_parts>@(order['announcement_condition_value'])</interrupt_on_wanted_parts>
+@[if order['announcement_condition'] == 'wanted_products']@
+        <interrupt_on_wanted_products>@(order['announcement_condition_value'])</interrupt_on_wanted_products>
 @[end if]@
-@[if order['announcement_condition'] == 'unwanted_parts']@
-        <interrupt_on_unwanted_parts>@(order['announcement_condition_value'])</interrupt_on_unwanted_parts>
+@[if order['announcement_condition'] == 'unwanted_products']@
+        <interrupt_on_unwanted_products>@(order['announcement_condition_value'])</interrupt_on_unwanted_products>
 @[end if]@
 @[for shipment_index in range(order['shipment_count'])]
         <shipment>
           <shipment_type>@(order_name)_shipment_@(shipment_index)</shipment_type>
-@[for part in order['parts']]@
+@[for product in order['products']]@
           <product>
-            <type>@(part.type)</type>
-            <pose>@(' '.join(part.pose.xyz)) @(' '.join(part.pose.rpy))</pose>
+            <type>@(product.type)</type>
+            <pose>@(' '.join(product.pose.xyz)) @(' '.join(product.pose.rpy))</pose>
           </product>
 @[end for]@
         </shipment>
@@ -275,6 +277,7 @@ expand_snippet('shipping_box.sdf.template')
         </material>
 @[end for]@
       </material_locations>
+      <update_rate>10</update_rate>
 
     </plugin>
 
@@ -330,38 +333,39 @@ expand_snippet('shipping_box.sdf.template')
 order_name, order = orders.items()[0]
 count = {}
 }@
-    <!-- Populate shipping_box_0 with order parts -->
+    <!-- Populate shipping_box_0 with order products -->
     <plugin filename="libPopulationPlugin.so" name="populate_box_0">
       <activation_topic>/ariac/populate_belt</activation_topic>
       <loop_forever>false</loop_forever>
       <prefix_object_names>true</prefix_object_names>
       <frame>shipping_box_0::box_base</frame>
       <object_sequence>
-@[for part in order['parts']]@
+@[for product in order['products']]@
         <object>
           <time>0.0</time>
-          <type>@(part.type)</type>
-          <pose>@(' '.join(part.pose.xyz[0:-1])) 0.00 @(' '.join(part.pose.rpy))</pose>
+          <type>@(product.type)</type>
+          <pose>@(' '.join(product.pose.xyz[0:-1])) 0.00 @(' '.join(product.pose.rpy))</pose>
         </object>
 @[end for]@
       </object_sequence>
+      <update_rate>10</update_rate>
     </plugin>
 
     <!-- Insert models to fill the shipping box -->
-@[for part in order['parts']]@
+@[for product in order['products']]@
 @{
 try:
-    id = count[part.type]
+    id = count[product.type]
 except:
     id = 0
 }@
     <include>
-      <name>populate_box_0|@(part.type)_@(id)</name>
-      <uri>model://@(part.type)_ariac</uri>
+      <name>populate_box_0|@(product.type)_@(id)</name>
+      <uri>model://@(product.type)_ariac</uri>
       <pose>-7.5 -3 -1.0 0 0 0</pose>
     </include>
 @{
-count[part.type] = id + 1
+count[product.type] = id + 1
 }@
 @[end for]@
 
@@ -376,6 +380,7 @@ count[part.type] = id + 1
       <congestion_sensor_topic>/ariac/congestion_sensor</congestion_sensor_topic>
       <conveyor_control_topic>/ariac/conveyor_enable</conveyor_control_topic>
       <waiting_box_topic>/ariac/waiting_shipping_box</waiting_box_topic>
+      <update_rate>10</update_rate>
     </plugin>
 
   </world>

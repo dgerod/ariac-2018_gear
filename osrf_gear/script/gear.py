@@ -51,6 +51,21 @@ arm_configs = {
 default_arm = {
     'type': 'ur10'
 }
+possible_products = [
+    'part1',
+    'part2',
+    'part3',
+    'part4',
+    'arm_part',
+    'cross_joint_part',
+    'disk_part',
+    'gasket_part',
+    'gear_part',
+    'piston_rod_part',
+    'pulley_part',
+    't_brace_part',
+    'u_joint_part',
+]
 sensor_configs = {
     'break_beam': None,
     'camera': None,
@@ -67,7 +82,21 @@ default_sensors = {
             'xyz': [0.645, -3.05, 0.5],
             'rpy': [0.0, 0.0, 0.0]
         }
-    }
+    },
+    'quality_control_sensor_1': {
+        'type': 'quality_control',
+        'pose': {
+            'xyz': [1.2, 1.1, 1.2],
+            'rpy': [-1.5707, 1.5707, -3.1416]
+        }
+    },
+    'quality_control_sensor_2': {
+        'type': 'quality_control',
+        'pose': {
+            'xyz': [1.2, -0.7, 1.2],
+            'rpy': [-1.5707, 1.5707, -3.1416]
+        }
+    },
 }
 default_belt_models = {
     'shipping_box': {
@@ -108,6 +137,7 @@ configurable_options = {
         'belt_model_type1': 'part1',
         'belt_model_type2': 'part2',
     },
+    'visualize_sensor_views': False,
 }
 default_time_limit = 500  # seconds
 global_model_count = {}  # the global count of how many times a model type has been created
@@ -127,6 +157,12 @@ def prepare_arguments(parser):
         help="don't run the gazebo client gui")
     add('-l', '--state-logging', action='store',
         help='generate gazebo state logs (will override config file option)')
+    add('--log-to-file', action='store_true', default=False,
+        help='direct the output of the gazebo ros node to log file instead of the console')
+    add('--visualize-sensor-views', action='store_true', default=False,
+        help='visualize the views of sensors in gazebo')
+    add('--fill-demo-shipment', action='store_true', default=False,
+        help='fill the first shippping box with the requested shipment on competiton start')
     mex_group = parser.add_mutually_exclusive_group(required=False)
     add = mex_group.add_argument
     add('config', nargs='?', metavar='CONFIG',
@@ -245,7 +281,7 @@ def create_pose_info(pose_dict):
     return PoseInfo(xyz, rpy)
 
 
-def create_sensor_info(name, sensor_data):
+def create_sensor_info(name, sensor_data, allow_protected_sensors=False):
     sensor_type = get_required_field(name, sensor_data, 'type')
     pose_dict = get_required_field(name, sensor_data, 'pose')
     for key in sensor_data:
@@ -253,16 +289,20 @@ def create_sensor_info(name, sensor_data):
             print("Warning: ignoring unknown entry in '{0}': {1}"
                   .format(name, key), file=sys.stderr)
     if sensor_type not in sensor_configs:
-        print("Error: given sensor type '{0}' is not one of the known sensor types: {1}"
-              .format(sensor_type, sensor_configs.keys()), file=sys.stderr)
+        if not allow_protected_sensors:
+            print("Error: given sensor type '{0}' is not one of the known sensor types: {1}"
+                  .format(sensor_type, sensor_configs.keys()), file=sys.stderr)
+            sys.exit(1)
     pose_info = create_pose_info(pose_dict)
     return SensorInfo(name, sensor_type, pose_info)
 
 
-def create_sensor_infos(sensors_dict):
+def create_sensor_infos(sensors_dict, allow_protected_sensors=False):
     sensor_infos = {}
     for name, sensor_data in sensors_dict.items():
-        sensor_infos[name] = create_sensor_info(name, sensor_data)
+        sensor_infos[name] = create_sensor_info(
+            name, sensor_data,
+            allow_protected_sensors=allow_protected_sensors)
     return sensor_infos
 
 
@@ -369,10 +409,10 @@ def create_drops_info(drops_dict):
         drop_region_max_xyz = get_required_field('max', drop_region_max, 'xyz')
         destination_info = get_required_field('drop_region', drop_region_dict, 'destination')
         destination = create_pose_info(destination_info)
-        part_type = get_required_field('drop_region', drop_region_dict, 'part_type_to_drop')
-        part_type = replace_type_aliases(part_type)
+        product_type = get_required_field('drop_region', drop_region_dict, 'product_type_to_drop')
+        product_type = replace_type_aliases(product_type)
         drop_region_infos.append(
-            DropRegionInfo(drop_region_min_xyz, drop_region_max_xyz, destination, part_type))
+            DropRegionInfo(drop_region_min_xyz, drop_region_max_xyz, destination, product_type))
     drops_info['drop_regions'] = drop_region_infos
     return drops_info
 
@@ -382,14 +422,14 @@ def create_order_info(name, order_dict):
     announcement_condition = get_required_field(name, order_dict, 'announcement_condition')
     announcement_condition_value = get_required_field(
         name, order_dict, 'announcement_condition_value')
-    parts_dict = get_required_field(name, order_dict, 'parts')
-    parts = []
-    for part_name, part_dict in parts_dict.items():
-        parts.append(create_model_info(part_name, part_dict))
+    products_dict = get_required_field(name, order_dict, 'products')
+    products = []
+    for product_name, product_dict in products_dict.items():
+        products.append(create_model_info(product_name, product_dict))
     return {
         'announcement_condition': announcement_condition,
         'announcement_condition_value': announcement_condition_value,
-        'parts': parts,
+        'products': products,
         'shipment_count': shipment_count,
     }
 
@@ -401,11 +441,11 @@ def create_order_infos(orders_dict):
     return order_infos
 
 
-def create_faulty_parts_info(faulty_parts_dict):
-    faulty_part_infos = {}
-    for part_name in faulty_parts_dict:
-        faulty_part_infos[part_name] = part_name  # no other info for now
-    return faulty_part_infos
+def create_faulty_products_info(faulty_products_dict):
+    faulty_product_infos = {}
+    for product_name in faulty_products_dict:
+        faulty_product_infos[product_name] = product_name  # no other info for now
+    return faulty_product_infos
 
 
 def create_bin_infos():
@@ -418,20 +458,20 @@ def create_bin_infos():
 def create_material_location_info(belt_models, models_over_bins):
     material_locations = {}
 
-    # Specify that belt parts can be found on the conveyor belt
+    # Specify that belt products can be found on the conveyor belt
     for _, spawn_times in belt_models.items():
-        for spawn_time, part in spawn_times.items():
-            if part.type in material_locations:
-                material_locations[part.type].update(['belt'])
+        for spawn_time, product in spawn_times.items():
+            if product.type in material_locations:
+                material_locations[product.type].update(['belt'])
             else:
-                material_locations[part.type] = {'belt'}
+                material_locations[product.type] = {'belt'}
 
-    # Specify in which bin the different bin parts can be found
-    for part_name, part in models_over_bins.items():
-        if part.type in material_locations:
-            material_locations[part.type].update([part.bin])
+    # Specify in which bin the different bin products can be found
+    for product_name, product in models_over_bins.items():
+        if product.type in material_locations:
+            material_locations[product.type].update([product.bin])
         else:
-            material_locations[part.type] = {part.bin}
+            material_locations[product.type] = {product.bin}
 
     return material_locations
 
@@ -446,11 +486,11 @@ def create_options_info(options_dict):
 def prepare_template_data(config_dict, args):
     template_data = {
         'arm': create_arm_info(default_arm),
-        'sensors': create_sensor_infos(default_sensors),
+        'sensors': create_sensor_infos(default_sensors, allow_protected_sensors=True),
         'models_to_insert': {},
         'models_to_spawn': {},
         'belt_models': create_belt_model_infos(default_belt_models),
-        'faulty_parts': {},
+        'faulty_products': {},
         'drops': {},
         'orders': {},
         'options': {},
@@ -463,6 +503,10 @@ def prepare_template_data(config_dict, args):
     template_data['options'].update(create_options_info(options_dict))
     if args.state_logging is not None:
         template_data['options']['gazebo_state_logging'] = args.state_logging
+    if args.fill_demo_shipment:
+        template_data['options']['fill_demo_shipment'] = True
+    if args.visualize_sensor_views:
+        template_data['options']['visualize_sensor_views'] = True
 
     models_over_bins = {}
     for key, value in config_dict.items():
@@ -478,8 +522,8 @@ def prepare_template_data(config_dict, args):
             template_data['belt_models'].update(create_belt_model_infos(value))
         elif key == 'drops':
             template_data['drops'].update(create_drops_info(value))
-        elif key == 'faulty_parts':
-            template_data['faulty_parts'].update(create_faulty_parts_info(value))
+        elif key == 'faulty_products':
+            template_data['faulty_products'].update(create_faulty_products_info(value))
         elif key == 'orders':
             template_data['orders'].update(create_order_infos(value))
         elif key == 'options':
@@ -497,6 +541,7 @@ def prepare_template_data(config_dict, args):
         template_data['belt_models'] or {},
         models_over_bins,
     )
+    template_data['possible_products'] = possible_products
     return template_data
 
 
@@ -550,6 +595,8 @@ def main(sysargv=None):
         'world_path:=' + os.path.join(args.output, 'gear.world'),
         'gear_urdf_xacro:=' + os.path.join(args.output, 'gear.urdf.xacro'),
     ]
+    if args.log_to_file:
+        cmd.append('gazebo_ros_output:=log')
     if args.verbose:
         cmd += ['verbose:=true']
     if args.no_gui:

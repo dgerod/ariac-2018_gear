@@ -33,11 +33,12 @@ class ExampleNodeTester(unittest.TestCase):
         self.prepare_tester()
         self._test_send_arm_to_zero_state()
 
-        # Starting the competition will cause parts from the order to be spawned on shipping_box_0
+        # Starting the competition will cause products from the order to be spawned on shipping_box_0
         self._test_start_comp()
         time.sleep(5.0)
         self._test_order_reception()
 
+        self._test_conveyor_control(100)
         # Wait for the box to reach the end of the belt
         time.sleep(60)
 
@@ -94,6 +95,10 @@ class ExampleNodeTester(unittest.TestCase):
             rospy.loginfo("Shipment submitted successfully")
         self.assertTrue(response.success, 'Failed to control drone')
 
+    def _test_conveyor_control(self, power):
+        success = ariac_example.control_conveyor(power)
+        self.assertTrue(success, 'Failed to control conveyor')
+
     def _test_drone_control(self, shipment_id='order_0_shipment_0'):
         success = ariac_example.control_drone(shipment_id)
         self.assertTrue(success, 'Failed to control drone')
@@ -110,9 +115,9 @@ class ExampleNodeTester(unittest.TestCase):
                 self.comp_class.current_comp_state == 'go', 'Competition not in "go" state')
         num_products_in_order = len(self.comp_class.received_orders[0].shipments[0].products)
         self.assertTrue(
-            # Expect to have a point for each product, the all products bonus, and a point for
-            # each product's pose
-            self.current_comp_score == 3 * num_products_in_order,
+            # Expect to have a point for each non-faulty product, a point for each non-faulty
+            # product's pose, and no all products bonus since there is a faulty product.
+            self.current_comp_score == 2 * (num_products_in_order - 1),
             'Something went wrong in the scoring. Current score: ' + str(self.current_comp_score))
 
 

@@ -18,10 +18,10 @@ class ScoringTester(ExampleNodeTester):
     def test(self):
         self.prepare_tester()
 
-        # Starting the competition will cause parts from the order to be spawned on shipping_box_0
+        # Starting the competition will cause products from the order to be spawned on shipping_box_0
         self._test_start_comp()
 
-        # Submit the shipping box as soon as the parts are spawned on the shipping box
+        # Submit the shipping box as soon as the products are spawned on the shipping box
         time.sleep(2.5)  # OK, give a little bit of leeway because that's what teams would do
         self._test_submit_shipment()
         time.sleep(5.0)

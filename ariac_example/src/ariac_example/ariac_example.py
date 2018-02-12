@@ -21,6 +21,7 @@ import rospy
 
 from osrf_gear.msg import Order
 from osrf_gear.msg import VacuumGripperState
+from osrf_gear.srv import ConveyorBeltControl
 from osrf_gear.srv import DroneControl
 from osrf_gear.srv import VacuumGripperControl
 from sensor_msgs.msg import JointState
@@ -85,6 +86,26 @@ def control_drone(shipment_type):
         rospy.logerr("Failed to control the drone: %s" % response)
     else:
         rospy.loginfo("Drone controlled successfully")
+    return response.success
+
+
+def control_conveyor(power):
+    rospy.loginfo("Waiting for conveyor control to be ready...")
+    name = '/ariac/conveyor/control'
+    rospy.wait_for_service(name)
+    rospy.loginfo("Conveyor control is now ready.")
+    rospy.loginfo("Requesting conveyor control...")
+
+    try:
+        conveyor_control = rospy.ServiceProxy(name, ConveyorBeltControl)
+        response = conveyor_control(power)
+    except rospy.ServiceException as exc:
+        rospy.logerr("Failed to control the conveyor: %s" % exc)
+        return False
+    if not response.success:
+        rospy.logerr("Failed to control the conveyor: %s" % response)
+    else:
+        rospy.loginfo("Conveyor controlled successfully")
     return response.success
 
 
