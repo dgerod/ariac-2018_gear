@@ -55,7 +55,6 @@ install(FILES
   ${rostests}
   ariac_rosapi.yaml
   ariac_rosapi_development_mode.yaml
-  fill_demo_shipment.yaml
   minimal_sample_unthrottled.yaml
   tf_sensors.yaml
   test_scoring/scoring_base_order.yaml
