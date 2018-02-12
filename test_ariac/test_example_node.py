@@ -38,6 +38,7 @@ class ExampleNodeTester(unittest.TestCase):
         time.sleep(5.0)
         self._test_order_reception()
 
+        self._test_conveyor_control(100)
         # Wait for the box to reach the end of the belt
         time.sleep(60)
 
@@ -93,6 +94,10 @@ class ExampleNodeTester(unittest.TestCase):
         else:
             rospy.loginfo("Shipment submitted successfully")
         self.assertTrue(response.success, 'Failed to control drone')
+
+    def _test_conveyor_control(self, power):
+        success = ariac_example.control_conveyor(power)
+        self.assertTrue(success, 'Failed to control conveyor')
 
     def _test_drone_control(self, shipment_id='order_0_shipment_0'):
         success = ariac_example.control_drone(shipment_id)
