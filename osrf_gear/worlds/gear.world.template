@@ -181,6 +181,7 @@ expand_snippet('shipping_box.sdf.template')
         <uri>model://drone_with_box</uri>
       </include>
       <plugin name="drone_plugin" filename="libROSDronePlugin.so">
+        <update_rate>10</update_rate>
         <submit_shipment_service_name>/ariac/submit_shipment</submit_shipment_service_name>
         <waiting_box_topic>/ariac/waiting_shipping_box</waiting_box_topic>
       </plugin>
@@ -276,6 +277,7 @@ expand_snippet('shipping_box.sdf.template')
         </material>
 @[end for]@
       </material_locations>
+      <update_rate>10</update_rate>
 
     </plugin>
 
@@ -346,6 +348,7 @@ count = {}
         </object>
 @[end for]@
       </object_sequence>
+      <update_rate>10</update_rate>
     </plugin>
 
     <!-- Insert models to fill the shipping box -->
@@ -377,6 +380,7 @@ count[part.type] = id + 1
       <congestion_sensor_topic>/ariac/congestion_sensor</congestion_sensor_topic>
       <conveyor_control_topic>/ariac/conveyor_enable</conveyor_control_topic>
       <waiting_box_topic>/ariac/waiting_shipping_box</waiting_box_topic>
+      <update_rate>10</update_rate>
     </plugin>
 
   </world>

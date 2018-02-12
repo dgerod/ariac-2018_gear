@@ -25,7 +25,7 @@
           <plugin filename="libgazebo_ros_range.so" name="gazebo_ros_range">
             <gaussianNoise>0.001</gaussianNoise>
             <alwaysOn>true</alwaysOn>
-            <updateRate>20</updateRate>
+            <update_rate>10</update_rate>
             <topicName>@(name)</topicName>
             <frameName>@(name)_frame</frameName>
             <robotNamespace>ariac</robotNamespace>

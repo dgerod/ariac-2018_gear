@@ -2,6 +2,7 @@
       <pose>@(' '.join(sensor.pose.xyz)) @(' '.join(sensor.pose.rpy))</pose>
       <link name="link">
         <sensor name="@(name)" type="ray">
+          <update_rate>10</update_rate>
           <pose>0.025 0 0 0 0 0</pose>
           <plugin name="proximity_ray_plugin" filename="libROSProximityRayPlugin.so" >
             <robotNamespace>ariac</robotNamespace>
