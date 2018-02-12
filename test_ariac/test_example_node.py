@@ -115,9 +115,9 @@ class ExampleNodeTester(unittest.TestCase):
                 self.comp_class.current_comp_state == 'go', 'Competition not in "go" state')
         num_products_in_order = len(self.comp_class.received_orders[0].shipments[0].products)
         self.assertTrue(
-            # Expect to have a point for each product, the all products bonus, and a point for
-            # each product's pose
-            self.current_comp_score == 3 * num_products_in_order,
+            # Expect to have a point for each non-faulty product, a point for each non-faulty
+            # product's pose, and no all products bonus since there is a faulty product.
+            self.current_comp_score == 2 * (num_products_in_order - 1),
             'Something went wrong in the scoring. Current score: ' + str(self.current_comp_score))
 
 
