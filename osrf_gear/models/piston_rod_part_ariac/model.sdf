@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
-  <model name="piston_rod_part">
+  <model name="piston_rod_part_ariac">
     <link name="link">
       <inertial>
         <pose>0 0.05415 0.00355 0 0 0</pose>
@@ -51,14 +51,14 @@
       <visual name="visual">
          <geometry>
            <mesh>
-             <uri>model://piston_rod_part/meshes/piston_rod.dae</uri>
+             <uri>model://piston_rod_part_ariac/meshes/piston_rod.dae</uri>
              <scale>0.25 0.25 0.25</scale>
            </mesh>
          </geometry>
         <material>
           <script>
-            <uri>model://arm_part/materials/scripts</uri>
-            <uri>model://arm_part/materials/textures</uri>
+            <uri>model://arm_part_ariac/materials/scripts</uri>
+            <uri>model://arm_part_ariac/materials/textures</uri>
             <name>ArmPart/Diffuse</name>
           </script>
         </material>
