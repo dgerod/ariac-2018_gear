@@ -8,7 +8,7 @@ def expand_snippet(filename, data=locals()):
 }@
 <?xml version="1.0" ?>
 <sdf version="1.5">
-  <world name="ariac">
+  <world name="default">
     <!-- Set the initial camera pose to be looking at the workspace. -->
     <gui>
       <camera name="user_camera">
