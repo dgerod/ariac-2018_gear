@@ -38,7 +38,7 @@
           <pose>0 0.02 0 0 0 -1.5708</pose>
           <geometry>
             <mesh>
-              <uri>model://logical_camera/meshes/camera.dae</uri>
+              <uri>model://logical_camera_ariac/meshes/camera.dae</uri>
             </mesh>
           </geometry>
         </collision>
@@ -47,7 +47,7 @@
           <pose>0 0.02 0 0 0 -1.5708</pose>
           <geometry>
             <mesh>
-              <uri>model://logical_camera/meshes/camera.dae</uri>
+              <uri>model://logical_camera_ariac/meshes/camera.dae</uri>
             </mesh>
           </geometry>
         </visual>

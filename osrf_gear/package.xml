@@ -5,7 +5,7 @@
   <description>
     The ROS package for the NIST Industrial Automation Competition.
   </description>
-  <maintainer email="caguero@osrfoundation.org">Carlos Aguero</maintainer>
+  <maintainer email="dhood@osrfoundation.org">D. Hood</maintainer>
   <license>Apache 2.0</license>
 
   <buildtool_depend>catkin</buildtool_depend>

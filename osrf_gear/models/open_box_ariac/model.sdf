@@ -137,7 +137,7 @@
         <geometry>
           <mesh>
             <scale>1.1 1.8 0.25</scale>
-            <uri>model://open_box/meshes/open_box.obj</uri>
+            <uri>model://open_box_ariac/meshes/open_box.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -146,7 +146,7 @@
         <geometry>
           <mesh>
             <scale>1.1 1.8 0.25</scale>
-            <uri>model://open_box/meshes/open_box.obj</uri>
+            <uri>model://open_box_ariac/meshes/open_box.obj</uri>
           </mesh>
         </geometry>
         <plugin name="toggle" filename="libToggleVisualPlugin.so">
@@ -159,7 +159,7 @@
         <geometry>
           <mesh>
             <scale>1.1 1.8 0.25</scale>
-            <uri>model://closed_box/meshes/closed_box.obj</uri>
+            <uri>model://closed_box_ariac/meshes/closed_box.obj</uri>
           </mesh>
         </geometry>
         <plugin name="toggle" filename="libToggleVisualPlugin.so">

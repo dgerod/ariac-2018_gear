@@ -6,7 +6,7 @@
           <pose>0.007 0 -0.033 0 0 0</pose>
             <geometry>
             <mesh>
-                <uri>model://swissranger_camera/meshes/SR4000.stl</uri>
+                <uri>model://swissranger_camera_ariac/meshes/SR4000.stl</uri>
             </mesh>
             </geometry>
             <material>

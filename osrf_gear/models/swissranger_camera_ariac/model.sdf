@@ -9,7 +9,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://swissranger_camera/meshes/collada/SR4000.dae</uri>
+            <uri>model://swissranger_camera_ariac/meshes/collada/SR4000.dae</uri>
           </mesh>
         </geometry>
       </visual>

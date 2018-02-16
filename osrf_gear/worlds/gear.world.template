@@ -57,20 +57,20 @@ def expand_snippet(filename, data=locals()):
     <!-- Pad to detect (and delete) boxes at the end of the belt -->
     <include>
       <name>drone_collection_zone</name>
-      <uri>model://drone_collection_zone</uri>
+      <uri>model://drone_collection_zone_ariac</uri>
       <pose>1.0 -4.6 0.005 0 1.5707 0</pose>
     </include>
 
     <!-- the workcell -->
     <include>
-      <uri>model://shipping_container</uri>
+      <uri>model://shipping_container_ariac</uri>
       <pose>0.42 -1.0 0 0 0 0</pose>
     </include>
 
 @[for bin_name, bin_pose in bins.items()]@
     <include>
       <name>@(bin_name)</name>
-      <uri>model://yellow_bin</uri>
+      <uri>model://yellow_bin_ariac</uri>
       <pose>@(' '.join(bin_pose.xyz)) @(' '.join(bin_pose.rpy))</pose>
     </include>
 @[end for]@
@@ -178,7 +178,7 @@ expand_snippet('shipping_box.sdf.template')
       <pose>-1.4 -9.4 4.3 0 0 1.5707</pose>
       <include>
         <name>drone</name>
-        <uri>model://drone_with_box</uri>
+        <uri>model://drone_with_box_ariac</uri>
       </include>
       <plugin name="drone_plugin" filename="libROSDronePlugin.so">
         <update_rate>10</update_rate>
@@ -190,7 +190,7 @@ expand_snippet('shipping_box.sdf.template')
     <!-- an invisible conveyor belt -->
       <include>
         <name>conveyor_belt</name>
-        <uri>model://conveyor_belt</uri>
+        <uri>model://conveyor_belt_ariac</uri>
       </include>
 
 @[if options['insert_models_over_bins']]@
