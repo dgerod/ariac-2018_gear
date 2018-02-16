@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
-  <model name="pulley_part">
+  <model name="pulley_part_ariac">
     <link name="link">
       <inertial>
         <pose>0 0 0.035145 0 0 0</pose>
@@ -386,13 +386,13 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://pulley_part/meshes/pulley.dae</uri>
+            <uri>model://pulley_part_ariac/meshes/pulley.dae</uri>
           </mesh>
         </geometry>
         <material>
           <script>
-            <uri>model://arm_part/materials/scripts</uri>
-            <uri>model://arm_part/materials/textures</uri>
+            <uri>model://arm_part_ariac/materials/scripts</uri>
+            <uri>model://arm_part_ariac/materials/textures</uri>
             <name>ArmPart/Diffuse</name>
           </script>
         </material>
