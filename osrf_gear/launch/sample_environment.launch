@@ -1,4 +1,8 @@
 <launch>
+  <arg name="verbose" default="false" />
+  <arg unless="$(arg verbose)" name="verbose_args" value="" />
+  <arg     if="$(arg verbose)" name="verbose_args" value="--verbose" />
+
   <arg name="state_logging" default="false" />
   <arg unless="$(arg state_logging)" name="state_logging_args" value="" />
   <arg     if="$(arg state_logging)" name="state_logging_args" value="--state-logging=true" />
@@ -13,6 +17,7 @@
 
   <node name="ariac_sim" pkg="osrf_gear" type="gear.py"
         args="--development-mode
+          $(arg verbose_args)
           $(arg state_logging_args)
           $(arg gui_args)
           $(arg fill_demo_shipment_args)
