@@ -52,7 +52,7 @@ if __name__ == '__main__':
         print('Waiting for Gazebo to start...')
         time.sleep(1.0)
     # Take an extra nap, to allow plugins to be loaded
-    time.sleep(30.0)
+    time.sleep(20.0)
     print('OK, starting test.')
 
     rostest.run('test_ariac', 'test_scoring_against_expected_score', ScoringTester, sys.argv)

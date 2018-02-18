@@ -52,7 +52,7 @@ class ExampleNodeTester(unittest.TestCase):
     def _test_start_comp(self):
         success = ariac_example.start_competition()
         self.assertTrue(success, 'Failed to start the competition')
-        time.sleep(0.5)
+        time.sleep(1.5)
         self.assertTrue(
             self.comp_class.current_comp_state == 'go', 'Competition not in "go" state')
 
