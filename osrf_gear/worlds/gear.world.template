@@ -354,7 +354,7 @@ count = {}
         <object>
           <time>0.0</time>
           <type>@(product.type)</type>
-          <pose>@(' '.join(product.pose.xyz[0:-1])) 0.00 @(' '.join(product.pose.rpy))</pose>
+          <pose>@(' '.join(product.pose.xyz[0:-1])) 0.1 @(' '.join(product.pose.rpy))</pose>
         </object>
 @[end for]@
       </object_sequence>
