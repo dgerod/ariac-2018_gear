@@ -143,6 +143,16 @@ default_time_limit = 500  # seconds
 global_model_count = {}  # the global count of how many times a model type has been created
 
 
+# Helper for converting strings to booleans; copied from https://stackoverflow.com/a/43357954
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
 def prepare_arguments(parser):
     add = parser.add_argument
     add('-n', '--dry-run', action='store_true', default=False,
@@ -155,7 +165,7 @@ def prepare_arguments(parser):
         help='if true the competition mode environment variable will not be set (default false)')
     add('--no-gui', action='store_true', default=False,
         help="don't run the gazebo client gui")
-    add('-l', '--state-logging', action='store',
+    add('-l', '--state-logging', action='store', type=str2bool, nargs='?',
         help='generate gazebo state logs (will override config file option)')
     add('--log-to-file', action='store_true', default=False,
         help='direct the output of the gazebo ros node to log file instead of the console')
