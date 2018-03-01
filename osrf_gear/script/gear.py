@@ -37,6 +37,11 @@ template_files = [
 ]
 arm_configs = {
     'ur10': {
+        'pose': {
+            'xyz': [0.3, 1.0, 0.7],
+            'rpy': [0.0, 0.0, 0.0]
+        },
+        'conveyor_offset': 0,
         'default_initial_joint_states': {
             'elbow_joint': 2.14,
             'linear_arm_actuator_joint': 0,
@@ -202,9 +207,10 @@ def expand_yaml_substitutions(yaml_dict):
 
 
 class ArmInfo:
-    def __init__(self, arm_type, initial_joint_states):
+    def __init__(self, arm_type, initial_joint_states, pose):
         self.type = arm_type
         self.initial_joint_states = initial_joint_states
+        self.pose = pose
 
 
 class ModelInfo:
@@ -267,6 +273,15 @@ def model_count_post_increment(model_type):
     return count
 
 
+def create_pose_info(pose_dict):
+    xyz = get_field_with_default(pose_dict, 'xyz', [0, 0, 0])
+    rpy = get_field_with_default(pose_dict, 'rpy', [0, 0, 0])
+    for key in pose_dict:
+        if key not in ['xyz', 'rpy']:
+            print("Warning: ignoring unknown entry in 'pose': " + key, file=sys.stderr)
+    return PoseInfo(xyz, rpy)
+
+
 def create_arm_info(arm_dict):
     arm_type = get_required_field('arm', arm_dict, 'type')
     if arm_type not in arm_configs:
@@ -279,16 +294,9 @@ def create_arm_info(arm_dict):
                 "Warning: ignoring unknown entry in '{0}': {1}"
                 .format('arm', key), file=sys.stderr)
     initial_joint_states = arm_configs[arm_type]['default_initial_joint_states']
-    return ArmInfo(arm_type, initial_joint_states)
-
-
-def create_pose_info(pose_dict):
-    xyz = get_field_with_default(pose_dict, 'xyz', [0, 0, 0])
-    rpy = get_field_with_default(pose_dict, 'rpy', [0, 0, 0])
-    for key in pose_dict:
-        if key not in ['xyz', 'rpy']:
-            print("Warning: ignoring unknown entry in 'pose': " + key, file=sys.stderr)
-    return PoseInfo(xyz, rpy)
+    pose = create_pose_info(arm_configs[arm_type]['pose'])
+    conveyor_offset = arm_configs[arm_type]['conveyor_offset']
+    return ArmInfo(arm_type, initial_joint_states, pose), conveyor_offset
 
 
 def create_sensor_info(name, sensor_data, allow_protected_sensors=False):
@@ -494,8 +502,10 @@ def create_options_info(options_dict):
 
 
 def prepare_template_data(config_dict, args):
+    arm_info, conveyor_offset = create_arm_info(default_arm)
     template_data = {
-        'arm': create_arm_info(default_arm),
+        'arm': arm_info,
+        'conveyor_offset': conveyor_offset,
         'sensors': create_sensor_infos(default_sensors, allow_protected_sensors=True),
         'models_to_insert': {},
         'models_to_spawn': {},
