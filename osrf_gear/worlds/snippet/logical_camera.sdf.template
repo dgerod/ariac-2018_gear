@@ -57,9 +57,9 @@
 
           <logical_camera>
             <near>0.2</near>
-            <far>0.75</far>
-            <horizontal_fov>1.1</horizontal_fov>
-            <aspect_ratio>1.5</aspect_ratio>
+            <far>0.55</far>
+            <horizontal_fov>1.0</horizontal_fov>
+            <aspect_ratio>1.3</aspect_ratio>
           </logical_camera>
 
           <visualize>@(options['visualize_sensor_views'])</visualize>
