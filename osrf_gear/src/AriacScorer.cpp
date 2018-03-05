@@ -248,14 +248,19 @@ ariac::ShipmentScore AriacScorer::ScoreShippingBox(const ariac::ShippingBox & sh
   {
     for (auto it = remainingAssignedProducts.begin(); it != remainingAssignedProducts.end(); ++it)
     {
-      // Ignore faulty products
-      if (currentProduct.isFaulty)
-        continue;
-
       // Only check poses of products of the same type
       auto assignedProduct = *it;
       if (assignedProduct.type != currentProduct.type)
         continue;
+
+      gzdbg << "\n\nEvaluating product of type '" << currentProduct.type << "'" << std::endl;
+
+      // Ignore faulty products
+      if (currentProduct.isFaulty)
+      {
+        gzdbg << "Skipping product because it is faulty" << std::endl;
+        continue;
+      }
 
       // Check the position of the product (ignoring orientation)
       gzdbg << "Comparing pose '" << currentProduct.pose << \
@@ -266,7 +271,10 @@ ariac::ShipmentScore AriacScorer::ScoreShippingBox(const ariac::ShippingBox & sh
         0);
       gzdbg << "Position error: " << posnDiff.GetLength() << std::endl;
       if (posnDiff.GetLength() > scoringParameters.distanceThresh)
+      {
+        gzdbg << "Skipping product because it is not in the correct position" << std::endl;
         continue;
+      }
       gzdbg << "Product of type '" << currentProduct.type << \
         "' in the correct position" << std::endl;
       score.productPose += scoringParameters.productPosition;
@@ -284,16 +292,24 @@ ariac::ShipmentScore AriacScorer::ScoreShippingBox(const ariac::ShippingBox & sh
       gzdbg << "Cosine of angle between orientations (quaternion dot product): " << \
         orientationDiff << std::endl;
       if (std::abs(orientationDiff) < (1.0 - quaternionDiffThresh))
+      {
+        gzdbg << "Skipping product because it is not in the correct orientation (roughly)" << std::endl;
         continue;
+      }
 
       // Filter the yaw based on a threshold set in radians (more user-friendly).
       double angleDiff = objOrientation.GetYaw() - orderOrientation.GetYaw();
       gzdbg << "Orientation error (yaw): " << std::abs(angleDiff) << \
         " (or " << std::abs(std::abs(angleDiff) - 2 * M_PI) << ")" << std::endl;
       if (std::abs(angleDiff) > scoringParameters.orientationThresh)
+      {
         // Account for wrapping in angles. E.g. -pi compared with pi should "pass".
         if (std::abs(std::abs(angleDiff) - 2 * M_PI) > scoringParameters.orientationThresh)
+        {
+          gzdbg << "Skipping product because it is not in the correct orientation" << std::endl;
           continue;
+        }
+      }
 
       gzdbg << "Product of type '" << currentProduct.type << \
         "' in the correct orientation" << std::endl;
