@@ -12,13 +12,13 @@ sensors:
   logical_camera_1:
     type: logical_camera
     pose:
-      xyz: [-0.4, 2.0, 1.54]
-      rpy: [0, 1.2, '-pi']
+      xyz: [-0.63, 1.14, 1.48]
+      rpy: [0, 1.26, 'pi']
   logical_camera_2:
     type: logical_camera
     pose:
-      xyz: [1.2, 2.25, 1.185]
-      rpy: ['-pi/2', 'pi/2', '-pi']
+      xyz: [1.2, 2.25, 0.96]
+      rpy: [0, 'pi/2', '-pi/2']
   quality_control_sensor_1:
     type: quality_control
     pose:
@@ -37,5 +37,5 @@ sensors:
   laser_profiler_1:
     type: laser_profiler
     pose:
-      xyz: [1.21, 3.1, 1.17]
+      xyz: [1.21, 3.1, 0.98]
       rpy: ['-pi', 'pi/2', 'pi/2']

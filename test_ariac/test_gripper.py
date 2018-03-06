@@ -69,10 +69,7 @@ class GripperTester(ExampleNodeTester):
 
     def _send_arm_to_product(self):
         trajectory = [
-            [1.5, -0.5, -2.0, 3.1, 4.15, -1.51, 0.0],
-            [1.5, -0.5, -1.0, 3.1, 4.15, -1.51, 0.0],
-            [1.5, -0.55, 0.0, 3.1, 4.15, -1.51, 0.0],
-            [1.5, -0.55, 5.91, 3.1, 4.15, -1.51, 0.0],
+            [1.5, 0.14, -0.81, 3.11, 4.03, -1.51, 0.0],
         ]
         for positions in trajectory:
             self.comp_class.send_arm_to_state(positions)
@@ -80,9 +77,9 @@ class GripperTester(ExampleNodeTester):
 
     def _send_arm_to_shipping_box(self):
         trajectory = [
-            [1.5, -0.5, -1.8, 3.1, 4.15, -1.51, 0.0],
-            [1.5, -0.5, -1.8, 0, 4.15, -1.51, 0.0],
-            [1.5, -0.5, -0.38, 0, 3.39, -1.51, 0.0],
+            [1.5, 0.14, -1.2, 3.1, 3.76, -1.37, 0.0],
+            [2.12, 0.14, -1.45, 3.1, 3.76, -1.37, 0.0],
+            [1.5, 0.14, -0.69, 5.53, 3.76, -1.37, 0.0],
         ]
         for positions in trajectory:
             self.comp_class.send_arm_to_state(positions)
