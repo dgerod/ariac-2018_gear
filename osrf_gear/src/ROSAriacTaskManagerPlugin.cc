@@ -92,6 +92,9 @@ namespace gazebo
     /// \brief Publishes the game score total.
     public: ros::Publisher taskScorePub;
 
+    /// \brief Name of service that allows the user to start the competition.
+    public: std::string compStartServiceName;
+
     /// \brief Service that allows the user to start the competition.
     public: ros::ServiceServer compStartServiceServer;
 
@@ -221,9 +224,9 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
   if (_sdf->HasElement("end_competition_service_name"))
     compEndServiceName = _sdf->Get<std::string>("end_competition_service_name");
 
-  std::string compStartServiceName = "start_competition";
+  this->dataPtr->compStartServiceName = "start_competition";
   if (_sdf->HasElement("start_competition_service_name"))
-    compStartServiceName = _sdf->Get<std::string>("start_competition_service_name");
+    this->dataPtr->compStartServiceName = _sdf->Get<std::string>("start_competition_service_name");
 
   std::string taskStateTopic = "competition_state";
   if (_sdf->HasElement("task_state_topic"))
@@ -432,11 +435,6 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
   this->dataPtr->taskScorePub = this->dataPtr->rosnode->advertise<
     std_msgs::Float32>(taskScoreTopic, 1000);
 
-  // Service for starting the competition.
-  this->dataPtr->compStartServiceServer =
-    this->dataPtr->rosnode->advertiseService(compStartServiceName,
-      &ROSAriacTaskManagerPlugin::HandleStartService, this);
-
   // Service for ending the competition.
   this->dataPtr->compEndServiceServer =
     this->dataPtr->rosnode->advertiseService(compEndServiceName,
@@ -487,6 +485,18 @@ void ROSAriacTaskManagerPlugin::OnUpdate()
 {
   std::lock_guard<std::mutex> lock(this->dataPtr->mutex);
   auto currentSimTime = this->dataPtr->world->GetSimTime();
+
+  // Delay advertising the competition start service to avoid a crash.
+  // Sometimes if the competition is started before the world is fully loaded, it causes a crash.
+  // See https://bitbucket.org/osrf/ariac/issues/91
+  if (!this->dataPtr->compStartServiceServer && currentSimTime.Double() >= 5.0)
+  {
+    // Service for starting the competition.
+    this->dataPtr->compStartServiceServer =
+      this->dataPtr->rosnode->advertiseService(this->dataPtr->compStartServiceName,
+        &ROSAriacTaskManagerPlugin::HandleStartService, this);
+  }
+
   if ((currentSimTime - this->dataPtr->lastSimTimePublish).Double() >= 1.0)
   {
     gzdbg << "Sim time: " << currentSimTime.Double() << std::endl;
