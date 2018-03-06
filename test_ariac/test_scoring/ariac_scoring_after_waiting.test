@@ -8,5 +8,5 @@
               --development-mode --verbose --no-gui"/>
   <test pkg="test_ariac" type="test_scoring_after_waiting.py"
         test-name="test_scoring_after_waiting"
-        time-limit="80.0" args="15"/>
+        time-limit="90.0" args="15"/>
 </launch>
