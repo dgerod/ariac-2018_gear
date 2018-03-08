@@ -36,10 +36,8 @@
   </include>
 
   <!-- load the URDF (it will include the robot arm model) -->
-  <!--
   <param name="robot_description"
-         command="$(find xacro)/xacro --inorder '$(arg gear_urdf_xacro)' use_effort_interface:=true" />
-  -->
+         command="$(find xacro)/xacro &#x002D;&#x002D;inorder '$(arg gear_urdf_xacro)' hardware_interface:=EffortJointInterface use_effort_interface:=true" />
 
 @[if arm]@
 @{
