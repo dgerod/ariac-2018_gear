@@ -38,6 +38,11 @@ template_files = [
 ]
 arm_configs = {
     'iiwa': {
+        'pose': {
+            'xyz': [-0.1, 1.0, 0.7],
+            'rpy': [0.0, 0.0, 0.0]
+        },
+        'conveyor_offset': -0.3,
         'default_initial_joint_states': {
             'elbow_joint': 2.14,
             'linear_arm_actuator_joint': 0,
@@ -65,7 +70,7 @@ arm_configs = {
         }
     },
 }
-default_arm = {
+default_arm_dict = {
     'type': 'ur10'
 }
 possible_products = [
@@ -191,8 +196,6 @@ def prepare_arguments(parser):
         help='visualize the views of sensors in gazebo')
     add('--fill-demo-shipment', action='store_true', default=False,
         help='fill the first shippping box with the requested shipment on competiton start')
-    add('--arm-type', action='store',
-        help='arm type to use: ur10 (default) or iiwa')
     mex_group = parser.add_mutually_exclusive_group(required=False)
     add = mex_group.add_argument
     add('config', nargs='?', metavar='CONFIG',
@@ -529,7 +532,8 @@ def create_options_info(options_dict):
 
 
 def prepare_template_data(config_dict, args):
-    arm_info, conveyor_offset = create_arm_info(config_dict.pop('arm_type'))
+    arm_dict = config_dict.pop('arm', default_arm_dict)
+    arm_info, conveyor_offset = create_arm_info(arm_dict)
     template_data = {
         'arm': arm_info,
         'conveyor_offset': conveyor_offset,
@@ -557,9 +561,7 @@ def prepare_template_data(config_dict, args):
 
     models_over_bins = {}
     for key, value in config_dict.items():
-        if key == 'arm':
-            print("Warning: ignoring 'arm' entry (ur10 is always used).", file=sys.stderr)
-        elif key == 'sensors':
+        if key == 'sensors':
             template_data['sensors'].update(
                 create_sensor_infos(value))
         elif key == 'models_over_bins':
@@ -625,7 +627,6 @@ def main(sysargv=None):
         # If a random seed isn't specified, this mapping won't be used
         model_id_mappings = {}
 
-    expanded_dict_config['arm_type'] = args.arm_type or default_arm
     template_data = prepare_template_data(expanded_dict_config, args)
     files = generate_files(template_data)
     if not args.dry_run and not os.path.isdir(args.output):
