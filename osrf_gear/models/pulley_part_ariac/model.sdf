@@ -15,6 +15,78 @@
         </inertia>
       </inertial>
 
+      <collision name="collision_asymmetric_mark_top">
+        <pose>0 -0.111 0.0705 0 0 0</pose>
+        <max_contacts>10</max_contacts>
+         <geometry>
+          <cylinder>
+            <length>0.012</length>
+            <radius>0.00392125</radius>
+          </cylinder>
+         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <max_vel>0.0</max_vel>
+              <min_depth>0.01</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+      <visual name="visual_asymmetric_mark_top">
+        <pose>0 -0.111 0.0705 0 0 0</pose>
+         <geometry>
+          <cylinder>
+            <length>0.012</length>
+            <radius>0.00392125</radius>
+          </cylinder>
+         </geometry>
+        <material>
+          <lighting>1</lighting>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/DarkGrey</name>
+          </script>
+          <emissive>0 0 0 1</emissive>
+        </material>
+      </visual>
+
+      <collision name="collision_asymmetric_mark_bottom">
+        <pose>0 0.111 -0.0005 0 0 0</pose>
+        <max_contacts>10</max_contacts>
+         <geometry>
+          <cylinder>
+            <length>0.012</length>
+            <radius>0.00392125</radius>
+          </cylinder>
+         </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <max_vel>0.0</max_vel>
+              <min_depth>0.01</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+      <visual name="visual_asymmetric_mark_bottom">
+        <pose>0 0.111 -0.0005 0 0 0</pose>
+         <geometry>
+          <cylinder>
+            <length>0.012</length>
+            <radius>0.00392125</radius>
+          </cylinder>
+         </geometry>
+        <material>
+          <lighting>1</lighting>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/DarkGrey</name>
+          </script>
+          <emissive>0 0 0 1</emissive>
+        </material>
+      </visual>
+
       <!-- Top collisions -->
       <collision name="collision_top_1">
         <pose>0 0 0.0719 0 0 0.2618</pose>
