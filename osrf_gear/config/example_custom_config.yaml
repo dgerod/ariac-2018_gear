@@ -12,7 +12,8 @@ options:
     order_part2: gear_part
     order_part3: pulley_part
 
-time_limit: 600                      # Maximum time allowed for the trial once started, in seconds
+time_limit: 500                      # Maximum time allowed for the trial once started, in seconds
+random_seed: 1                       # Seed for the pseudo random number generator (used to randomize model names)
 
 # Orders to announce during the trial
 orders:
@@ -73,8 +74,8 @@ orders:
 
 # Individual products that will be reported as faulty
 faulty_products:
-  - piston_rod_part_1                # The piston rod part in the bins with ID 1
-  - piston_rod_part_3
+  - piston_rod_part_83                # The piston rod part in the bins with randomized ID of 83
+  - piston_rod_part_24
 
 # Models to be inserted in the bins
 models_over_bins:
@@ -107,7 +108,7 @@ models_over_bins:
 models_to_spawn:
   bin2::link:                        # Name of the reference frame
     models:                          # List of models to spawn
-      piston_rod_part_1:             # Name of the model
+      piston_rod_part_1:             # An arbitrary unique name of the model (will be randomized)
         type: piston_rod_part        # Type of model (must be installed locally)
         pose:
           xyz: [0.1, 0.1, 0.25]      # Co-ordinates of the model origin in the specified reference frame
