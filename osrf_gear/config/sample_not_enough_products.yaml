@@ -76,5 +76,7 @@ models_over_bins:
         num_models_y: 2
 
 faulty_products:
-  - disk_part_2
-  - disk_part_5
+  - disk_part_55
+  - disk_part_46
+ 
+random_seed: 1
