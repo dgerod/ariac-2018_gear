@@ -66,7 +66,7 @@ arm_configs = {
     },
 }
 default_arm = {
-    'type': 'iiwa'
+    'type': 'ur10'
 }
 possible_products = [
     'part1',
@@ -191,6 +191,8 @@ def prepare_arguments(parser):
         help='visualize the views of sensors in gazebo')
     add('--fill-demo-shipment', action='store_true', default=False,
         help='fill the first shippping box with the requested shipment on competiton start')
+    add('--arm-type', action='store',
+        help='arm type to use: ur10 (default) or iiwa')
     mex_group = parser.add_mutually_exclusive_group(required=False)
     add = mex_group.add_argument
     add('config', nargs='?', metavar='CONFIG',
@@ -527,7 +529,7 @@ def create_options_info(options_dict):
 
 
 def prepare_template_data(config_dict, args):
-    arm_info, conveyor_offset = create_arm_info(default_arm)
+    arm_info, conveyor_offset = create_arm_info(config_dict.pop('arm_type'))
     template_data = {
         'arm': arm_info,
         'conveyor_offset': conveyor_offset,
@@ -623,6 +625,7 @@ def main(sysargv=None):
         # If a random seed isn't specified, this mapping won't be used
         model_id_mappings = {}
 
+    expanded_dict_config['arm_type'] = args.arm_type or default_arm
     template_data = prepare_template_data(expanded_dict_config, args)
     files = generate_files(template_data)
     if not args.dry_run and not os.path.isdir(args.output):
