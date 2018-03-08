@@ -14,11 +14,11 @@
       </collision>
 
       <collision name="collision_belt_side_back">
-        <pose>0.267 1.6275 0.32 0 0 0</pose>
+        <pose>0.268 1.6275 0.32 0 0 0</pose>
         <max_contacts>10</max_contacts>
         <geometry>
           <box>
-            <size>0.137 7.98 0.3</size>
+            <size>0.145 7.98 0.3</size>
           </box>
         </geometry>
       </collision>
