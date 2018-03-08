@@ -23,28 +23,6 @@
         </geometry>
       </collision>
 
-      <!--
-      <collision name="collision_floor">
-        <pose>-0.18 1.715 0.1 0 0 0</pose>
-        <max_contacts>10</max_contacts>
-        <geometry>
-          <box>
-            <size>3.25 8.61 0.13</size>
-          </box>
-        </geometry>
-      </collision>
-
-      <collision name="collision_roof">
-        <pose>-0.18 1.715 2.65 0 0 0</pose>
-        <max_contacts>10</max_contacts>
-        <geometry>
-          <box>
-            <size>3.25 8.61 0.1</size>
-          </box>
-        </geometry>
-      </collision>
-      -->
-
       <visual name="visual">
         <geometry>
           <mesh>
