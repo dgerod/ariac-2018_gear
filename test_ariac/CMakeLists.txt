@@ -37,6 +37,7 @@ set(rostests
   test_scoring/ariac_scoring_interrupted.test
   test_scoring/ariac_scoring_not_interrupted.test
   test_scoring/ariac_scoring_faulty_parts.test
+  test_scoring/ariac_scoring_faulty_parts_randomized.test
 )
 
 foreach(rostest ${rostests})
@@ -70,6 +71,7 @@ install(FILES
   test_scoring/scoring_correct_parts_not_flipped.yaml
   test_scoring/scoring_missing_parts.yaml
   test_scoring/scoring_faulty_parts.yaml
+  test_scoring/scoring_faulty_parts_randomized.yaml
   test_scoring/scoring_perfect_shipment_both_shipments.yaml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/test
 )
