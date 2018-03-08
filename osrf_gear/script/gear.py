@@ -21,6 +21,7 @@ from __future__ import print_function
 import argparse
 import math
 import os
+import random
 import subprocess
 import sys
 
@@ -146,6 +147,7 @@ configurable_options = {
 }
 default_time_limit = 500  # seconds
 global_model_count = {}  # the global count of how many times a model type has been created
+model_id_mappings = None  # mapping between model index and IDs, for each type
 
 
 # Helper for converting strings to booleans; copied from https://stackoverflow.com/a/43357954
@@ -273,6 +275,18 @@ def model_count_post_increment(model_type):
     return count
 
 
+def get_next_model_id(model_type):
+    if model_id_mappings is None:
+        # Not using a mapping, just return the index as the ID
+        return model_count_post_increment(model_type)
+
+    if model_type not in model_id_mappings:
+        # First time we've used this model; initialize the random mapping between index and ID
+        model_id_mappings[model_type] = random.sample(range(0, 100), 100)
+
+    return model_id_mappings[model_type][model_count_post_increment(model_type)]
+
+
 def create_pose_info(pose_dict):
     xyz = get_field_with_default(pose_dict, 'xyz', [0, 0, 0])
     rpy = get_field_with_default(pose_dict, 'rpy', [0, 0, 0])
@@ -347,7 +361,7 @@ def create_models_to_spawn_infos(models_to_spawn_dict):
             # assign each model a unique name because gazebo can't do this
             # if the models all spawn at the same time
             scoped_model_name = reference_frame.replace('::', '|') + '|' + \
-                model_info.type + '_' + str(model_count_post_increment(model_info.type))
+                model_info.type + '_' + str(get_next_model_id(model_info.type))
             models_to_spawn_infos[scoped_model_name] = model_info
     return models_to_spawn_infos
 
@@ -398,7 +412,7 @@ def create_models_over_bins_infos(models_over_bins_dict):
                     # assign each model a unique name because gazebo can't do this
                     # if the models all spawn at the same time
                     scoped_model_name = bin_name + '|' + \
-                        model_info.type + '_' + str(model_count_post_increment(model_type))
+                        model_info.type + '_' + str(get_next_model_id(model_type))
                     model_info.bin = bin_name
                     models_to_spawn_infos[scoped_model_name] = model_info
     return models_to_spawn_infos
@@ -589,6 +603,15 @@ def main(sysargv=None):
     expanded_dict_config = expand_yaml_substitutions(dict_config)
     if args.verbose:
         print(yaml.dump({'Using configuration': expanded_dict_config}))
+
+    if 'random_seed' in expanded_dict_config:
+        global model_id_mappings
+        random_seed = expanded_dict_config.pop('random_seed')
+        random.seed(random_seed)
+        # Initialize the mapping between model index and ID that will exist for each model type
+        # If a random seed isn't specified, this mapping won't be used
+        model_id_mappings = {}
+
     template_data = prepare_template_data(expanded_dict_config, args)
     files = generate_files(template_data)
     if not args.dry_run and not os.path.isdir(args.output):
