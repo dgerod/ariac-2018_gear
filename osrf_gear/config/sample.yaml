@@ -1,4 +1,6 @@
 # Competition configuration options
+arm:
+  type: ur10
 
 options:
   insert_models_over_bins: true
