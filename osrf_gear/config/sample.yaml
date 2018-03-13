@@ -1,6 +1,6 @@
 # Competition configuration options
 arm:
-  type: ur10
+  type: iiwa
 
 options:
   insert_models_over_bins: true
