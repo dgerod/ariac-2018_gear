@@ -39,18 +39,19 @@ template_files = [
 arm_configs = {
     'iiwa': {
         'pose': {
-            'xyz': [-0.1, 1.0, 0.7],
+            'xyz': [0.0, 1.0, 0.7],
             'rpy': [0.0, 0.0, 0.0]
         },
-        'conveyor_offset': -0.3,
+        'conveyor_offset': -0.5,
         'default_initial_joint_states': {
-            'elbow_joint': 2.14,
+            'iiwa_joint_1': 0,
+            'iiwa_joint_2': 0,
+            'iiwa_joint_3': 0,
+            'iiwa_joint_4': 0,
+            'iiwa_joint_5': 0,
+            'iiwa_joint_6': 0,
+            'iiwa_joint_7': 0,
             'linear_arm_actuator_joint': 0,
-            'shoulder_lift_joint': -2.0,
-            'shoulder_pan_joint': 3.14,
-            'wrist_1_joint': 3.27,
-            'wrist_2_joint': -1.51,
-            'wrist_3_joint': 0,
         },
     },
     'ur10': {
