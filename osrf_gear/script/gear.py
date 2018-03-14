@@ -531,6 +531,7 @@ def prepare_template_data(config_dict, args):
         'time_limit': default_time_limit,
         'bin_height': bin_height,
         'world_dir': world_dir,
+        'joint_limited_ur10': config_dict.pop('joint_limited_ur10', False),
     }
     # Process the options first as they may affect the processing of the rest
     options_dict = get_field_with_default(config_dict, 'options', {})
