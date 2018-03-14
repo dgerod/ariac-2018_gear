@@ -205,7 +205,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <scale>1.3 0.7 1.0</scale>
+            <scale>1.1 0.7 0.8</scale>
             <uri>model://shipping_container_ariac/meshes/ShippingContainer_Textured.obj</uri>
           </mesh>
         </geometry>

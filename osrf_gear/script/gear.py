@@ -39,10 +39,10 @@ template_files = [
 arm_configs = {
     'iiwa': {
         'pose': {
-            'xyz': [0.0, 1.0, 0.7],
+            'xyz': [-0.05, 1.0, 0.6],
             'rpy': [0.0, 0.0, 0.0]
         },
-        'conveyor_offset': -0.5,
+        'conveyor_offset': [-0.6, 0, 0.19],
         'default_initial_joint_states': {
             'iiwa_joint_1': 0,
             'iiwa_joint_2': 0,
@@ -59,7 +59,7 @@ arm_configs = {
             'xyz': [0.3, 1.0, 0.7],
             'rpy': [0.0, 0.0, 0.0]
         },
-        'conveyor_offset': 0,
+        'conveyor_offset': [0, 0, 0],
         'default_initial_joint_states': {
             'elbow_joint': 2.14,
             'linear_arm_actuator_joint': 0,
@@ -132,14 +132,14 @@ default_belt_models = {
     },
 }
 n_bins = 5
-bin1_x = -0.85
+bin1_x = -0.775
 bin1_y = -1.3
-binN_x = -0.85
+binN_x = -0.775
 binN_y = bin1_y + n_bins * 0.81
 bin_width = 0.35
 bin_depth = 0.25
-bin_height = 0.96
-bin_angle = -0.25
+bin_height = 0.75
+bin_angle = -0.19
 default_bin_origins = {
     'bin{0}'.format(n): [
         bin1_x + (binN_x - bin1_x) / n_bins * n,
