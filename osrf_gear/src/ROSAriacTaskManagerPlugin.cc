@@ -147,7 +147,7 @@ namespace gazebo
     public: std::mutex mutex;
 
     // During the competition, this environment variable will be set.
-    bool competitonMode = false;
+    bool competitionMode = false;
   };
 }
 
@@ -201,8 +201,8 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
 {
   gzdbg << "ARIAC VERSION: 2.1.0\n";
   auto competitionEnv = std::getenv("ARIAC_COMPETITION");
-  this->dataPtr->competitonMode = competitionEnv != NULL;
-  gzdbg << "ARIAC COMPETITION MODE: " << (this->dataPtr->competitonMode ? competitionEnv : "false") << std::endl;
+  this->dataPtr->competitionMode = competitionEnv != NULL;
+  gzdbg << "ARIAC COMPETITION MODE: " << (this->dataPtr->competitionMode ? competitionEnv : "false") << std::endl;
 
   GZ_ASSERT(_world, "ROSAriacTaskManagerPlugin world pointer is NULL");
   GZ_ASSERT(_sdf, "ROSAriacTaskManagerPlugin sdf pointer is NULL");
@@ -432,7 +432,7 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
     std_msgs::String>(taskStateTopic, 1000);
 
   // Publisher for announcing the score of the game.
-  if (!this->dataPtr->competitonMode)
+  if (!this->dataPtr->competitionMode)
   {
     this->dataPtr->taskScorePub = this->dataPtr->rosnode->advertise<
       std_msgs::Float32>(taskScoreTopic, 1000);
@@ -610,7 +610,7 @@ void ROSAriacTaskManagerPlugin::PublishStatus(const ros::TimerEvent&)
 {
   std_msgs::Float32 scoreMsg;
   scoreMsg.data = this->dataPtr->currentGameScore.total();
-  if (!this->dataPtr->competitonMode)
+  if (!this->dataPtr->competitionMode)
   {
     this->dataPtr->taskScorePub.publish(scoreMsg);
   }
@@ -751,7 +751,7 @@ bool ROSAriacTaskManagerPlugin::HandleSubmitShipmentService(
   const std::string& callerName = event.getCallerName();
   gzdbg << "Submit shipment service called by: " << callerName << std::endl;
 
-  if (this->dataPtr->competitonMode && callerName.compare("/gazebo") != 0)
+  if (this->dataPtr->competitionMode && callerName.compare("/gazebo") != 0)
   {
     std::string errStr = "Competition mode is enabled so this service is not enabled.";
     gzerr << errStr << std::endl;
