@@ -432,8 +432,11 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
     std_msgs::String>(taskStateTopic, 1000);
 
   // Publisher for announcing the score of the game.
-  this->dataPtr->taskScorePub = this->dataPtr->rosnode->advertise<
-    std_msgs::Float32>(taskScoreTopic, 1000);
+  if (!this->dataPtr->competitonMode)
+  {
+    this->dataPtr->taskScorePub = this->dataPtr->rosnode->advertise<
+      std_msgs::Float32>(taskScoreTopic, 1000);
+  }
 
   // Service for ending the competition.
   this->dataPtr->compEndServiceServer =
@@ -607,7 +610,10 @@ void ROSAriacTaskManagerPlugin::PublishStatus(const ros::TimerEvent&)
 {
   std_msgs::Float32 scoreMsg;
   scoreMsg.data = this->dataPtr->currentGameScore.total();
-  this->dataPtr->taskScorePub.publish(scoreMsg);
+  if (!this->dataPtr->competitonMode)
+  {
+    this->dataPtr->taskScorePub.publish(scoreMsg);
+  }
 
   std_msgs::String stateMsg;
   stateMsg.data = this->dataPtr->currentState;

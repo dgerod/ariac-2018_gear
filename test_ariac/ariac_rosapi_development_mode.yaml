@@ -11,6 +11,11 @@ topics:
     num_publishers: 1
     num_subscribers: 1
 
+  - topic: /ariac/current_score
+    type: std_msgs/Float32
+    num_publishers: 1
+    num_subscribers: 0
+
 
 ##########################################################
 # Services
