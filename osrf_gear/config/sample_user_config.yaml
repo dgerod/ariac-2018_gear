@@ -1,3 +1,4 @@
+joint_limited_ur10: false
 sensors:
   break_beam_1:
     type: break_beam
