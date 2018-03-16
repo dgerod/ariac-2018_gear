@@ -56,7 +56,7 @@ initial_joint_states_string = \
   </include>
 
 @[end if]@
-@[if arm.type == 'iiwa']@
+@[if arm.type == 'iiwa14']@
   <!-- load iiwa -->
   <include file="$(find iiwa_gazebo)/launch/iiwa_gazebo.launch">
     <arg name="hardware_interface" value="EffortJointInterface" />

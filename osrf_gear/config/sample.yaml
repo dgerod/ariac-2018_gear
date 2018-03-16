@@ -1,6 +1,6 @@
 # Competition configuration options
 arm:
-  type: iiwa
+  type: iiwa14
 
 options:
   insert_models_over_bins: true

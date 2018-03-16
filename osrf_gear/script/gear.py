@@ -37,7 +37,7 @@ template_files = [
     os.path.join(launch_dir, 'gear.urdf.xacro.template'),
 ]
 arm_configs = {
-    'iiwa': {
+    'iiwa14': {
         'pose': {
             'xyz': [-0.05, 1.0, 0.6],
             'rpy': [0.0, 0.0, 0.0]
