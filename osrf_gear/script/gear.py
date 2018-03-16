@@ -59,7 +59,7 @@ arm_configs = {
             'xyz': [0.3, 1.0, 0.7],
             'rpy': [0.0, 0.0, 0.0]
         },
-        'conveyor_offset': [0, 0, 0],
+        'conveyor_offset': [-0.3, 0, 0.19],
         'default_initial_joint_states': {
             'elbow_joint': 2.14,
             'linear_arm_actuator_joint': 0,
