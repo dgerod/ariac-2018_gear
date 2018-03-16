@@ -64,6 +64,8 @@ void ShippingBoxPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     sdf::ElementPtr triggerAnimationAtElem = _sdf->GetElement("trigger_animation_at");
     this->triggerAnimationAtPose = true;
     this->triggerAnimationAt = triggerAnimationAtElem->Get<math::Vector3>();
+    sdf::ElementPtr endAnimationAtElem = _sdf->GetElement("end_animation_at");
+    this->endAnimationAt = endAnimationAtElem->Get<math::Vector3>();
   }
 
   if (_sdf->HasElement("nested_animation"))
@@ -137,8 +139,8 @@ void ShippingBoxPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->rampAnimation.reset(
     new gazebo::common::PoseAnimation(this->shippingBoxID, 3/speedFactor, false));
 
-  ignition::math::Vector3d end_position(1.16, -4.4, 0.1);
   ignition::math::Vector3d start_position(this->triggerAnimationAt.x, this->triggerAnimationAt.y, this->triggerAnimationAt.z);
+  ignition::math::Vector3d end_position(this->endAnimationAt.x, this->endAnimationAt.y, this->endAnimationAt.z);
 
   gazebo::common::PoseKeyFrame *key = this->rampAnimation->CreateKeyFrame(1.0/speedFactor);
   key->Translation(end_position + ignition::math::Vector3d(0, 0.3, 0.2));
@@ -196,7 +198,7 @@ void ShippingBoxPlugin::OnUpdate(const common::UpdateInfo &/*_info*/)
     // Trigger the animation.
     this->rampAnimation->SetTime(0);
     this->model->SetAnimation(this->rampAnimation);
-    this->triggerAnimationAt = false;
+    this->triggerAnimationAtPose = false;
   }
 
   if (!this->newMsg)
