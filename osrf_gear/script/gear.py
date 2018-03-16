@@ -42,7 +42,7 @@ arm_configs = {
             'xyz': [-0.05, 1.0, 0.6],
             'rpy': [0.0, 0.0, 0.0]
         },
-        'conveyor_offset': [-0.6, 0, 0.19],
+        'conveyor_offset': [-0.6, 0, 0.17],
         'default_initial_joint_states': {
             'iiwa_joint_1': 0,
             'iiwa_joint_2': 0,
@@ -59,7 +59,7 @@ arm_configs = {
             'xyz': [0.3, 1.0, 0.7],
             'rpy': [0.0, 0.0, 0.0]
         },
-        'conveyor_offset': [-0.3, 0, 0.19],
+        'conveyor_offset': [-0.3, 0, 0.17],
         'default_initial_joint_states': {
             'elbow_joint': 2.14,
             'linear_arm_actuator_joint': 0,
@@ -102,21 +102,21 @@ default_sensors = {
     'congestion_sensor': {
         'type': 'break_beam',
         'pose': {
-            'xyz': [0.645, -3.05, 0.5],
+            'xyz': [0.745, -3.05, 0.5],
             'rpy': [0.0, 0.0, 0.0]
         }
     },
     'quality_control_sensor_1': {
         'type': 'quality_control',
         'pose': {
-            'xyz': [1.2, 1.1, 1.2],
+            'xyz': [1.15, 1.1, 1.2],
             'rpy': [-1.5707, 1.5707, -3.1416]
         }
     },
     'quality_control_sensor_2': {
         'type': 'quality_control',
         'pose': {
-            'xyz': [1.2, -0.7, 1.2],
+            'xyz': [1.15, -0.7, 1.2],
             'rpy': [-1.5707, 1.5707, -3.1416]
         }
     },
@@ -304,12 +304,14 @@ def get_next_model_id(model_type):
     return model_id_mappings[model_type][model_count_post_increment(model_type)]
 
 
-def create_pose_info(pose_dict):
+def create_pose_info(pose_dict, offset=None):
     xyz = get_field_with_default(pose_dict, 'xyz', [0, 0, 0])
     rpy = get_field_with_default(pose_dict, 'rpy', [0, 0, 0])
     for key in pose_dict:
         if key not in ['xyz', 'rpy']:
             print("Warning: ignoring unknown entry in 'pose': " + key, file=sys.stderr)
+    if offset is not None:
+        xyz = [sum(i) for i in zip(xyz, offset)]
     return PoseInfo(xyz, rpy)
 
 
@@ -330,7 +332,7 @@ def create_arm_info(arm_dict):
     return ArmInfo(arm_type, initial_joint_states, pose), conveyor_offset
 
 
-def create_sensor_info(name, sensor_data, allow_protected_sensors=False):
+def create_sensor_info(name, sensor_data, allow_protected_sensors=False, offset=None):
     sensor_type = get_required_field(name, sensor_data, 'type')
     pose_dict = get_required_field(name, sensor_data, 'pose')
     for key in sensor_data:
@@ -342,16 +344,16 @@ def create_sensor_info(name, sensor_data, allow_protected_sensors=False):
             print("Error: given sensor type '{0}' is not one of the known sensor types: {1}"
                   .format(sensor_type, sensor_configs.keys()), file=sys.stderr)
             sys.exit(1)
-    pose_info = create_pose_info(pose_dict)
+    pose_info = create_pose_info(pose_dict, offset=offset)
     return SensorInfo(name, sensor_type, pose_info)
 
 
-def create_sensor_infos(sensors_dict, allow_protected_sensors=False):
+def create_sensor_infos(sensors_dict, allow_protected_sensors=False, offset=None):
     sensor_infos = {}
     for name, sensor_data in sensors_dict.items():
         sensor_infos[name] = create_sensor_info(
             name, sensor_data,
-            allow_protected_sensors=allow_protected_sensors)
+            allow_protected_sensors=allow_protected_sensors, offset=offset)
     return sensor_infos
 
 
@@ -538,7 +540,7 @@ def prepare_template_data(config_dict, args):
     template_data = {
         'arm': arm_info,
         'conveyor_offset': conveyor_offset,
-        'sensors': create_sensor_infos(default_sensors, allow_protected_sensors=True),
+        'sensors': create_sensor_infos(default_sensors, allow_protected_sensors=True, offset=conveyor_offset),
         'models_to_insert': {},
         'models_to_spawn': {},
         'belt_models': create_belt_model_infos(default_belt_models),
