@@ -68,7 +68,7 @@ def expand_snippet(filename, data=locals()):
     <include>
       <name>drone_collection_zone</name>
       <uri>model://drone_collection_zone_ariac</uri>
-      <pose>1.0 -4.6 0.005 0 1.5707 0</pose>
+      <pose>1.0 -4.6 0.03 0 1.5707 0</pose>
     </include>
 
     <!-- the workcell -->
@@ -198,6 +198,7 @@ expand_snippet('shipping_box.sdf.template')
         <update_rate>10</update_rate>
         <submit_shipment_service_name>/ariac/submit_shipment</submit_shipment_service_name>
         <waiting_box_topic>/ariac/waiting_shipping_box</waiting_box_topic>
+        <collection_point>@(1.4 + conveyor_offset[0]) @(-4.4 + conveyor_offset[1]) @(0.8 + conveyor_offset[2])</collection_point>
       </plugin>
     </model>
 
