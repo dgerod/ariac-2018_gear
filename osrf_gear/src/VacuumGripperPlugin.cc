@@ -634,9 +634,9 @@ bool VacuumGripperPlugin::CheckModelContact()
     double alignment = gripperLinkNormal.Dot(this->dataPtr->modelContactNormal);
 
     // Alignment of > 0.95 represents alignment angle of < acos(0.95) = ~18 degrees
-    //if (alignment > 0.95) {
+    if (alignment > 0.95) {
       modelInContact = true;
-    //}
+    }
   }
   return modelInContact;
 }

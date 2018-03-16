@@ -23,7 +23,7 @@
     <origin xyz="0 0.1 0" rpy="${90 * 0.0174533} 0 0" />
 @[end if]@
 @[if arm.type == 'iiwa']@
-    <origin xyz="0 0.0 0.05" rpy="0 0 0" />
+    <origin xyz="0 0.0 0.05" rpy="3.1416 0 0" />
 @[end if]@
 
     <grippable_model_types>
