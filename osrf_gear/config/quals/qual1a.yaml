@@ -17,6 +17,7 @@ options:
     order_part2: piston_rod_part
     order_part3: gear_part
     order_part4: pulley_part
+  gazebo_state_logging: true
 
 orders:
   order_0:
