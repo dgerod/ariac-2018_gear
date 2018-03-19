@@ -60,8 +60,7 @@ class ExampleNodeTester(unittest.TestCase):
         self.assertEqual(len(self.comp_class.received_orders), 1)
 
     def _send_arm_to_initial_pose(self):
-        positions = [2.14, 0.0, -2.0, 3.14, 3.27, -1.51, 0.0]
-        self.comp_class.send_arm_to_state(positions)
+        self.comp_class.send_arm_to_state([0] * len(self.comp_class.arm_joint_names))
         time.sleep(1.0)
 
     def _test_send_arm_to_zero_state(self):

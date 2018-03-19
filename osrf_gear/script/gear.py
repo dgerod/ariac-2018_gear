@@ -72,7 +72,7 @@ arm_configs = {
     },
 }
 default_arm_dict = {
-    'type': 'ur10'
+    'type': 'iiwa14'
 }
 possible_products = [
     'part1',
