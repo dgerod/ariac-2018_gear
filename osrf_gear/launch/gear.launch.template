@@ -59,6 +59,7 @@ initial_joint_states_string = \
 @[if arm.type == 'iiwa14']@
   <!-- load iiwa -->
   <include file="$(find iiwa_gazebo)/launch/iiwa_gazebo.launch">
+    <arg name="robot_name" value="ariac" />
     <arg name="hardware_interface" value="EffortJointInterface" />
     <arg name="extra_spawn_model_args" value="@(initial_joint_states_string)" />
   </include>
