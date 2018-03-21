@@ -77,7 +77,7 @@ def expand_snippet(filename, data=locals()):
       <pose>0.275 -1.0 0 0 0 0</pose>
     </include>
     <include>
-      <uri>model://shipping_container_conveyor_ariac</uri>
+      <uri>model://shipping_container_conveyor_tall_ariac</uri>
       <pose>@(0.64 + conveyor_offset[0]) @(-1.0 + conveyor_offset[1]) 0 0 0 0</pose>
     </include>
 
