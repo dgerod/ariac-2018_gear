@@ -3,27 +3,25 @@
   <model name="shipping_container_conveyor_ariac">
     <static>true</static>
     <link name="link">
-      <!--
       <collision name="collision_belt_side_front">
-        <pose>1.191 1.6275 0.32 0 0 0</pose>
+        <pose>0.83 1.6275 0.41 0 0 0</pose>
         <max_contacts>10</max_contacts>
         <geometry>
           <box>
-            <size>0.137 7.98 0.3</size>
+            <size>0.105 7.98 0.4</size>
           </box>
         </geometry>
       </collision>
 
       <collision name="collision_belt_side_back">
-        <pose>0.268 1.6275 0.32 0 0 0</pose>
+        <pose>0.185 1.6275 0.41 0 0 0</pose>
         <max_contacts>10</max_contacts>
         <geometry>
           <box>
-            <size>0.145 7.98 0.3</size>
+            <size>0.105 7.98 0.4</size>
           </box>
         </geometry>
       </collision>
-      -->
 
       <visual name="visual">
         <geometry>
