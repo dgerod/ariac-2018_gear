@@ -1,3 +1,4 @@
+joint_limited_ur10: false  # limit ur10 joints to [-pi, pi] instead of [-2pi, 2pi], defaults to false
 sensors:
   break_beam_1:
     type: break_beam

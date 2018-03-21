@@ -27,6 +27,7 @@ set(rostests
   # gripper_unthrottled.test  # this needs a good gripper pose; regression is fixed.
   test_scoring/ariac_scoring_perfect_shipment.test
   test_scoring/ariac_scoring_after_waiting.test
+  test_scoring/ariac_scoring_after_waiting_with_state_logging.test
   test_scoring/ariac_scoring_perfect_shipment_flipped.test
   test_scoring/ariac_scoring_correct_parts_incorrect_poses.test
   test_scoring/ariac_scoring_correct_parts_plus_unwanted.test
