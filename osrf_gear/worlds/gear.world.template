@@ -73,7 +73,7 @@ def expand_snippet(filename, data=locals()):
 
     <!-- the workcell -->
     <include>
-      <uri>model://shipping_container_ariac</uri>
+      <uri>model://shipping_container_short_ariac</uri>
       <pose>0.275 -1.0 0 0 0 0</pose>
     </include>
     <include>
