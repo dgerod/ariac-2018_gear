@@ -535,8 +535,7 @@ def create_options_info(options_dict):
 
 
 def prepare_template_data(config_dict, args):
-    arm_dict = config_dict.pop('arm', default_arm_dict)
-    arm_info, conveyor_offset = create_arm_info(arm_dict)
+    arm_info, conveyor_offset = create_arm_info(config_dict.pop('arm_type'))
     template_data = {
         'arm': arm_info,
         'conveyor_offset': conveyor_offset,
@@ -564,7 +563,9 @@ def prepare_template_data(config_dict, args):
 
     models_over_bins = {}
     for key, value in config_dict.items():
-        if key == 'sensors':
+        if key == 'arm':
+            print("Warning: ignoring 'arm' entry (iiwa14 is always used).", file=sys.stderr)
+        elif key == 'sensors':
             template_data['sensors'].update(
                 create_sensor_infos(value))
         elif key == 'models_over_bins':
@@ -630,6 +631,7 @@ def main(sysargv=None):
         # If a random seed isn't specified, this mapping won't be used
         model_id_mappings = {}
 
+    expanded_dict_config['arm_type'] = default_arm_dict
     template_data = prepare_template_data(expanded_dict_config, args)
     files = generate_files(template_data)
     if not args.dry_run and not os.path.isdir(args.output):
