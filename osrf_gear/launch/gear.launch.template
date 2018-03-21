@@ -36,8 +36,12 @@
   </include>
 
   <!-- load the URDF (it will include the robot arm model) -->
+  <!-- TODO(dhood): this includes arguments for both the iiwa14 and the ur10 -->
   <param name="robot_description"
-         command="$(find xacro)/xacro &#x002D;&#x002D;inorder '$(arg gear_urdf_xacro)' hardware_interface:=EffortJointInterface use_effort_interface:=true joint_limited:=$(arg limited)" />
+    command="$(find xacro)/xacro &#x002D;&#x002D;inorder '$(arg gear_urdf_xacro)'
+      hardware_interface:=EffortJointInterface
+      use_effort_interface:=true joint_limited:=$(arg limited)
+    " />
 
 
 @[if arm]@
