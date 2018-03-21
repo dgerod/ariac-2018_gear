@@ -10,7 +10,7 @@
   <xacro:property name="base_link" value="base_link" />
 @[end if]@
 @[if arm.type == 'iiwa14']@
-  <xacro:include filename="$(find iiwa_description)/urdf/iiwa14.urdf.xacro" />
+  <xacro:include filename="$(find iiwa_description_ariac)/urdf/iiwa14.urdf.xacro" />
   <xacro:property name="wrist_link" value="iiwa_link_7" />
   <xacro:property name="base_link" value="iiwa_link_0" />
 @[end if]@
