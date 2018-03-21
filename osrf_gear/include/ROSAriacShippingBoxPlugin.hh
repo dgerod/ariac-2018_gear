@@ -140,6 +140,9 @@ namespace gazebo
     /// \brief The pose at which the animation should be triggered.
     protected: math::Vector3 triggerAnimationAt;
 
+    /// \brief The pose at which the animation should end.
+    protected: math::Vector3 endAnimationAt;
+
     /// \brief Animation for going down the ramp
     public: gazebo::common::PoseAnimationPtr rampAnimation;
   };

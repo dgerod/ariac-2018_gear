@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-<xacro:macro name="create_vacuum_gripper" params="wrist_link **grippable_model_types **drops_info">
+<xacro:macro name="create_vacuum_gripper" params="wrist_link *origin **grippable_model_types **drops_info">
 
   <link name="vacuum_gripper_link">
     <inertial>
@@ -31,7 +31,7 @@
   </link>
 
   <joint name="vacuum_gripper_joint" type="revolute">
-    <origin xyz="0 0.1 0" rpy="${90 * 0.0174533} 0 0" />
+    <xacro:insert_block name="origin" />
     <axis xyz="0 0 1" />
     <limit lower="0" upper="0" effort="0" velocity="0" />
     <parent link="${wrist_link}" />

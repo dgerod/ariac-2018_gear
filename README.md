@@ -18,3 +18,5 @@ To access the source code for the version of GEAR used in ARIAC 2017, use the [`
 ---
 
 We acknowledge the original authors of the `ur_description` and `ur_gazebo` packages, which we have modified to work with the ARIAC simulation and embedded in the `osrf_gear/vendor` directory.
+
+We acknowledge the original authors of the `iiwa_stack` and the `iiwa_*` packages, which we have modified to work with the ARIAC simulation and embedded in the `iiwa_stack` directory as a git submodule of [our fork of the repository](https://github.com/osrf/iiwa_stack).

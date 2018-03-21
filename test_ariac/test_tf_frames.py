@@ -31,7 +31,7 @@ class TfTester(ExampleNodeTester):
 
     def _test_shipping_box_pose(self):
         self._test_pose(
-            [1.16, 0.9, 0.45],
+            [0.56, 0.9, 0.58],
             tf.transformations.quaternion_from_euler(0, 0, 0),
             self.camera_above_box0 + '_shipping_box_0_frame'
         )

@@ -37,12 +37,29 @@ template_files = [
     os.path.join(launch_dir, 'gear.urdf.xacro.template'),
 ]
 arm_configs = {
+    'iiwa14': {
+        'pose': {
+            'xyz': [-0.05, 1.0, 0.6],
+            'rpy': [0.0, 0.0, 0.0]
+        },
+        'conveyor_offset': [-0.6, 0, 0.17],
+        'default_initial_joint_states': {
+            'iiwa_joint_1': 0,
+            'iiwa_joint_2': 0,
+            'iiwa_joint_3': 0,
+            'iiwa_joint_4': 0,
+            'iiwa_joint_5': 0,
+            'iiwa_joint_6': 0,
+            'iiwa_joint_7': 0,
+            'linear_arm_actuator_joint': 0,
+        },
+    },
     'ur10': {
         'pose': {
             'xyz': [0.3, 1.0, 0.7],
             'rpy': [0.0, 0.0, 0.0]
         },
-        'conveyor_offset': 0,
+        'conveyor_offset': [-0.3, 0, 0.17],
         'default_initial_joint_states': {
             'elbow_joint': 2.14,
             'linear_arm_actuator_joint': 0,
@@ -54,8 +71,8 @@ arm_configs = {
         }
     },
 }
-default_arm = {
-    'type': 'ur10'
+default_arm_dict = {
+    'type': 'iiwa14'
 }
 possible_products = [
     'part1',
@@ -85,21 +102,21 @@ default_sensors = {
     'congestion_sensor': {
         'type': 'break_beam',
         'pose': {
-            'xyz': [0.645, -3.05, 0.5],
+            'xyz': [0.66, -3.05, 0.45],
             'rpy': [0.0, 0.0, 0.0]
         }
     },
     'quality_control_sensor_1': {
         'type': 'quality_control',
         'pose': {
-            'xyz': [1.2, 1.1, 1.2],
+            'xyz': [1.15, 1.1, 1.2],
             'rpy': [-1.5707, 1.5707, -3.1416]
         }
     },
     'quality_control_sensor_2': {
         'type': 'quality_control',
         'pose': {
-            'xyz': [1.2, -0.7, 1.2],
+            'xyz': [1.15, -0.7, 1.2],
             'rpy': [-1.5707, 1.5707, -3.1416]
         }
     },
@@ -115,14 +132,14 @@ default_belt_models = {
     },
 }
 n_bins = 5
-bin1_x = -0.85
+bin1_x = -0.775
 bin1_y = -1.3
-binN_x = -0.85
+binN_x = -0.775
 binN_y = bin1_y + n_bins * 0.81
 bin_width = 0.35
 bin_depth = 0.25
-bin_height = 0.96
-bin_angle = -0.25
+bin_height = 0.75
+bin_angle = -0.19
 default_bin_origins = {
     'bin{0}'.format(n): [
         bin1_x + (binN_x - bin1_x) / n_bins * n,
@@ -287,12 +304,14 @@ def get_next_model_id(model_type):
     return model_id_mappings[model_type][model_count_post_increment(model_type)]
 
 
-def create_pose_info(pose_dict):
+def create_pose_info(pose_dict, offset=None):
     xyz = get_field_with_default(pose_dict, 'xyz', [0, 0, 0])
     rpy = get_field_with_default(pose_dict, 'rpy', [0, 0, 0])
     for key in pose_dict:
         if key not in ['xyz', 'rpy']:
             print("Warning: ignoring unknown entry in 'pose': " + key, file=sys.stderr)
+    if offset is not None:
+        xyz = [sum(i) for i in zip(xyz, offset)]
     return PoseInfo(xyz, rpy)
 
 
@@ -313,7 +332,7 @@ def create_arm_info(arm_dict):
     return ArmInfo(arm_type, initial_joint_states, pose), conveyor_offset
 
 
-def create_sensor_info(name, sensor_data, allow_protected_sensors=False):
+def create_sensor_info(name, sensor_data, allow_protected_sensors=False, offset=None):
     sensor_type = get_required_field(name, sensor_data, 'type')
     pose_dict = get_required_field(name, sensor_data, 'pose')
     for key in sensor_data:
@@ -325,16 +344,16 @@ def create_sensor_info(name, sensor_data, allow_protected_sensors=False):
             print("Error: given sensor type '{0}' is not one of the known sensor types: {1}"
                   .format(sensor_type, sensor_configs.keys()), file=sys.stderr)
             sys.exit(1)
-    pose_info = create_pose_info(pose_dict)
+    pose_info = create_pose_info(pose_dict, offset=offset)
     return SensorInfo(name, sensor_type, pose_info)
 
 
-def create_sensor_infos(sensors_dict, allow_protected_sensors=False):
+def create_sensor_infos(sensors_dict, allow_protected_sensors=False, offset=None):
     sensor_infos = {}
     for name, sensor_data in sensors_dict.items():
         sensor_infos[name] = create_sensor_info(
             name, sensor_data,
-            allow_protected_sensors=allow_protected_sensors)
+            allow_protected_sensors=allow_protected_sensors, offset=offset)
     return sensor_infos
 
 
@@ -516,11 +535,11 @@ def create_options_info(options_dict):
 
 
 def prepare_template_data(config_dict, args):
-    arm_info, conveyor_offset = create_arm_info(default_arm)
+    arm_info, conveyor_offset = create_arm_info(config_dict.pop('arm_type'))
     template_data = {
         'arm': arm_info,
         'conveyor_offset': conveyor_offset,
-        'sensors': create_sensor_infos(default_sensors, allow_protected_sensors=True),
+        'sensors': create_sensor_infos(default_sensors, allow_protected_sensors=True, offset=conveyor_offset),
         'models_to_insert': {},
         'models_to_spawn': {},
         'belt_models': create_belt_model_infos(default_belt_models),
@@ -546,7 +565,7 @@ def prepare_template_data(config_dict, args):
     models_over_bins = {}
     for key, value in config_dict.items():
         if key == 'arm':
-            print("Warning: ignoring 'arm' entry (ur10 is always used).", file=sys.stderr)
+            print("Warning: ignoring 'arm' entry (iiwa14 is always used).", file=sys.stderr)
         elif key == 'sensors':
             template_data['sensors'].update(
                 create_sensor_infos(value))
@@ -613,6 +632,7 @@ def main(sysargv=None):
         # If a random seed isn't specified, this mapping won't be used
         model_id_mappings = {}
 
+    expanded_dict_config['arm_type'] = default_arm_dict
     template_data = prepare_template_data(expanded_dict_config, args)
     files = generate_files(template_data)
     if not args.dry_run and not os.path.isdir(args.output):

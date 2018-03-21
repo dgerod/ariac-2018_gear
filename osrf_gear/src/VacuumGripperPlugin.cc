@@ -527,7 +527,7 @@ bool VacuumGripperPlugin::GetContactNormal()
 
   if (!collisionPtr)
   {
-    gzdbg << "Somehow the gripper was in collision with itself.\n";
+    gzdbg << "The gripper was in collision with its own model.\n";
   }
 
   return false;

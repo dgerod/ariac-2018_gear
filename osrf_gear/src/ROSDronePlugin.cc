@@ -72,6 +72,9 @@ namespace gazebo
     /// \brief Robot animation for the drone returning to its base
     public: gazebo::common::PoseAnimationPtr returnAnimation;
 
+    /// \brief The pose from which models should be collected.
+    public: ignition::math::Vector3d collectionPoint;
+
     /// \brief Pointer to the model
     public: gazebo::physics::ModelPtr model;
 
@@ -158,6 +161,7 @@ void ROSDronePlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   {
     waitingBoxTopic = _sdf->Get<std::string>("waiting_box_topic");
   }
+  this->dataPtr->collectionPoint = _sdf->Get<ignition::math::Vector3d>("collection_point");
 
   this->dataPtr->rosnode = new ros::NodeHandle(this->dataPtr->robotNamespace);
 
@@ -177,7 +181,7 @@ void ROSDronePlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   ignition::math::Vector3d off_screen_position1(-1.4, -9.4, 4.3);
   ignition::math::Vector3d off_screen_position2(6.4, -12.4, 4.3);
-  ignition::math::Vector3d lower_position(1.4, -4.4, 0.8);
+  ignition::math::Vector3d lower_position = this->dataPtr->collectionPoint;
   ignition::math::Vector3d hover_position = lower_position + ignition::math::Vector3d(0.1, -0.2, 0.4);
 
   gazebo::common::PoseKeyFrame *key = this->dataPtr->collectAnimation->CreateKeyFrame(0);
