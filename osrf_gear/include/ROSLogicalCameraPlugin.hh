@@ -119,6 +119,9 @@ namespace gazebo
     /// e.g. if model_name1 is whitelisted, both bin7|model_name1 and bin6|model_name1 will be published
     protected: std::vector<std::string> knownModelNames;
 
+    /// \brief If true, detected model type will be anonymized
+    protected: bool anonymizeModels;
+
     /// \brief Map of noise IDs to noise models
     protected: std::map<std::string, sensors::NoisePtr> noiseModels;
 
