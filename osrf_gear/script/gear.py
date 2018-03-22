@@ -75,19 +75,11 @@ default_arm_dict = {
     'type': 'iiwa14'
 }
 possible_products = [
-    'part1',
-    'part2',
-    'part3',
-    'part4',
-    'arm_part',
-    'cross_joint_part',
     'disk_part',
     'gasket_part',
     'gear_part',
     'piston_rod_part',
     'pulley_part',
-    't_brace_part',
-    'u_joint_part',
 ]
 sensor_configs = {
     'break_beam': None,
