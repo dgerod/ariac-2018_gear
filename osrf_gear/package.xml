@@ -10,6 +10,9 @@
   <author email="dhood@osrfoundation.org">D. Hood</author>
   <author email="william@osrfoundation.org">William Woodall</author>
 
+  <!-- iiwa_control, iiwa_description, iiwa_gazebo author -->
+  <author email="salvo.virga@tum.de">Salvo Virga</author>
+
   <!-- ur_gazebo authors -->
   <author>Alexander Bubeck</author>
   <author email="sedwards@swri.org">Shaun Edwards</author>
