@@ -28,9 +28,11 @@ import sys
 import em
 import yaml
 
-this_dir = os.path.abspath(os.path.dirname(__file__))
-world_dir = os.path.join(this_dir, '..', '..', 'share', 'osrf_gear', 'worlds')
-launch_dir = os.path.join(this_dir, '..', '..', 'share', 'osrf_gear', 'launch')
+import rospkg
+
+rospack = rospkg.RosPack()
+world_dir = os.path.join(rospack.get_path('osrf_gear'), 'worlds')
+launch_dir = os.path.join(rospack.get_path('osrf_gear'), 'launch')
 template_files = [
     os.path.join(world_dir, 'gear.world.template'),
     os.path.join(launch_dir, 'gear.launch.template'),
