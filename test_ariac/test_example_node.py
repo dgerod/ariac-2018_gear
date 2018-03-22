@@ -58,6 +58,8 @@ class ExampleNodeTester(unittest.TestCase):
 
     def _test_order_reception(self):
         self.assertEqual(len(self.comp_class.received_orders), 1)
+        num_products_in_order = len(self.comp_class.received_orders[0].shipments[0].products)
+        self.assertGreater(num_products_in_order, 0, 'No products in received order')
 
     def _send_arm_to_initial_pose(self):
         self.comp_class.send_arm_to_state([0] * len(self.comp_class.arm_joint_names))
@@ -112,12 +114,6 @@ class ExampleNodeTester(unittest.TestCase):
             # If there were more shipments expected, the order won't be done
             self.assertTrue(
                 self.comp_class.current_comp_state == 'go', 'Competition not in "go" state')
-        num_products_in_order = len(self.comp_class.received_orders[0].shipments[0].products)
-        self.assertTrue(
-            # Expect to have a point for each non-faulty product, a point for each non-faulty
-            # product's pose, and no all products bonus since there is a faulty product.
-            self.current_comp_score == 2 * (num_products_in_order - 1),
-            'Something went wrong in the scoring. Current score: ' + str(self.current_comp_score))
 
 
 if __name__ == '__main__':

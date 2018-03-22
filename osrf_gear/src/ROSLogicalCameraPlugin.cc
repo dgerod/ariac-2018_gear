@@ -113,6 +113,18 @@ void ROSLogicalCameraPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
     }
   }
 
+  this->anonymizeModels = false;
+  if (_sdf->HasElement("anonymize_models"))
+  {
+    this->anonymizeModels = _sdf->Get<bool>("anonymize_models");
+  }
+  if (this->anonymizeModels)
+  {
+    ROS_DEBUG("Anonymizing model types");
+  } else {
+    ROS_DEBUG("Not anonymizing model types");
+  }
+
   this->modelFramePrefix = this->name + "_";
   if (_sdf->HasElement("model_frame_prefix"))
   {
@@ -226,7 +238,19 @@ void ROSLogicalCameraPlugin::OnImage(ConstLogicalCameraImagePtr &_msg)
         msgs::ConvertIgn(_msg->model(i).pose().orientation()));
       modelPose = math::Pose(modelPosition, modelOrientation);
 
-      std::string modelFrameId = this->modelFramePrefix + ariac::TrimNamespace(modelName) + "_frame";
+      std::string modelNameToUse;
+      std::string modelTypeToUse;
+      if (this->anonymizeModels)
+      {
+        modelNameToUse = "model_" + ariac::DetermineModelId(modelName);
+        modelTypeToUse = "model";
+      }
+      else
+      {
+        modelNameToUse = ariac::TrimNamespace(modelName);
+        modelTypeToUse = modelType;
+      }
+      std::string modelFrameId = this->modelFramePrefix + modelNameToUse + "_frame";
 
       bool isAgv = modelType == "agv1" || modelType == "agv2";
       if (isAgv)
@@ -248,7 +272,7 @@ void ROSLogicalCameraPlugin::OnImage(ConstLogicalCameraImagePtr &_msg)
       {
         this->AddNoise(modelPose);
       }
-      this->AddModelToMsg(modelType, modelPose, imageMsg);
+      this->AddModelToMsg(modelTypeToUse, modelPose, imageMsg);
       this->PublishTF(modelPose, this->name + "_frame", modelFrameId);
 
     }

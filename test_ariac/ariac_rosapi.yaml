@@ -56,11 +56,6 @@ topics:
     num_publishers: 1
     num_subscribers: 0
 
-  - topic: /ariac/current_score
-    type: std_msgs/Float32
-    num_publishers: 1
-    num_subscribers: 0
-
   - topic: /ariac/quality_control_sensor_1
     type: osrf_gear/LogicalCameraImage
     num_publishers: 1
@@ -161,9 +156,6 @@ services:
   # Competition control
   - service: /ariac/start_competition
     type: std_srvs/Trigger
-
-  - service: /ariac/material_locations
-    type: osrf_gear/GetMaterialLocations
 
   - service: /ariac/drone
     type: osrf_gear/DroneControl

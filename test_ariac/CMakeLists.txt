@@ -84,7 +84,6 @@ install(PROGRAMS
   test_gripper_unthrottled.py
   test_scoring_after_waiting.py
   test_scoring_after_waiting.py
-  test_scoring_immediate.py
   test_scoring_against_expected_score.py
   test_tf_frames.py
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/test

@@ -23,6 +23,7 @@
 @[end for]@
           <type>shipping_box</type>
         </known_model_types>
+        <anonymize_models>false</anonymize_models>
       </plugin>
       <link name="link">
         <gravity>false</gravity>

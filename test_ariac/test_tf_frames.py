@@ -46,18 +46,26 @@ class TfTester(ExampleNodeTester):
 
     def _test_faulty_products(self):
         quality_control_sensor = 'quality_control_sensor_1'
-        # This product is faulty and should be reported as such.
+        # This product is faulty and should be reported as such in an anonymized way.
         self._test_pose(
             [0.1, -0.2, 0.0], tf.transformations.quaternion_from_euler(0, 0, 0),
-            quality_control_sensor + '_piston_rod_part_1_frame',
+            quality_control_sensor + '_model_1_frame',
             self.camera_above_box0 + '_shipping_box_0_frame'
         )
+
+        # The model type should not be used in the name anymore (now anonymized).
+        with self.assertRaises(tf2.LookupException):
+            self._test_pose(
+                [0.1, -0.2, 0.0], tf.transformations.quaternion_from_euler(0, 0, 0),
+                quality_control_sensor + '_piston_rod_part_1_frame',
+                self.camera_above_box0 + '_shipping_box_0_frame'
+            )
 
         # This product is not faulty and should not be found by TF.
         with self.assertRaises(tf2.LookupException):
             self._test_pose(
                 [0.1, -0.2, 0.0], tf.transformations.quaternion_from_euler(0, 0, 0),
-                quality_control_sensor + '_piston_rod_part_2_frame',
+                quality_control_sensor + '_model_3_frame',
                 self.camera_above_box0 + '_shipping_box_0_frame'
             )
 

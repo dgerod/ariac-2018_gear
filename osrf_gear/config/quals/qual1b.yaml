@@ -111,8 +111,8 @@ models_over_bins:
 random_seed: 4
 
 faulty_products:
-  - piston_rod_part_70
-  - gear_part_9
-  - gear_part_5
-  - piston_rod_part_38
-  - piston_rod_part_6
+  - piston_rod_part_91
+  - gear_part_104
+  - gear_part_77
+  - piston_rod_part_113
+  - piston_rod_part_54
