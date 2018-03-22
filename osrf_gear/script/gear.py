@@ -156,10 +156,32 @@ configurable_options = {
 }
 default_time_limit = 500  # seconds
 max_count_per_model = 30  # limit on the number of instances of each model type
-global_model_count = {}  # the global count of how many times a model type has been created
-model_id_mappings = None  # mapping between model index and IDs, for each type
-max_model_id = max_count_per_model * len(possible_products)
-random_ids = random.sample(range(0, max_model_id), max_model_id)
+
+def initialize_model_id_mappings(random_seed=None):
+    global global_model_count, model_id_mappings
+    global_model_count = {}  # global count of how many times a model type has been created
+
+    randomize = False
+    if random_seed is not None:
+        randomize = True
+        random.seed(random_seed)
+
+    # Initialize the mapping between model index and ID that will exist for each model type
+    model_id_mappings = {}
+
+    # Initialize the list of random IDs that will be used in the mappings
+    # The IDs will be unique across different model types
+    max_model_id = max_count_per_model * len(possible_products)  # can be larger for more spread
+    random_ids = random.sample(range(0, max_model_id), max_model_id)
+    for model_type in possible_products:
+        if not randomize:
+            # Just use ordinary mapping
+            model_id_mappings[model_type] = list(range(1, max_count_per_model + 1))
+        else:
+            # Use random IDs for the mapping
+            model_id_mappings[model_type] = random_ids[:max_count_per_model]
+            del random_ids[:max_count_per_model]
+
 
 
 # Helper for converting strings to booleans; copied from https://stackoverflow.com/a/43357954
@@ -282,21 +304,12 @@ def model_count_post_increment(model_type):
     try:
         count = global_model_count[model_type]
     except KeyError:
-        count = 1
+        count = 0
     global_model_count[model_type] = count + 1
     return count
 
 
 def get_next_model_id(model_type):
-    if model_id_mappings is None:
-        # Not using a mapping, just return the index as the ID
-        return model_count_post_increment(model_type)
-
-    if model_type not in model_id_mappings:
-        # First time we've used this model; initialize the random mapping between index and ID
-        model_id_mappings[model_type] = random_ids[:max_count_per_model]
-        del random_ids[:max_count_per_model]
-
     return model_id_mappings[model_type][model_count_post_increment(model_type)]
 
 
@@ -620,13 +633,8 @@ def main(sysargv=None):
     if args.verbose:
         print(yaml.dump({'Using configuration': expanded_dict_config}))
 
-    if 'random_seed' in expanded_dict_config:
-        global model_id_mappings
-        random_seed = expanded_dict_config.pop('random_seed')
-        random.seed(random_seed)
-        # Initialize the mapping between model index and ID that will exist for each model type
-        # If a random seed isn't specified, this mapping won't be used
-        model_id_mappings = {}
+    random_seed = expanded_dict_config.pop('random_seed', None)
+    initialize_model_id_mappings(random_seed)
 
     expanded_dict_config['arm_type'] = default_arm_dict
     template_data = prepare_template_data(expanded_dict_config, args)
