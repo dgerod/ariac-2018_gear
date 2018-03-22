@@ -74,8 +74,8 @@ orders:
 
 # Individual products that will be reported as faulty
 faulty_products:
-  - piston_rod_part_83                # The piston rod part in the bins with randomized ID of 83
-  - piston_rod_part_24
+  - piston_rod_part_57                # The piston rod part in the bins with randomized ID of 57
+  - piston_rod_part_45
 
 # Models to be inserted in the bins
 models_over_bins:
