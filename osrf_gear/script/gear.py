@@ -155,8 +155,11 @@ configurable_options = {
     'visualize_sensor_views': False,
 }
 default_time_limit = 500  # seconds
+max_count_per_model = 30  # limit on the number of instances of each model type
 global_model_count = {}  # the global count of how many times a model type has been created
 model_id_mappings = None  # mapping between model index and IDs, for each type
+max_model_id = max_count_per_model * len(possible_products)
+random_ids = random.sample(range(0, max_model_id), max_model_id)
 
 
 # Helper for converting strings to booleans; copied from https://stackoverflow.com/a/43357954
@@ -291,7 +294,8 @@ def get_next_model_id(model_type):
 
     if model_type not in model_id_mappings:
         # First time we've used this model; initialize the random mapping between index and ID
-        model_id_mappings[model_type] = random.sample(range(0, 100), 100)
+        model_id_mappings[model_type] = random_ids[:max_count_per_model]
+        del random_ids[:max_count_per_model]
 
     return model_id_mappings[model_type][model_count_post_increment(model_type)]
 
