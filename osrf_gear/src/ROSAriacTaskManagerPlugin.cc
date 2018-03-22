@@ -449,9 +449,12 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
       &ROSAriacTaskManagerPlugin::HandleSubmitShipmentService, this);
 
   // Service for querying material storage locations.
-  this->dataPtr->getMaterialLocationsServiceServer =
-    this->dataPtr->rosnode->advertiseService(getMaterialLocationsServiceName,
-      &ROSAriacTaskManagerPlugin::HandleGetMaterialLocationsService, this);
+  if (!this->dataPtr->competitionMode)
+  {
+    this->dataPtr->getMaterialLocationsServiceServer =
+      this->dataPtr->rosnode->advertiseService(getMaterialLocationsServiceName,
+        &ROSAriacTaskManagerPlugin::HandleGetMaterialLocationsService, this);
+  }
 
   // Client for the conveyor control commands.
   this->dataPtr->conveyorControlClient =

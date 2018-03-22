@@ -157,9 +157,6 @@ services:
   - service: /ariac/start_competition
     type: std_srvs/Trigger
 
-  - service: /ariac/material_locations
-    type: osrf_gear/GetMaterialLocations
-
   - service: /ariac/drone
     type: osrf_gear/DroneControl
 
