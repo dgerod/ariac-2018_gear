@@ -26,9 +26,8 @@ import subprocess
 import sys
 
 import em
-import yaml
-
 import rospkg
+import yaml
 
 rospack = rospkg.RosPack()
 world_dir = os.path.join(rospack.get_path('osrf_gear'), 'worlds')
