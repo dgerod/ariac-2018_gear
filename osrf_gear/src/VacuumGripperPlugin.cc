@@ -462,11 +462,11 @@ void VacuumGripperPlugin::OnUpdate()
   if (this->dataPtr->attached && this->dataPtr->dropPending)
   {
     auto objPose = this->dataPtr->dropAttachedModel->GetWorldPose();
-    ignition::math::Pose3d dropFramePose;
-    ignition::math::Matrix4d dropFrameTransMat;
     gzdbg << "Object world pose: " << objPose << std::endl;
     for (const auto dropObject : this->dataPtr->objectsToDrop)
     {
+      ignition::math::Pose3d dropFramePose;
+      ignition::math::Matrix4d dropFrameTransMat;
       if (dropObject.frame)
       {
         // Transform the pose of the object from world frame to the specified frame.
@@ -484,12 +484,16 @@ void VacuumGripperPlugin::OnUpdate()
         // Drop the object.
         this->HandleDetach();
 
-        // Determine the destination in the world frame.
-        ignition::math::Matrix4d objDestLocal(dropObject.destination.Ign());
-        auto objDestWorld = (dropFrameTransMat * objDestLocal).Pose();
+        auto objDest= dropObject.destination;
+        if (dropObject.frame)
+        {
+          // Determine the destination in the world frame.
+          ignition::math::Matrix4d objDestLocal(objDest.Ign());
+          objDest = (dropFrameTransMat * objDestLocal).Pose();
+        }
 
         // Teleport it to the destination.
-        this->dataPtr->dropAttachedModel->SetWorldPose(objDestWorld);
+        this->dataPtr->dropAttachedModel->SetWorldPose(objDest);
         this->dataPtr->dropAttachedModel->SetLinearVel(math::Vector3::Zero);
         this->dataPtr->dropAttachedModel->SetLinearAccel(math::Vector3::Zero);
 
