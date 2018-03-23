@@ -272,11 +272,12 @@ class PoseInfo:
 
 
 class DropRegionInfo:
-    def __init__(self, name, drop_region_min, drop_region_max, destination, model_type):
+    def __init__(self, name, drop_region_min, drop_region_max, destination, frame, model_type):
         self.name = name
         self.min = [str(f) for f in drop_region_min]
         self.max = [str(f) for f in drop_region_max]
         self.destination = destination
+        self.frame = frame
         self.type = model_type
 
 
@@ -466,6 +467,7 @@ def create_drops_info(drops_dict):
     drop_region_infos = []
     drop_regions_dict = get_required_field('drops', drops_dict, 'drop_regions')
     for drop_name, drop_region_dict in drop_regions_dict.items():
+        frame = get_field_with_default(drop_region_dict, 'frame', 'world')
         drop_region_min = get_required_field('drop_region', drop_region_dict, 'min')
         drop_region_min_xyz = get_required_field('min', drop_region_min, 'xyz')
         drop_region_max = get_required_field('drop_region', drop_region_dict, 'max')
@@ -475,7 +477,9 @@ def create_drops_info(drops_dict):
         product_type = get_required_field('drop_region', drop_region_dict, 'product_type_to_drop')
         product_type = replace_type_aliases(product_type)
         drop_region_infos.append(
-            DropRegionInfo(drop_name, drop_region_min_xyz, drop_region_max_xyz, destination, product_type))
+            DropRegionInfo(
+                drop_name, drop_region_min_xyz, drop_region_max_xyz,
+                destination, frame, product_type))
     drops_info['drop_regions'] = drop_region_infos
     return drops_info
 
