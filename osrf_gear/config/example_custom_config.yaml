@@ -114,27 +114,40 @@ models_to_spawn:
         pose:
           xyz: [0.1, 0.1, 0.25]      # Co-ordinates of the model origin in the specified reference frame
           rpy: [0, 0, '-pi/2']       # Roll, pitch, yaw of the model in the specified reference frame
+
+# Drops from the vacuum gripper to be triggered at particular locations
 drops:
   drop_regions:
-    agv1_impeding:
+    shipping_box_flap:
       frame: shipping_box_0::box_base # Frame the drop region/destination is specified in
-      min:
-        xyz: [-0.4, -0.4, -0.5]
-      max:
-        xyz: [0.4, 0.4, 1.5]
+      min:                           # Min corner of the bounding box that triggers a drop
+        xyz: [-0.15, -0.35, 0.0]
+      max:                           # Max corner of the bounding box that triggers a drop
+        xyz: [0.15, 0.35, 0.5]
       destination:                   # Where to drop the part to
-        xyz: [0.4, 0.1, 0.2]
-        rpy: [0, 0, 0.2]
-      product_type_to_drop: gear_part
-    agv2_impeding:
-      min:
-        xyz: [0.0, -2.7, 0.6]
-      max:
-        xyz: [0.6, -3.5, 1.5]
-      destination:
-        xyz: [0.4, -3.1, 0.8]
+        xyz: [-0.35, 0.1, 0.15]
         rpy: [0, 0, 0.2]
       product_type_to_drop: piston_rod_part
+    shipping_box_0_impeding:
+      frame: shipping_box_0::box_base
+      min:
+        xyz: [-0.15, -0.35, 0.0]
+      max:
+        xyz: [0.15, 0.35, 0.5]
+      destination:
+        xyz: [0.15, 0.15, 0.15]
+        rpy: [0, 0, -0.2]
+      product_type_to_drop: pulley_part
+    shipping_box_1_impeding:
+      frame: shipping_box_1::box_base
+      min:
+        xyz: [-0.15, -0.35, 0.0]
+      max:
+        xyz: [0.15, 0.35, 0.5]
+      destination:
+        xyz: [0.15, 0.15, 0.15]
+        rpy: [0, 0, -0.2]
+      product_type_to_drop: pulley_part
     bin3_reachable:
       min:
         xyz: [-0.85, 0.7, 0.7]
@@ -143,4 +156,4 @@ drops:
       destination:
         xyz: [-0.65, 1.15, 0.76]
         rpy: [0, 0, 0.5]
-      product_type_to_drop: piston_rod_part
+      product_type_to_drop: gear_part

@@ -331,7 +331,6 @@ void VacuumGripperPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
       if (dropRegionElem->HasElement("frame"))
       {
         std::string dropFrameName = dropRegionElem->Get<std::string>("frame");
-        fprintf(stderr, "DROP REGION FRAME: %s\n", dropFrameName.c_str());
         dropFrame = this->dataPtr->world->GetEntity(dropFrameName);
         if (!dropFrame) {
           gzthrow(std::string("The frame '") + dropFrameName + "' does not exist");
@@ -348,7 +347,6 @@ void VacuumGripperPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
       math::Box dropRegion = math::Box(min, max);
       math::Pose destination = dstElement->Get<math::Pose>();
-
 
       VacuumGripperPluginPrivate::DropObject dropObject {type, dropRegion, destination, dropFrame};
       this->dataPtr->objectsToDrop.push_back(dropObject);
@@ -461,25 +459,23 @@ void VacuumGripperPlugin::OnUpdate()
 
   if (this->dataPtr->attached && this->dataPtr->dropPending)
   {
-    auto objPose = this->dataPtr->dropAttachedModel->GetWorldPose();
-    gzdbg << "Object world pose: " << objPose << std::endl;
     for (const auto dropObject : this->dataPtr->objectsToDrop)
     {
       if (dropObject.type != this->dataPtr->attachedObjType)
       {
         continue;
       }
+
+      auto objPose = this->dataPtr->dropAttachedModel->GetWorldPose();
       ignition::math::Pose3d dropFramePose;
       ignition::math::Matrix4d dropFrameTransMat;
       if (dropObject.frame)
       {
         // Transform the pose of the object from world frame to the specified frame.
         dropFramePose = dropObject.frame->GetWorldPose().Ign();
-        gzdbg << "Frame pose: " << dropFramePose << std::endl;
         dropFrameTransMat = ignition::math::Matrix4d(dropFramePose);
         ignition::math::Matrix4d objPoseWorld(objPose.Ign());
         objPose = (dropFrameTransMat.Inverse() * objPoseWorld).Pose();
-        gzdbg << "Object pose in drop frame: " << objPose << std::endl;
       }
 
       if (!dropObject.dropRegion.Contains(objPose.pos))
