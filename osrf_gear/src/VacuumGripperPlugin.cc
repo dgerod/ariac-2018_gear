@@ -490,6 +490,8 @@ void VacuumGripperPlugin::OnUpdate()
 
         // Teleport it to the destination.
         this->dataPtr->dropAttachedModel->SetWorldPose(objDestWorld);
+        this->dataPtr->dropAttachedModel->SetLinearVel(math::Vector3::Zero);
+        this->dataPtr->dropAttachedModel->SetLinearAccel(math::Vector3::Zero);
 
         this->dataPtr->droppedObjects.push_back(this->dataPtr->attachedObjType);
 
