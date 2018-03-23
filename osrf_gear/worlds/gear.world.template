@@ -30,7 +30,8 @@ def expand_snippet(filename, data=locals()):
 @[end if]@
 
 @[if drops and options['visualize_drop_regions']]@
-@[for drop_region in drops['drop_regions']]@
+@[  for drop_region in drops['drop_regions']]@
+@[    if drop_region.frame == "world"]@
     <model name="@(drop_region.name)">
         <pose>@(' '.join([str((float(drop_region.min[i]) + float(drop_region.max[i])) * 0.5) for i in range(3)])) 0 0 0</pose>
         <static>true</static>
@@ -44,7 +45,8 @@ def expand_snippet(filename, data=locals()):
           </visual>
         </link>
      </model>
-@[end for]@
+@[    end if]@
+@[  end for]@
 @[end if]@
 
 

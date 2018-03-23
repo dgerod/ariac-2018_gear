@@ -11,6 +11,7 @@ options:
     order_part1: piston_rod_part    # Wherever 'order_part1' is used in the configuration file, use 'piston_rod_part'
     order_part2: gear_part
     order_part3: pulley_part
+  visualize_drop_regions: false     # Whether or not to visualize drop regions (world frame only)
 
 time_limit: 500                      # Maximum time allowed for the trial once started, in seconds
 random_seed: 1                       # Seed for the pseudo random number generator (used to randomize model names)
@@ -116,12 +117,12 @@ models_to_spawn:
 drops:
   drop_regions:
     agv1_impeding:
-      frame: shipping_box_0::box_base
+      frame: shipping_box_0::box_base # Frame the drop region/destination is specified in
       min:
         xyz: [-0.4, -0.4, -0.5]
       max:
         xyz: [0.4, 0.4, 1.5]
-      destination:                   # Where to drop the part to (world co-ordinates)
+      destination:                   # Where to drop the part to
         xyz: [0.4, 0.1, 0.2]
         rpy: [0, 0, 0.2]
       product_type_to_drop: gear_part
