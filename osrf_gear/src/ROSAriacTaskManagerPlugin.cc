@@ -264,9 +264,11 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
     orderElem = _sdf->GetElement("order");
   }
 
-  unsigned int orderCount = 0;
   while (orderElem)
   {
+    // Parse the order name.
+    ariac::OrderID_t orderID = orderElem->Get<std::string>("name");
+
     // Parse the start time.
     double startTime = std::numeric_limits<double>::infinity();
     if (orderElem->HasElement("start_time"))
@@ -369,7 +371,6 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
     }
 
     // Add a new order.
-    ariac::OrderID_t orderID = "order_" + std::to_string(orderCount++);
     ariac::Order order = {orderID, startTime, interruptOnUnwantedProducts, interruptOnWantedProducts, allowedTime, shipments, 0.0};
     this->dataPtr->ordersToAnnounce.push_back(order);
 
