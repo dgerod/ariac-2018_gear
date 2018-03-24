@@ -270,6 +270,10 @@ expand_snippet('shipping_box.sdf.template')
         <interrupt_on_unwanted_products>@(order['announcement_condition_value'])</interrupt_on_unwanted_products>
 @[end if]@
 @[for shipment_index in range(order['shipment_count'])]
+@{
+if '_update' in order_name:
+    order_name = order_name.split('_update')[0]
+}@
         <shipment>
           <shipment_type>@(order_name)_shipment_@(shipment_index)</shipment_type>
 @[for product in order['products']]@

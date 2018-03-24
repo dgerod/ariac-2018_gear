@@ -699,6 +699,20 @@ void ROSAriacTaskManagerPlugin::ProcessOrdersToAnnounce()
 
   if (announceNextOrder)
   {
+    auto updateLocn = nextOrder.orderID.find("_update");
+    if (updateLocn != std::string::npos)
+    {
+      gzdbg << "Order to update: " << nextOrder.orderID << std::endl;
+      this->AnnounceOrder(nextOrder);
+
+      // Update the order the scorer's monitoring
+      gzdbg << "Updating order: " << nextOrder << std::endl;
+      nextOrder.orderID = nextOrder.orderID.substr(0, updateLocn);
+      this->dataPtr->ariacScorer.UpdateOrder(nextOrder);
+      this->dataPtr->ordersToAnnounce.erase(this->dataPtr->ordersToAnnounce.begin());
+      return;
+    }
+
     gzdbg << "New order to announce: " << nextOrder.orderID << std::endl;
 
     // Move order to the 'in process' stack
@@ -842,7 +856,7 @@ void ROSAriacTaskManagerPlugin::PopulateConveyorBelt()
 }
 
 /////////////////////////////////////////////////
-void ROSAriacTaskManagerPlugin::AssignOrder(const ariac::Order & order)
+void ROSAriacTaskManagerPlugin::AnnounceOrder(const ariac::Order & order)
 {
     // Publish the order to ROS topic
     std::ostringstream logMessage;
@@ -852,6 +866,12 @@ void ROSAriacTaskManagerPlugin::AssignOrder(const ariac::Order & order)
     osrf_gear::Order orderMsg;
     fillOrderMsg(order, orderMsg);
     this->dataPtr->orderPub.publish(orderMsg);
+}
+
+/////////////////////////////////////////////////
+void ROSAriacTaskManagerPlugin::AssignOrder(const ariac::Order & order)
+{
+    this->AnnounceOrder(order);
 
     // Assign the scorer the order to monitor
     gzdbg << "Assigning order: " << order << std::endl;
