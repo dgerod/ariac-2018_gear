@@ -124,6 +124,12 @@ namespace gazebo
     /// \brief Product count at which to blackout sensors.
     public: int sensorBlackoutProductCount = 0;
 
+    /// \brief If sensor blackout is currently in progress.
+    public: bool sensorBlackoutInProgress = false;
+
+    /// \brief The start time of the sensor blackout.
+    public: common::Time sensorBlackoutStartTime;
+
     /// \brief Timer for regularly publishing state/score.
     public: ros::Timer statusPubTimer;
 
@@ -217,11 +223,23 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
   this->dataPtr->world = _world;
   this->dataPtr->sdf = _sdf;
 
+  // Initialize Gazebo transport.
+  this->dataPtr->node = transport::NodePtr(new transport::Node());
+  this->dataPtr->node->Init();
+
   std::string robotNamespace = "";
   if (_sdf->HasElement("robot_namespace"))
   {
     robotNamespace = _sdf->GetElement(
       "robot_namespace")->Get<std::string>() + "/";
+  }
+
+  // Initialize ROS
+  this->dataPtr->rosnode.reset(new ros::NodeHandle(robotNamespace));
+
+  if(ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info))
+  {
+    ros::console::notifyLoggerLevelsChanged();
   }
 
   this->dataPtr->timeLimit = -1.0;
@@ -426,20 +444,12 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
 
   if (_sdf->HasElement("sensor_blackout"))
   {
-    sensorBlackoutElem = _sdf->GetElement("sensor_blackout");
+    auto sensorBlackoutElem = _sdf->GetElement("sensor_blackout");
     std::string sensorEnableTopic = sensorBlackoutElem->Get<std::string>("topic");
     this->dataPtr->sensorBlackoutProductCount = sensorBlackoutElem->Get<int>("product_count");
     this->dataPtr->sensorBlackoutDuration = sensorBlackoutElem->Get<double>("duration");
     this->dataPtr->sensorBlackoutControlPub = 
       this->dataPtr->node->Advertise<msgs::GzString>(sensorEnableTopic);
-  }
-
-  // Initialize ROS
-  this->dataPtr->rosnode.reset(new ros::NodeHandle(robotNamespace));
-
-  if(ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info))
-  {
-    ros::console::notifyLoggerLevelsChanged();
   }
 
   // Publisher for announcing new orders.
@@ -484,9 +494,6 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
     this->dataPtr->rosnode->createTimer(ros::Duration(0.1),
       &ROSAriacTaskManagerPlugin::PublishStatus, this);
 
-  // Initialize Gazebo transport.
-  this->dataPtr->node = transport::NodePtr(new transport::Node());
-  this->dataPtr->node->Init();
   this->dataPtr->populatePub =
     this->dataPtr->node->Advertise<msgs::GzString>(populationActivateTopic);
 
@@ -547,6 +554,9 @@ void ROSAriacTaskManagerPlugin::OnUpdate()
 
     // Update the order manager.
     this->ProcessOrdersToAnnounce();
+
+    // Update the sensors if appropriate.
+    this->ProcessSensorBlackout();
 
     // Update the score.
     this->dataPtr->ariacScorer.Update(elapsedTime);
@@ -737,6 +747,44 @@ void ROSAriacTaskManagerPlugin::ProcessOrdersToAnnounce()
     this->dataPtr->ordersToAnnounce.erase(this->dataPtr->ordersToAnnounce.begin());
 
     this->AssignOrder(nextOrder);
+  }
+}
+
+
+/////////////////////////////////////////////////
+void ROSAriacTaskManagerPlugin::ProcessSensorBlackout()
+{
+  auto currentSimTime = this->dataPtr->world->GetSimTime();
+  if (this->dataPtr->sensorBlackoutProductCount > 0)
+  {
+    // Count total products in all boxes.
+    int totalProducts = 0;
+    for (const auto & shippingBox : this->dataPtr->ariacScorer.GetShippingBoxes())
+    {
+      totalProducts += shippingBox.currentShipment.products.size();
+    }
+    if (totalProducts >= this->dataPtr->sensorBlackoutProductCount)
+    {
+      gzdbg << "Triggering sensor blackout because " << totalProducts << " products detected." << std::endl;
+      gazebo::msgs::GzString activateMsg;
+      activateMsg.set_data("deactivate");
+      this->dataPtr->sensorBlackoutControlPub->Publish(activateMsg);
+      this->dataPtr->sensorBlackoutProductCount = -1;
+      this->dataPtr->sensorBlackoutStartTime = currentSimTime;
+      this->dataPtr->sensorBlackoutInProgress = true;
+    }
+  }
+  if (this->dataPtr->sensorBlackoutInProgress)
+  {
+    auto elapsedTime = (currentSimTime - this->dataPtr->sensorBlackoutStartTime).Double();
+    if (elapsedTime > this->dataPtr->sensorBlackoutDuration)
+    {
+      gzdbg << "Ending sensor blackout." << std::endl;
+      gazebo::msgs::GzString activateMsg;
+      activateMsg.set_data("activate");
+      this->dataPtr->sensorBlackoutControlPub->Publish(activateMsg);
+      this->dataPtr->sensorBlackoutInProgress = false;
+    }
   }
 }
 
