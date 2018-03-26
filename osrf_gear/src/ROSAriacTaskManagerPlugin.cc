@@ -115,6 +115,15 @@ namespace gazebo
     /// \brief Publisher for enabling the conveyor.
     public: transport::PublisherPtr conveyorEnablePub;
 
+    /// \brief Publisher for controlling the blackout of sensors.
+    public: transport::PublisherPtr sensorBlackoutControlPub;
+
+    /// \brief Duration at which to blackout sensors.
+    public: double sensorBlackoutDuration;
+
+    /// \brief Product count at which to blackout sensors.
+    public: int sensorBlackoutProductCount = 0;
+
     /// \brief Timer for regularly publishing state/score.
     public: ros::Timer statusPubTimer;
 
@@ -413,6 +422,16 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
       this->dataPtr->materialLocations[materialType] = locations;
       materialElem = materialElem->GetNextElement("material");
     }
+  }
+
+  if (_sdf->HasElement("sensor_blackout"))
+  {
+    sensorBlackoutElem = _sdf->GetElement("sensor_blackout");
+    std::string sensorEnableTopic = sensorBlackoutElem->Get<std::string>("topic");
+    this->dataPtr->sensorBlackoutProductCount = sensorBlackoutElem->Get<int>("product_count");
+    this->dataPtr->sensorBlackoutDuration = sensorBlackoutElem->Get<double>("duration");
+    this->dataPtr->sensorBlackoutControlPub = 
+      this->dataPtr->node->Advertise<msgs::GzString>(sensorEnableTopic);
   }
 
   // Initialize ROS

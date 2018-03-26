@@ -320,6 +320,13 @@ if '_update' in order_name:
         </material>
 @[end for]@
       </material_locations>
+@[if sensor_blackout]@
+      <sensor_blackout>
+        <duration>@(sensor_blackout['duration'])</duration>
+        <product_count>@(sensor_blackout['product_count'])</product_count>
+        <topic>/ariac/sensor_enable</topic>
+      </sensor_blackout>
+@[end if]@
       <update_rate>10</update_rate>
 
     </plugin>
