@@ -36,6 +36,7 @@ set(rostests
   test_scoring/ariac_scoring_missing_parts.test
   test_scoring/ariac_scoring_low_priority_order.test
   test_scoring/ariac_scoring_interrupted.test
+  test_scoring/ariac_scoring_updated_order.test
   test_scoring/ariac_scoring_not_interrupted.test
   test_scoring/ariac_scoring_faulty_parts.test
   test_scoring/ariac_scoring_faulty_parts_randomized.test
@@ -62,6 +63,7 @@ install(FILES
   test_scoring/scoring_base_order.yaml
   test_scoring/scoring_base_order_flipped.yaml
   test_scoring/scoring_base_order_interrupted.yaml
+  test_scoring/scoring_base_order_updated.yaml
   test_scoring/scoring_partial_shipment_both_shipments.yaml
   test_scoring/scoring_perfect_shipment.yaml
   test_scoring/scoring_perfect_shipment_both_shipments.yaml
