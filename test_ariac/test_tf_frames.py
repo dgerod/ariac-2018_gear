@@ -21,13 +21,16 @@ class TfTester(ExampleNodeTester):
     def test(self):
         self.prepare_tester()
 
-        self.tfBuffer = tf2_ros.Buffer()
-        self.listener = tf2_ros.TransformListener(self.tfBuffer)
+        self.prepare_tf()
 
-        self.camera_above_box0 = 'logical_camera_1'
         self._test_shipping_box_pose()
         self._test_logical_camera_products()
         self._test_faulty_products()
+
+    def prepare_tf(self):
+        self.camera_above_box0 = 'logical_camera_1'
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer)
 
     def _test_shipping_box_pose(self):
         self._test_pose(
