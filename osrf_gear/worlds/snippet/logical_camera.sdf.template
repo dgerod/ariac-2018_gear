@@ -55,6 +55,9 @@
         </visual>
 
         <sensor name="logical_camera" type="logical_camera">
+          <plugin name="sensor_blackout_plugin" filename="libSensorBlackoutPlugin.so" >
+            <activation_topic>/ariac/sensor_enable</activation_topic>
+          </plugin>
 
           <logical_camera>
             <near>0.2</near>

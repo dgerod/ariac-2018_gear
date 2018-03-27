@@ -4,9 +4,13 @@
         <sensor name="@(name)" type="ray">
           <update_rate>10</update_rate>
           <pose>0.025 0 0 0 0 0</pose>
+          <plugin name="sensor_blackout_plugin" filename="libSensorBlackoutPlugin.so" >
+            <activation_topic>/ariac/sensor_enable</activation_topic>
+          </plugin>
           <plugin name="proximity_ray_plugin" filename="libROSProximityRayPlugin.so" >
             <robotNamespace>ariac</robotNamespace>
             <time_delay>0.05</time_delay><!-- this modifies the update rate of the ray sensor -->
+            <activation_topic>/ariac/sensor_enable</activation_topic>
           </plugin>
           <ray>
             <range>

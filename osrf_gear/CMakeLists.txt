@@ -112,6 +112,19 @@ install(TARGETS ${ros_vacuum_gripper_plugin_name}
   RUNTIME DESTINATION bin)
 
 
+# Create the libSensorBlackoutPlugin.so library.
+set(sensor_blackout_plugin_name SensorBlackoutPlugin)
+add_library(${sensor_blackout_plugin_name} src/SensorBlackoutPlugin.cc)
+target_link_libraries(${sensor_blackout_plugin_name}
+  ${GAZEBO_LIBRARIES}
+)
+install(TARGETS ${sensor_blackout_plugin_name}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+
 # Create the libToggleVisualPlugin.so library.
 set(toggle_visual_plugin_name ToggleVisualPlugin)
 add_library(${toggle_visual_plugin_name} src/ToggleVisualPlugin.cc)
