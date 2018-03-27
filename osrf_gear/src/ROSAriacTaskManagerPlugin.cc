@@ -264,9 +264,11 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
     orderElem = _sdf->GetElement("order");
   }
 
-  unsigned int orderCount = 0;
   while (orderElem)
   {
+    // Parse the order name.
+    ariac::OrderID_t orderID = orderElem->Get<std::string>("name");
+
     // Parse the start time.
     double startTime = std::numeric_limits<double>::infinity();
     if (orderElem->HasElement("start_time"))
@@ -369,7 +371,6 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
     }
 
     // Add a new order.
-    ariac::OrderID_t orderID = "order_" + std::to_string(orderCount++);
     ariac::Order order = {orderID, startTime, interruptOnUnwantedProducts, interruptOnWantedProducts, allowedTime, shipments, 0.0};
     this->dataPtr->ordersToAnnounce.push_back(order);
 
@@ -698,6 +699,20 @@ void ROSAriacTaskManagerPlugin::ProcessOrdersToAnnounce()
 
   if (announceNextOrder)
   {
+    auto updateLocn = nextOrder.orderID.find("_update");
+    if (updateLocn != std::string::npos)
+    {
+      gzdbg << "Order to update: " << nextOrder.orderID << std::endl;
+      this->AnnounceOrder(nextOrder);
+
+      // Update the order the scorer's monitoring
+      gzdbg << "Updating order: " << nextOrder << std::endl;
+      nextOrder.orderID = nextOrder.orderID.substr(0, updateLocn);
+      this->dataPtr->ariacScorer.UpdateOrder(nextOrder);
+      this->dataPtr->ordersToAnnounce.erase(this->dataPtr->ordersToAnnounce.begin());
+      return;
+    }
+
     gzdbg << "New order to announce: " << nextOrder.orderID << std::endl;
 
     // Move order to the 'in process' stack
@@ -841,7 +856,7 @@ void ROSAriacTaskManagerPlugin::PopulateConveyorBelt()
 }
 
 /////////////////////////////////////////////////
-void ROSAriacTaskManagerPlugin::AssignOrder(const ariac::Order & order)
+void ROSAriacTaskManagerPlugin::AnnounceOrder(const ariac::Order & order)
 {
     // Publish the order to ROS topic
     std::ostringstream logMessage;
@@ -851,6 +866,12 @@ void ROSAriacTaskManagerPlugin::AssignOrder(const ariac::Order & order)
     osrf_gear::Order orderMsg;
     fillOrderMsg(order, orderMsg);
     this->dataPtr->orderPub.publish(orderMsg);
+}
+
+/////////////////////////////////////////////////
+void ROSAriacTaskManagerPlugin::AssignOrder(const ariac::Order & order)
+{
+    this->AnnounceOrder(order);
 
     // Assign the scorer the order to monitor
     gzdbg << "Assigning order: " << order << std::endl;

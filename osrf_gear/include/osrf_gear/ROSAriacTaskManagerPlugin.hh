@@ -147,6 +147,9 @@ namespace gazebo
     public: bool HandleGetMaterialLocationsService(
       osrf_gear::GetMaterialLocations::Request & req, osrf_gear::GetMaterialLocations::Response & res);
 
+    /// \brief Announce an order to participants.
+    protected: void AnnounceOrder(const ariac::Order & order);
+
     /// \brief Assign an order to be monitored by the scorer.
     protected: void AssignOrder(const ariac::Order & order);
 
