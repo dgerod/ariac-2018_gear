@@ -59,6 +59,7 @@ namespace gazebo
                 return this->type == _obj.type && \
                   this->dropRegion == _obj.dropRegion && \
                   this->destination == _obj.destination;
+                  this->frame == _obj.frame;
               }
 
               /// \brief Stream insertion operator.
@@ -82,6 +83,9 @@ namespace gazebo
 
               /// \brief Destination where objects are teleported to after a drop
               public: math::Pose destination;
+
+              /// \brief Reference frame of the drop region/destination
+              public: physics::EntityPtr frame;
 
               /// \brief Getter for the type of object to drop
               public: std::string getType() const
@@ -321,12 +325,30 @@ void VacuumGripperPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         dropRegionElem = dropRegionElem->GetNextElement("drop_region");
         continue;
       }
+
+      // Parse the frame of the drop.
+      physics::EntityPtr dropFrame = NULL;
+      if (dropRegionElem->HasElement("frame"))
+      {
+        std::string dropFrameName = dropRegionElem->Get<std::string>("frame");
+        dropFrame = this->dataPtr->world->GetEntity(dropFrameName);
+        if (!dropFrame) {
+          gzthrow(std::string("The frame '") + dropFrameName + "' does not exist");
+        }
+        if (!dropFrame->HasType(physics::Base::LINK) &&
+          !dropFrame->HasType(physics::Base::MODEL))
+        {
+          gzthrow("'frame' tag must list the name of a link or model");
+        }
+      }
+
       sdf::ElementPtr typeElement = dropRegionElem->GetElement("type");
       std::string type = typeElement->Get<std::string>();
 
       math::Box dropRegion = math::Box(min, max);
       math::Pose destination = dstElement->Get<math::Pose>();
-      VacuumGripperPluginPrivate::DropObject dropObject {type, dropRegion, destination};
+
+      VacuumGripperPluginPrivate::DropObject dropObject {type, dropRegion, destination, dropFrame};
       this->dataPtr->objectsToDrop.push_back(dropObject);
 
       dropRegionElem = dropRegionElem->GetNextElement("drop_region");
@@ -437,25 +459,51 @@ void VacuumGripperPlugin::OnUpdate()
 
   if (this->dataPtr->attached && this->dataPtr->dropPending)
   {
-    auto objPose = this->dataPtr->dropAttachedModel->GetWorldPose();
     for (const auto dropObject : this->dataPtr->objectsToDrop)
     {
-      if (dropObject.type == this->dataPtr->attachedObjType && \
-        dropObject.dropRegion.Contains(objPose.pos))
+      if (dropObject.type != this->dataPtr->attachedObjType)
       {
-        // Drop the object.
-        this->HandleDetach();
-
-        // Teleport it to the destination.
-        this->dataPtr->dropAttachedModel->SetWorldPose(
-          dropObject.destination);
-
-        this->dataPtr->droppedObjects.push_back(this->dataPtr->attachedObjType);
-
-        this->dataPtr->dropPending = false;
-        gzdbg << "Object dropped and teleported" << std::endl;
-        break;
+        continue;
       }
+
+      auto objPose = this->dataPtr->dropAttachedModel->GetWorldPose();
+      ignition::math::Pose3d dropFramePose;
+      ignition::math::Matrix4d dropFrameTransMat;
+      if (dropObject.frame)
+      {
+        // Transform the pose of the object from world frame to the specified frame.
+        dropFramePose = dropObject.frame->GetWorldPose().Ign();
+        dropFrameTransMat = ignition::math::Matrix4d(dropFramePose);
+        ignition::math::Matrix4d objPoseWorld(objPose.Ign());
+        objPose = (dropFrameTransMat.Inverse() * objPoseWorld).Pose();
+      }
+
+      if (!dropObject.dropRegion.Contains(objPose.pos))
+      {
+        continue;
+      }
+
+      // Drop the object.
+      this->HandleDetach();
+
+      auto objDest= dropObject.destination;
+      if (dropObject.frame)
+      {
+        // Determine the destination in the world frame.
+        ignition::math::Matrix4d objDestLocal(objDest.Ign());
+        objDest = (dropFrameTransMat * objDestLocal).Pose();
+      }
+
+      // Teleport it to the destination.
+      this->dataPtr->dropAttachedModel->SetWorldPose(objDest);
+      this->dataPtr->dropAttachedModel->SetLinearVel(math::Vector3::Zero);
+      this->dataPtr->dropAttachedModel->SetLinearAccel(math::Vector3::Zero);
+
+      this->dataPtr->droppedObjects.push_back(this->dataPtr->attachedObjType);
+
+      this->dataPtr->dropPending = false;
+      gzdbg << "Object dropped and teleported" << std::endl;
+      break;
     }
   }
 

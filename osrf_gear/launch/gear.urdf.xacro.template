@@ -41,6 +41,9 @@
             <max>@(' '.join(drop_region.max))</max>
             <destination>@(' '.join(drop_region.destination.xyz)) @(' '.join(drop_region.destination.rpy))</destination>
             <type>@(drop_region.type)</type>
+@[if drop_region.frame != "world"]@
+            <frame>@(drop_region.frame)</frame>
+@[end if]@
           </drop_region>
 @[end for]@
         </drop_regions>
