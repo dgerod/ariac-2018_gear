@@ -24,6 +24,8 @@ set(rostests
   ariac_example.test
   ariac_tf_frames.test
   gripper.test
+  gripper_drop_over_bins.test
+  gripper_drop_over_box.test
   # gripper_unthrottled.test  # this needs a good gripper pose; regression is fixed.
   test_scoring/ariac_scoring_perfect_shipment.test
   test_scoring/ariac_scoring_after_waiting.test
@@ -36,6 +38,7 @@ set(rostests
   test_scoring/ariac_scoring_missing_parts.test
   test_scoring/ariac_scoring_low_priority_order.test
   test_scoring/ariac_scoring_interrupted.test
+  test_scoring/ariac_scoring_updated_order.test
   test_scoring/ariac_scoring_not_interrupted.test
   test_scoring/ariac_scoring_faulty_parts.test
   test_scoring/ariac_scoring_faulty_parts_randomized.test
@@ -59,9 +62,12 @@ install(FILES
   ariac_rosapi_development_mode.yaml
   minimal_sample_unthrottled.yaml
   tf_sensors.yaml
+  product_drop_over_bins.yaml
+  product_drop_over_box.yaml
   test_scoring/scoring_base_order.yaml
   test_scoring/scoring_base_order_flipped.yaml
   test_scoring/scoring_base_order_interrupted.yaml
+  test_scoring/scoring_base_order_updated.yaml
   test_scoring/scoring_partial_shipment_both_shipments.yaml
   test_scoring/scoring_perfect_shipment.yaml
   test_scoring/scoring_perfect_shipment_both_shipments.yaml
@@ -81,10 +87,11 @@ install(PROGRAMS
   ros_api_checker
   test_example_node.py
   test_gripper.py
+  test_gripper_drop_over_bins.py
+  test_gripper_drop_over_box.py
   test_gripper_unthrottled.py
   test_scoring_after_waiting.py
   test_scoring_after_waiting.py
-  test_scoring_immediate.py
   test_scoring_against_expected_score.py
   test_tf_frames.py
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/test

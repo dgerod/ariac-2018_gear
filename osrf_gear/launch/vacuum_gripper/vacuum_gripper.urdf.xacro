@@ -30,6 +30,9 @@
     </collision>
   </link>
 
+  <!-- Gazebo will collapse consecutive fixed joints.
+       To avoid that happening when parts are attached to the gripper, it is a
+       null revolute joint instead. -->
   <joint name="vacuum_gripper_joint" type="revolute">
     <xacro:insert_block name="origin" />
     <axis xyz="0 0 1" />

@@ -62,6 +62,10 @@ class AriacScorer
   /// \param[in] order The order.
   public: void AssignOrder(const ariac::Order & order);
 
+  /// \brief Update a previously-assigned order.
+  /// \param[in] order The order.
+  public: void UpdateOrder(const ariac::Order & order);
+
   /// \brief Stop processing the current order.
   /// \param[in] timeTaken The time spent on the order.
   /// \return The score for the order.

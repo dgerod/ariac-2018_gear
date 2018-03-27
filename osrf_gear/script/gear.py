@@ -26,11 +26,12 @@ import subprocess
 import sys
 
 import em
+import rospkg
 import yaml
 
-this_dir = os.path.abspath(os.path.dirname(__file__))
-world_dir = os.path.join(this_dir, '..', '..', 'share', 'osrf_gear', 'worlds')
-launch_dir = os.path.join(this_dir, '..', '..', 'share', 'osrf_gear', 'launch')
+rospack = rospkg.RosPack()
+world_dir = os.path.join(rospack.get_path('osrf_gear'), 'worlds')
+launch_dir = os.path.join(rospack.get_path('osrf_gear'), 'launch')
 template_files = [
     os.path.join(world_dir, 'gear.world.template'),
     os.path.join(launch_dir, 'gear.launch.template'),
@@ -75,19 +76,11 @@ default_arm_dict = {
     'type': 'iiwa14'
 }
 possible_products = [
-    'part1',
-    'part2',
-    'part3',
-    'part4',
-    'arm_part',
-    'cross_joint_part',
     'disk_part',
     'gasket_part',
     'gear_part',
     'piston_rod_part',
     'pulley_part',
-    't_brace_part',
-    'u_joint_part',
 ]
 sensor_configs = {
     'break_beam': None,
@@ -161,10 +154,36 @@ configurable_options = {
         'belt_model_type2': 'part2',
     },
     'visualize_sensor_views': False,
+    'visualize_drop_regions': False,
 }
 default_time_limit = 500  # seconds
-global_model_count = {}  # the global count of how many times a model type has been created
-model_id_mappings = None  # mapping between model index and IDs, for each type
+max_count_per_model = 30  # limit on the number of instances of each model type
+
+def initialize_model_id_mappings(random_seed=None):
+    global global_model_count, model_id_mappings
+    global_model_count = {}  # global count of how many times a model type has been created
+
+    randomize = False
+    if random_seed is not None:
+        randomize = True
+        random.seed(random_seed)
+
+    # Initialize the mapping between model index and ID that will exist for each model type
+    model_id_mappings = {}
+
+    # Initialize the list of random IDs that will be used in the mappings
+    # The IDs will be unique across different model types
+    max_model_id = max_count_per_model * len(possible_products)  # can be larger for more spread
+    random_ids = random.sample(range(0, max_model_id), max_model_id)
+    for model_type in possible_products:
+        if not randomize:
+            # Just use ordinary mapping
+            model_id_mappings[model_type] = list(range(1, max_count_per_model + 1))
+        else:
+            # Use random IDs for the mapping
+            model_id_mappings[model_type] = random_ids[:max_count_per_model]
+            del random_ids[:max_count_per_model]
+
 
 
 # Helper for converting strings to booleans; copied from https://stackoverflow.com/a/43357954
@@ -253,10 +272,12 @@ class PoseInfo:
 
 
 class DropRegionInfo:
-    def __init__(self, drop_region_min, drop_region_max, destination, model_type):
+    def __init__(self, name, drop_region_min, drop_region_max, destination, frame, model_type):
+        self.name = name
         self.min = [str(f) for f in drop_region_min]
         self.max = [str(f) for f in drop_region_max]
         self.destination = destination
+        self.frame = frame
         self.type = model_type
 
 
@@ -287,20 +308,12 @@ def model_count_post_increment(model_type):
     try:
         count = global_model_count[model_type]
     except KeyError:
-        count = 1
+        count = 0
     global_model_count[model_type] = count + 1
     return count
 
 
 def get_next_model_id(model_type):
-    if model_id_mappings is None:
-        # Not using a mapping, just return the index as the ID
-        return model_count_post_increment(model_type)
-
-    if model_type not in model_id_mappings:
-        # First time we've used this model; initialize the random mapping between index and ID
-        model_id_mappings[model_type] = random.sample(range(0, 100), 100)
-
     return model_id_mappings[model_type][model_count_post_increment(model_type)]
 
 
@@ -454,6 +467,7 @@ def create_drops_info(drops_dict):
     drop_region_infos = []
     drop_regions_dict = get_required_field('drops', drops_dict, 'drop_regions')
     for drop_name, drop_region_dict in drop_regions_dict.items():
+        frame = get_field_with_default(drop_region_dict, 'frame', 'world')
         drop_region_min = get_required_field('drop_region', drop_region_dict, 'min')
         drop_region_min_xyz = get_required_field('min', drop_region_min, 'xyz')
         drop_region_max = get_required_field('drop_region', drop_region_dict, 'max')
@@ -463,7 +477,9 @@ def create_drops_info(drops_dict):
         product_type = get_required_field('drop_region', drop_region_dict, 'product_type_to_drop')
         product_type = replace_type_aliases(product_type)
         drop_region_infos.append(
-            DropRegionInfo(drop_region_min_xyz, drop_region_max_xyz, destination, product_type))
+            DropRegionInfo(
+                drop_name, drop_region_min_xyz, drop_region_max_xyz,
+                destination, frame, product_type))
     drops_info['drop_regions'] = drop_region_infos
     return drops_info
 
@@ -624,13 +640,8 @@ def main(sysargv=None):
     if args.verbose:
         print(yaml.dump({'Using configuration': expanded_dict_config}))
 
-    if 'random_seed' in expanded_dict_config:
-        global model_id_mappings
-        random_seed = expanded_dict_config.pop('random_seed')
-        random.seed(random_seed)
-        # Initialize the mapping between model index and ID that will exist for each model type
-        # If a random seed isn't specified, this mapping won't be used
-        model_id_mappings = {}
+    random_seed = expanded_dict_config.pop('random_seed', None)
+    initialize_model_id_mappings(random_seed)
 
     expanded_dict_config['arm_type'] = default_arm_dict
     template_data = prepare_template_data(expanded_dict_config, args)

@@ -11,6 +11,7 @@ options:
     order_part1: piston_rod_part    # Wherever 'order_part1' is used in the configuration file, use 'piston_rod_part'
     order_part2: gear_part
     order_part3: pulley_part
+  visualize_drop_regions: false     # Whether or not to visualize drop regions (world frame only)
 
 time_limit: 500                      # Maximum time allowed for the trial once started, in seconds
 random_seed: 1                       # Seed for the pseudo random number generator (used to randomize model names)
@@ -74,8 +75,8 @@ orders:
 
 # Individual products that will be reported as faulty
 faulty_products:
-  - piston_rod_part_83                # The piston rod part in the bins with randomized ID of 83
-  - piston_rod_part_24
+  - piston_rod_part_57                # The piston rod part in the bins with randomized ID of 57
+  - piston_rod_part_45
 
 # Models to be inserted in the bins
 models_over_bins:
@@ -113,3 +114,46 @@ models_to_spawn:
         pose:
           xyz: [0.1, 0.1, 0.25]      # Co-ordinates of the model origin in the specified reference frame
           rpy: [0, 0, '-pi/2']       # Roll, pitch, yaw of the model in the specified reference frame
+
+# Drops from the vacuum gripper to be triggered at particular locations
+drops:
+  drop_regions:
+    shipping_box_flap:
+      frame: shipping_box_0::box_base # Frame the drop region/destination is specified in
+      min:                           # Min corner of the bounding box that triggers a drop
+        xyz: [-0.15, -0.35, 0.0]
+      max:                           # Max corner of the bounding box that triggers a drop
+        xyz: [0.15, 0.35, 0.5]
+      destination:                   # Where to drop the part to
+        xyz: [-0.35, 0.1, 0.15]
+        rpy: [0, 0, 0.2]
+      product_type_to_drop: piston_rod_part
+    shipping_box_0_impeding:
+      frame: shipping_box_0::box_base
+      min:
+        xyz: [-0.15, -0.35, 0.0]
+      max:
+        xyz: [0.15, 0.35, 0.5]
+      destination:
+        xyz: [0.15, 0.15, 0.15]
+        rpy: [0, 0, -0.2]
+      product_type_to_drop: pulley_part
+    shipping_box_1_impeding:
+      frame: shipping_box_1::box_base
+      min:
+        xyz: [-0.15, -0.35, 0.0]
+      max:
+        xyz: [0.15, 0.35, 0.5]
+      destination:
+        xyz: [0.15, 0.15, 0.15]
+        rpy: [0, 0, -0.2]
+      product_type_to_drop: pulley_part
+    bin3_reachable:
+      min:
+        xyz: [-0.85, 0.7, 0.7]
+      max:
+        xyz: [-0.65, 1.60, 1.3]
+      destination:
+        xyz: [-0.65, 1.15, 0.76]
+        rpy: [0, 0, 0.5]
+      product_type_to_drop: gear_part

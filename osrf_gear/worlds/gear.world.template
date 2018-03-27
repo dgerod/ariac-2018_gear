@@ -29,6 +29,27 @@ def expand_snippet(filename, data=locals()):
     </scene>
 @[end if]@
 
+@[if drops and options['visualize_drop_regions']]@
+@[  for drop_region in drops['drop_regions']]@
+@[    if drop_region.frame == "world"]@
+    <model name="@(drop_region.name)">
+        <pose>@(' '.join([str((float(drop_region.min[i]) + float(drop_region.max[i])) * 0.5) for i in range(3)])) 0 0 0</pose>
+        <static>true</static>
+        <link name="link">
+          <visual name="visual">
+            <geometry>
+            <box>
+              <size>@(' '.join([str(float(drop_region.max[i]) - float(drop_region.min[i])) for i in range(3)]))</size>
+            </box>
+            </geometry>
+          </visual>
+        </link>
+     </model>
+@[    end if]@
+@[  end for]@
+@[end if]@
+
+
     <!-- A global light source -->
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
@@ -259,6 +280,7 @@ expand_snippet('shipping_box.sdf.template')
       <orders_topic>/ariac/orders</orders_topic>
 @[for order_name, order in orders.items()]@
       <order>
+        <name>@(order_name)</name>
 @[if order['announcement_condition'] == 'time']@
         <start_time>@(order['announcement_condition_value'])</start_time>
 @[end if]@
@@ -269,6 +291,10 @@ expand_snippet('shipping_box.sdf.template')
         <interrupt_on_unwanted_products>@(order['announcement_condition_value'])</interrupt_on_unwanted_products>
 @[end if]@
 @[for shipment_index in range(order['shipment_count'])]
+@{
+if '_update' in order_name:
+    order_name = order_name.split('_update')[0]
+}@
         <shipment>
           <shipment_type>@(order_name)_shipment_@(shipment_index)</shipment_type>
 @[for product in order['products']]@

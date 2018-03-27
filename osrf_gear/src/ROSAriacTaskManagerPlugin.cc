@@ -147,7 +147,7 @@ namespace gazebo
     public: std::mutex mutex;
 
     // During the competition, this environment variable will be set.
-    bool competitonMode = false;
+    bool competitionMode = false;
   };
 }
 
@@ -199,10 +199,10 @@ ROSAriacTaskManagerPlugin::~ROSAriacTaskManagerPlugin()
 void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
   sdf::ElementPtr _sdf)
 {
-  gzdbg << "ARIAC VERSION: 2.1.0\n";
+  gzdbg << "ARIAC VERSION: 2.1.1\n";
   auto competitionEnv = std::getenv("ARIAC_COMPETITION");
-  this->dataPtr->competitonMode = competitionEnv != NULL;
-  gzdbg << "ARIAC COMPETITION MODE: " << (this->dataPtr->competitonMode ? competitionEnv : "false") << std::endl;
+  this->dataPtr->competitionMode = competitionEnv != NULL;
+  gzdbg << "ARIAC COMPETITION MODE: " << (this->dataPtr->competitionMode ? competitionEnv : "false") << std::endl;
 
   GZ_ASSERT(_world, "ROSAriacTaskManagerPlugin world pointer is NULL");
   GZ_ASSERT(_sdf, "ROSAriacTaskManagerPlugin sdf pointer is NULL");
@@ -264,9 +264,11 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
     orderElem = _sdf->GetElement("order");
   }
 
-  unsigned int orderCount = 0;
   while (orderElem)
   {
+    // Parse the order name.
+    ariac::OrderID_t orderID = orderElem->Get<std::string>("name");
+
     // Parse the start time.
     double startTime = std::numeric_limits<double>::infinity();
     if (orderElem->HasElement("start_time"))
@@ -369,7 +371,6 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
     }
 
     // Add a new order.
-    ariac::OrderID_t orderID = "order_" + std::to_string(orderCount++);
     ariac::Order order = {orderID, startTime, interruptOnUnwantedProducts, interruptOnWantedProducts, allowedTime, shipments, 0.0};
     this->dataPtr->ordersToAnnounce.push_back(order);
 
@@ -432,8 +433,11 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
     std_msgs::String>(taskStateTopic, 1000);
 
   // Publisher for announcing the score of the game.
-  this->dataPtr->taskScorePub = this->dataPtr->rosnode->advertise<
-    std_msgs::Float32>(taskScoreTopic, 1000);
+  if (!this->dataPtr->competitionMode)
+  {
+    this->dataPtr->taskScorePub = this->dataPtr->rosnode->advertise<
+      std_msgs::Float32>(taskScoreTopic, 1000);
+  }
 
   // Service for ending the competition.
   this->dataPtr->compEndServiceServer =
@@ -446,9 +450,12 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
       &ROSAriacTaskManagerPlugin::HandleSubmitShipmentService, this);
 
   // Service for querying material storage locations.
-  this->dataPtr->getMaterialLocationsServiceServer =
-    this->dataPtr->rosnode->advertiseService(getMaterialLocationsServiceName,
-      &ROSAriacTaskManagerPlugin::HandleGetMaterialLocationsService, this);
+  if (!this->dataPtr->competitionMode)
+  {
+    this->dataPtr->getMaterialLocationsServiceServer =
+      this->dataPtr->rosnode->advertiseService(getMaterialLocationsServiceName,
+        &ROSAriacTaskManagerPlugin::HandleGetMaterialLocationsService, this);
+  }
 
   // Client for the conveyor control commands.
   this->dataPtr->conveyorControlClient =
@@ -607,7 +614,10 @@ void ROSAriacTaskManagerPlugin::PublishStatus(const ros::TimerEvent&)
 {
   std_msgs::Float32 scoreMsg;
   scoreMsg.data = this->dataPtr->currentGameScore.total();
-  this->dataPtr->taskScorePub.publish(scoreMsg);
+  if (!this->dataPtr->competitionMode)
+  {
+    this->dataPtr->taskScorePub.publish(scoreMsg);
+  }
 
   std_msgs::String stateMsg;
   stateMsg.data = this->dataPtr->currentState;
@@ -689,6 +699,20 @@ void ROSAriacTaskManagerPlugin::ProcessOrdersToAnnounce()
 
   if (announceNextOrder)
   {
+    auto updateLocn = nextOrder.orderID.find("_update");
+    if (updateLocn != std::string::npos)
+    {
+      gzdbg << "Order to update: " << nextOrder.orderID << std::endl;
+      this->AnnounceOrder(nextOrder);
+
+      // Update the order the scorer's monitoring
+      gzdbg << "Updating order: " << nextOrder << std::endl;
+      nextOrder.orderID = nextOrder.orderID.substr(0, updateLocn);
+      this->dataPtr->ariacScorer.UpdateOrder(nextOrder);
+      this->dataPtr->ordersToAnnounce.erase(this->dataPtr->ordersToAnnounce.begin());
+      return;
+    }
+
     gzdbg << "New order to announce: " << nextOrder.orderID << std::endl;
 
     // Move order to the 'in process' stack
@@ -745,7 +769,7 @@ bool ROSAriacTaskManagerPlugin::HandleSubmitShipmentService(
   const std::string& callerName = event.getCallerName();
   gzdbg << "Submit shipment service called by: " << callerName << std::endl;
 
-  if (this->dataPtr->competitonMode && callerName.compare("/gazebo") != 0)
+  if (this->dataPtr->competitionMode && callerName.compare("/gazebo") != 0)
   {
     std::string errStr = "Competition mode is enabled so this service is not enabled.";
     gzerr << errStr << std::endl;
@@ -832,7 +856,7 @@ void ROSAriacTaskManagerPlugin::PopulateConveyorBelt()
 }
 
 /////////////////////////////////////////////////
-void ROSAriacTaskManagerPlugin::AssignOrder(const ariac::Order & order)
+void ROSAriacTaskManagerPlugin::AnnounceOrder(const ariac::Order & order)
 {
     // Publish the order to ROS topic
     std::ostringstream logMessage;
@@ -842,6 +866,12 @@ void ROSAriacTaskManagerPlugin::AssignOrder(const ariac::Order & order)
     osrf_gear::Order orderMsg;
     fillOrderMsg(order, orderMsg);
     this->dataPtr->orderPub.publish(orderMsg);
+}
+
+/////////////////////////////////////////////////
+void ROSAriacTaskManagerPlugin::AssignOrder(const ariac::Order & order)
+{
+    this->AnnounceOrder(order);
 
     // Assign the scorer the order to monitor
     gzdbg << "Assigning order: " << order << std::endl;

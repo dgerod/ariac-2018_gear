@@ -22,6 +22,7 @@
           <name>@(product_name)</name>
 @[end for]@
         </known_model_names>
+        <anonymize_models>true</anonymize_models>
       </plugin>
       <link name="link">
         <gravity>false</gravity>

@@ -398,6 +398,25 @@ void AriacScorer::AssignOrder(const ariac::Order & order)
 }
 
 /////////////////////////////////////////////////
+void AriacScorer::UpdateOrder(const ariac::Order & order)
+{
+  boost::mutex::scoped_lock mutexLock(this->mutex);
+  gzdbg << "Updated order: " << order << std::endl;
+  ariac::OrderID_t orderID = order.orderID;
+  auto it = find_if(this->ordersInProgress.begin(), this->ordersInProgress.end(),
+      [&orderID](const ariac::Order& o) {
+        return o.orderID == orderID;
+      });
+  if (it == this->ordersInProgress.end())
+  {
+    gzerr << "No order with ID: " << orderID << std::endl;
+    return;
+  }
+  // TODO: re-evaluating any existing score.
+  *it = order;
+}
+
+/////////////////////////////////////////////////
 ariac::OrderScore AriacScorer::UnassignOrder(const ariac::OrderID_t & orderID)
 {
   gzdbg << "Unassign order request for: " << orderID << std::endl;
@@ -409,13 +428,13 @@ ariac::OrderScore AriacScorer::UnassignOrder(const ariac::OrderID_t & orderID)
       });
   if (it1 == this->ordersInProgress.end())
   {
-    gzdbg << "No order with ID: " << orderID << std::endl;
+    gzerr << "No order with ID: " << orderID << std::endl;
     return orderScore;
   }
   auto it = this->gameScore.orderScores.find(orderID);
   if (it == this->gameScore.orderScores.end())
   {
-    gzdbg << "No order score with ID: " << orderID << std::endl;
+    gzerr << "No order score with ID: " << orderID << std::endl;
     return orderScore;
   }
   orderScore = it->second;
