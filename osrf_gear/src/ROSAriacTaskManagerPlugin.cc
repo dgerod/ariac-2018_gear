@@ -199,7 +199,7 @@ ROSAriacTaskManagerPlugin::~ROSAriacTaskManagerPlugin()
 void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
   sdf::ElementPtr _sdf)
 {
-  gzdbg << "ARIAC VERSION: 2.1.0\n";
+  gzdbg << "ARIAC VERSION: 2.1.1\n";
   auto competitionEnv = std::getenv("ARIAC_COMPETITION");
   this->dataPtr->competitionMode = competitionEnv != NULL;
   gzdbg << "ARIAC COMPETITION MODE: " << (this->dataPtr->competitionMode ? competitionEnv : "false") << std::endl;
