@@ -14,7 +14,6 @@
  * limitations under the License.
  *
 */
-#include <functional>
 #include <cstdio>
 
 #include <gazebo/transport/Node.hh>
@@ -35,7 +34,6 @@ SensorBlackoutPlugin::SensorBlackoutPlugin()
 SensorBlackoutPlugin::~SensorBlackoutPlugin()
 {
     this->parentSensor.reset();
-    this->world.reset();
 }
 
 /////////////////////////////////////////////////
@@ -45,9 +43,8 @@ void SensorBlackoutPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
     this->parentSensor = _parent;
 
     std::string worldName = this->parentSensor->WorldName();
-    this->world = physics::get_world(worldName);
     this->node = transport::NodePtr(new transport::Node());
-    this->node->Init(worldName);
+    this->node->Init(this->parentSensor->WorldName());
 
     if (!_sdf->HasElement("activation_topic"))
     {
@@ -56,23 +53,24 @@ void SensorBlackoutPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
     }
     std::string activationTopic = _sdf->Get<std::string>("activation_topic");
     this->activationSub = this->node->Subscribe(activationTopic,
-            &ROSLogicalCameraPlugin::OnActivationMsg, this);
-      this->node->Subscribe<msgs::Header>(this->stateTopic, 50);
+            &SensorBlackoutPlugin::OnActivationMsg, this);
 }
 
 /////////////////////////////////////////////////
 void SensorBlackoutPlugin::OnActivationMsg(ConstGzStringPtr &_msg)
 {
+  fprintf(stderr, "%s %s active: %s\n", this->parentSensor->ParentName().c_str(), this->parentSensor->Name().c_str(), this->parentSensor->IsActive() ? "true" : "false");
   if (_msg->data() == "activate")
   {
-    this->dataPtr->sensor->setActive(true);
+    this->parentSensor->SetActive(true);
   }
   else if (_msg->data() == "deactivate")
   {
-    this->dataPtr->sensor->setActive(false);
+    this->parentSensor->SetActive(false);
   }
   else
   {
     gzerr << "Unknown activation command [" << _msg->data() << "]" << std::endl;
   }
+  fprintf(stderr, "%s active: %s\n", this->parentSensor->Name().c_str(), this->parentSensor->IsActive() ? "true" : "false");
 }

@@ -22,6 +22,9 @@
         </collision>
         <sensor name="@(name)" type="ray">
           <pose>0.023 0 0 0 0 0</pose>
+          <plugin name="sensor_blackout_plugin" filename="libSensorBlackoutPlugin.so" >
+            <activation_topic>/ariac/sensor_enable</activation_topic>
+          </plugin>
           <plugin filename="libgazebo_ros_range.so" name="gazebo_ros_range">
             <gaussianNoise>0.001</gaussianNoise>
             <alwaysOn>true</alwaysOn>

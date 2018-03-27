@@ -40,11 +40,17 @@ namespace gazebo
     public: virtual ~SensorBlackoutPlugin();
 
     /// \brief Called when an activation/deactivation message received
-    public: virtual void OnActivationMsg();
+    public: void OnActivationMsg(ConstGzStringPtr &_msg);
 
     /// \brief Load the plugin
     /// \param take in SDF root element
     public: void Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf);
+
+    /// \brief Pointer to this node for publishing
+    protected: transport::NodePtr node;
+
+    /// \brief The parent sensor
+    protected: sensors::SensorPtr parentSensor;
 
     /// \brief Subscriber to the activation topic.
     protected: transport::SubscriberPtr activationSub;
