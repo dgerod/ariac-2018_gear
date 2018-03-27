@@ -1,6 +1,7 @@
 # In this scenario:
 # - There is one order of one shipment.
 # - The order will be updated while it is being fulfilled.
+#   - Shipments will be evaluated against the updated order.
 #   - Teams should respond by filling the updated order instead of the original order.
 
 options:
@@ -45,7 +46,7 @@ orders:
           rpy: [0, 0, 0]
   order_0_update_0:
     announcement_condition: wanted_products
-    announcement_condition_value: 2
+    announcement_condition_value: 4
     shipment_count: 1
     products:
       product_0:
@@ -54,7 +55,7 @@ orders:
           xyz: [0.1, -0.2, 0]
           rpy: [0, 0, 0]
       product_1:
-        type: order_part1
+        type: order_part2
         pose:
           xyz: [-0.1, -0.2, 0]
           rpy: [0, 0, 0]
@@ -69,7 +70,7 @@ orders:
           xyz: [-0.15, 0.15, 0]
           rpy: [0, 0, 0]
       product_4:
-        type: order_part2
+        type: order_part3
         pose:
           xyz: [0.0, 0.15, 0]
           rpy: [0, 0, 0]
