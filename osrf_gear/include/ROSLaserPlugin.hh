@@ -93,6 +93,18 @@ namespace gazebo
     private: gazebo::transport::SubscriberPtr laser_scan_sub_;
     private: void OnScan(ConstLaserScanStampedPtr &_msg);
 
+    /// \brief Called when an activation/deactivation message received
+    public: void OnActivationMsg(ConstGzStringPtr &_msg);
+
+    /// \brief Subscriber to the activation topic.
+    private: transport::SubscriberPtr activation_sub_;
+
+    /// \brief If true, publish to the ROS topic
+    private: std::string activation_topic_name_;
+
+    /// \brief If true, publish to the ROS topic
+    private: bool publishing_ = true;
+
     /// \brief prevents blocking
     private: PubMultiQueue pmq;
   };

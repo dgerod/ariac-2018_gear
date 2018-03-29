@@ -98,6 +98,11 @@ void ROSLaserPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   else
     this->topic_name_ = this->sdf->Get<std::string>("topicName");
 
+  if (_sdf->HasElement("activation_topic"))
+  {
+    this->activation_topic_name_ = _sdf->Get<std::string>("activation_topic");
+  }
+
   this->laser_connect_count_ = 0;
 
     // Make sure the ROS node for Gazebo has already been initialized
@@ -149,6 +154,13 @@ void ROSLaserPlugin::LoadThread()
     this->pub_queue_ = this->pmq.addPub<sensor_msgs::LaserScan>();
   }
 
+  if (this->activation_topic_name_ != "")
+  {
+    this->activation_sub_ = this->gazebo_node_->Subscribe(
+        this->activation_topic_name_,
+        &ROSLaserPlugin::OnActivationMsg, this);
+  }
+
   // Initialize the controller
 
   // sensor generation off by default
@@ -179,6 +191,10 @@ void ROSLaserPlugin::LaserDisconnect()
 // Convert new Gazebo message to ROS message and publish it
 void ROSLaserPlugin::OnScan(ConstLaserScanStampedPtr &_msg)
 {
+  if (!this->publishing_)
+  {
+    return;
+  }
   // We got a new message from the Gazebo sensor.  Stuff a
   // corresponding ROS message and publish it.
   sensor_msgs::LaserScan laser_msg;
@@ -200,5 +216,22 @@ void ROSLaserPlugin::OnScan(ConstLaserScanStampedPtr &_msg)
             _msg->scan().intensities().end(),
             laser_msg.intensities.begin());
   this->pub_queue_->push(laser_msg, this->pub_);
+}
+
+/////////////////////////////////////////////////
+void ROSLaserPlugin::OnActivationMsg(ConstGzStringPtr &_msg)
+{
+  if (_msg->data() == "activate")
+  {
+    this->publishing_ = true;
+  }
+  else if (_msg->data() == "deactivate")
+  {
+    this->publishing_ = false;
+  }
+  else
+  {
+    gzerr << "Unknown activation command [" << _msg->data() << "]" << std::endl;
+  }
 }
 }
