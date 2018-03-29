@@ -27,6 +27,7 @@ set(rostests
   gripper_drop_over_bins.test
   gripper_drop_over_box.test
   # gripper_unthrottled.test  # this needs a good gripper pose; regression is fixed.
+  sensor_blackout.test
   test_scoring/ariac_scoring_perfect_shipment.test
   test_scoring/ariac_scoring_after_waiting.test
   test_scoring/ariac_scoring_after_waiting_with_state_logging.test
@@ -64,6 +65,7 @@ install(FILES
   tf_sensors.yaml
   product_drop_over_bins.yaml
   product_drop_over_box.yaml
+  sensor_blackout.yaml
   test_scoring/scoring_base_order.yaml
   test_scoring/scoring_base_order_flipped.yaml
   test_scoring/scoring_base_order_interrupted.yaml
@@ -93,6 +95,7 @@ install(PROGRAMS
   test_scoring_after_waiting.py
   test_scoring_after_waiting.py
   test_scoring_against_expected_score.py
+  test_sensor_blackout.py
   test_tf_frames.py
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/test
 )
