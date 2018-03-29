@@ -79,7 +79,7 @@ void ROSProximityRayPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sd
 
   // Initialize the publishers
   this->statePub = this->rosnode->advertise<osrf_gear::Proximity>(
-    this->stateTopic, 1, true);
+    this->stateTopic, 1, false);
   this->stateChangePub = this->rosnode->advertise<osrf_gear::Proximity>(
     this->stateChangeTopic, 1, true);
 

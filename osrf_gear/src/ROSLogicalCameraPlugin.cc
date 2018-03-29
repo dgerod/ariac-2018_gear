@@ -170,7 +170,7 @@ void ROSLogicalCameraPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
           &ROSLogicalCameraPlugin::OnImage, this);
   gzdbg << "Subscribing to gazebo topic: " << this->sensor->Topic() << "\n";
 
-  this->imagePub = this->rosnode->advertise<osrf_gear::LogicalCameraImage>(imageTopic_ros, 1, true);
+  this->imagePub = this->rosnode->advertise<osrf_gear::LogicalCameraImage>(imageTopic_ros, 1, false);
   gzdbg << "Publishing to ROS topic: " << imagePub.getTopic() << "\n";
 
   if (_sdf->HasElement("activation_topic"))
