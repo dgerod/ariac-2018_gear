@@ -91,6 +91,15 @@ namespace gazebo
     protected: void PublishTF(
       const math::Pose & pose, const std::string & parentFrame, const std::string & frame);
 
+    /// \brief Called when an activation/deactivation message received
+    public: void OnActivationMsg(ConstGzStringPtr &_msg);
+
+    /// \brief Subscriber to the activation topic.
+    protected: transport::SubscriberPtr activationSub;
+
+    /// \brief If true, publish to the ROS topic
+    protected: bool publishing = true;
+
     /// \brief Node for communication with gazebo
     protected: transport::NodePtr node;
 
