@@ -291,6 +291,7 @@ add_library(${ros_laser_plugin_name} src/ROSLaserPlugin.cc)
 target_link_libraries(${ros_laser_plugin_name}
   ${GAZEBO_LIBRARIES}
   ${catkin_LIBRARIES}
+  RayPlugin
 )
 add_dependencies(${ros_laser_plugin_name}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
