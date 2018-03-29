@@ -35,6 +35,7 @@
             <robotNamespace>/</robotNamespace>
             <frameName>@(name)_frame</frameName>
             <topicName>ariac/@(name)</topicName>
+            <alwaysOn>true</alwaysOn>
           </plugin>
           <ray>
             <range>
