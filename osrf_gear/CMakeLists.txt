@@ -285,6 +285,22 @@ install(TARGETS ${task_plugin_name}
   RUNTIME DESTINATION bin
 )
 
+# Create the libROSLaserPlugin.so library.
+set(ros_laser_plugin_name ROSLaserPlugin)
+add_library(${ros_laser_plugin_name} src/ROSLaserPlugin.cc)
+target_link_libraries(${ros_laser_plugin_name}
+  ${GAZEBO_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
+add_dependencies(${ros_laser_plugin_name}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+)
+install(TARGETS ${ros_laser_plugin_name}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
 # Create the libROSLogicalCameraPlugin.so library.
 set(ros_logical_camera_plugin_name ROSLogicalCameraPlugin)
 add_library(${ros_logical_camera_plugin_name} src/ROSLogicalCameraPlugin.cc)

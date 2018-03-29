@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef GAZEBO_ROS_LASER_HH
-#define GAZEBO_ROS_LASER_HH
+#ifndef ROS_LASER_PLUGIN_HH
+#define ROS_LASER_PLUGIN_HH
 
 #include <string>
 
@@ -42,13 +42,13 @@
 
 namespace gazebo
 {
-  class GazeboRosLaser : public RayPlugin
+  class ROSLaserPlugin : public RayPlugin
   {
     /// \brief Constructor
-    public: GazeboRosLaser();
+    public: ROSLaserPlugin();
 
     /// \brief Destructor
-    public: ~GazeboRosLaser();
+    public: ~ROSLaserPlugin();
 
     /// \brief Load the plugin
     /// \param take in SDF root element

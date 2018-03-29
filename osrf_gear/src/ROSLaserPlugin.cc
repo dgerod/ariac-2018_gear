@@ -21,6 +21,8 @@
  * Date: 01 Feb 2007
  */
 
+#include "ROSLaserPlugin.hh"
+
 #include <algorithm>
 #include <string>
 #include <assert.h>
@@ -38,23 +40,21 @@
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
 
-#include <gazebo_plugins/gazebo_ros_laser.h>
-
 namespace gazebo
 {
 // Register this plugin with the simulator
-GZ_REGISTER_SENSOR_PLUGIN(GazeboRosLaser)
+GZ_REGISTER_SENSOR_PLUGIN(ROSLaserPlugin)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constructor
-GazeboRosLaser::GazeboRosLaser()
+ROSLaserPlugin::ROSLaserPlugin()
 {
   this->seed = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Destructor
-GazeboRosLaser::~GazeboRosLaser()
+ROSLaserPlugin::~ROSLaserPlugin()
 {
   this->rosnode_->shutdown();
   delete this->rosnode_;
@@ -62,7 +62,7 @@ GazeboRosLaser::~GazeboRosLaser()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Load the controller
-void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
+void ROSLaserPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 {
   // load plugin
   RayPlugin::Load(_parent, this->sdf);
@@ -77,7 +77,7 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     dynamic_pointer_cast<sensors::RaySensor>(_parent);
 
   if (!this->parent_ray_sensor_)
-    gzthrow("GazeboRosLaser controller requires a Ray Sensor as its parent");
+    gzthrow("ROSLaserPlugin controller requires a Ray Sensor as its parent");
 
   this->robot_namespace_ =  GetRobotNamespace(_parent, _sdf, "Laser");
 
@@ -111,13 +111,13 @@ void GazeboRosLaser::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
   ROS_INFO_NAMED("laser", "Starting Laser Plugin (ns = %s)", this->robot_namespace_.c_str() );
   // ros callback queue for processing subscription
   this->deferred_load_thread_ = boost::thread(
-    boost::bind(&GazeboRosLaser::LoadThread, this));
+    boost::bind(&ROSLaserPlugin::LoadThread, this));
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Load the controller
-void GazeboRosLaser::LoadThread()
+void ROSLaserPlugin::LoadThread()
 {
   this->gazebo_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
   this->gazebo_node_->Init(this->world_name_);
@@ -142,8 +142,8 @@ void GazeboRosLaser::LoadThread()
     ros::AdvertiseOptions ao =
       ros::AdvertiseOptions::create<sensor_msgs::LaserScan>(
       this->topic_name_, 1,
-      boost::bind(&GazeboRosLaser::LaserConnect, this),
-      boost::bind(&GazeboRosLaser::LaserDisconnect, this),
+      boost::bind(&ROSLaserPlugin::LaserConnect, this),
+      boost::bind(&ROSLaserPlugin::LaserDisconnect, this),
       ros::VoidPtr(), NULL);
     this->pub_ = this->rosnode_->advertise(ao);
     this->pub_queue_ = this->pmq.addPub<sensor_msgs::LaserScan>();
@@ -157,18 +157,18 @@ void GazeboRosLaser::LoadThread()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Increment count
-void GazeboRosLaser::LaserConnect()
+void ROSLaserPlugin::LaserConnect()
 {
   this->laser_connect_count_++;
   if (this->laser_connect_count_ == 1)
     this->laser_scan_sub_ =
       this->gazebo_node_->Subscribe(this->parent_ray_sensor_->Topic(),
-                                    &GazeboRosLaser::OnScan, this);
+                                    &ROSLaserPlugin::OnScan, this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Decrement count
-void GazeboRosLaser::LaserDisconnect()
+void ROSLaserPlugin::LaserDisconnect()
 {
   this->laser_connect_count_--;
   if (this->laser_connect_count_ == 0)
@@ -177,7 +177,7 @@ void GazeboRosLaser::LaserDisconnect()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Convert new Gazebo message to ROS message and publish it
-void GazeboRosLaser::OnScan(ConstLaserScanStampedPtr &_msg)
+void ROSLaserPlugin::OnScan(ConstLaserScanStampedPtr &_msg)
 {
   // We got a new message from the Gazebo sensor.  Stuff a
   // corresponding ROS message and publish it.
