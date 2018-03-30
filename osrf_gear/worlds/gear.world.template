@@ -274,6 +274,7 @@ expand_snippet('shipping_box.sdf.template')
       <start_competition_service_name>/ariac/start_competition</start_competition_service_name>
       <end_competition_service_name>/ariac/end_competition</end_competition_service_name>
       <population_activate_topic>/ariac/populate_belt</population_activate_topic>
+      <conveyor_enable_topic>/ariac/conveyor_enable</conveyor_enable_topic>
       <conveyor_control_topic>/ariac/conveyor/control</conveyor_control_topic>
       <submit_shipment_service_name>/ariac/submit_shipment</submit_shipment_service_name>
       <material_locations_service_name>/ariac/material_locations</material_locations_service_name>
