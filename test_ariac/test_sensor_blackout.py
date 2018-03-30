@@ -30,7 +30,9 @@ class SensorBlackoutTester(TfTester):
 
         # Starting the competition will cause the sensor blackout period to be triggered.
         self._test_start_comp()
-        rospy.sleep(2.5)
+
+        # Wait for the sensor blackout to be triggered.
+        rospy.sleep(2.0)
 
         # The TF frames from the logical cameras should not be published.
         self._test_no_tf_frames()
@@ -64,6 +66,8 @@ class SensorBlackoutTester(TfTester):
     def _test_no_tf_frames(self):
         with self.assertRaises(tf2.LookupException):
             self._test_logical_camera_products()
+        with self.assertRaises(tf2.LookupException):
+            self._test_faulty_products()
 
 
 if __name__ == '__main__':
