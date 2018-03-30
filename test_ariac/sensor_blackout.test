@@ -2,6 +2,7 @@
   <node name="ariac_sim" pkg="osrf_gear" type="gear.py"
         args="-f
               $(find osrf_gear)/config/sample_user_config.yaml
+              $(find test_ariac)/test/tf_sensors.yaml
               $(find test_ariac)/test/scoring_base_order.yaml
               $(find test_ariac)/test/scoring_perfect_shipment.yaml
               $(find test_ariac)/test/sensor_blackout.yaml
