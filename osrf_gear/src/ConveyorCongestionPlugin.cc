@@ -92,7 +92,6 @@ class ConveyorCongestionPlugin : public WorldPlugin
 
   private: void OnSensorState(ConstHeaderPtr &_msg)
   {
-    fprintf(stderr, "Congestion sensor says: %i\n", _msg->index());
     this->congestionSensorState = _msg->index();
   }
 

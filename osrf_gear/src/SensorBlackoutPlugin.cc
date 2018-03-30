@@ -59,7 +59,6 @@ void SensorBlackoutPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf
 /////////////////////////////////////////////////
 void SensorBlackoutPlugin::OnActivationMsg(ConstGzStringPtr &_msg)
 {
-  fprintf(stderr, "%s %s active: %s\n", this->parentSensor->ParentName().c_str(), this->parentSensor->Name().c_str(), this->parentSensor->IsActive() ? "true" : "false");
   if (_msg->data() == "activate")
   {
     this->parentSensor->SetActive(true);
@@ -72,5 +71,4 @@ void SensorBlackoutPlugin::OnActivationMsg(ConstGzStringPtr &_msg)
   {
     gzerr << "Unknown activation command [" << _msg->data() << "]" << std::endl;
   }
-  fprintf(stderr, "%s active: %s\n", this->parentSensor->Name().c_str(), this->parentSensor->IsActive() ? "true" : "false");
 }
