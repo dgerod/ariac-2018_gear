@@ -27,6 +27,7 @@ set(rostests
   gripper_drop_over_bins.test
   gripper_drop_over_box.test
   # gripper_unthrottled.test  # this needs a good gripper pose; regression is fixed.
+  sensors.test
   sensor_blackout.test
   test_scoring/ariac_scoring_perfect_shipment.test
   test_scoring/ariac_scoring_after_waiting.test
@@ -96,6 +97,7 @@ install(PROGRAMS
   test_scoring_after_waiting.py
   test_scoring_against_expected_score.py
   test_sensor_blackout.py
+  test_sensors.py
   test_tf_frames.py
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/test
 )
