@@ -426,7 +426,7 @@ count[product.type] = id + 1
       If this detects a model, and the `drone_collection_zone` detects a box waiting,
       then this plugin will set the belt power to 0 and disable conveyor belt control.
       Control will be reenabled when the waiting box gets collected (power left at 0). -->
-    <plugin filename="libROSConveyorCongestionPlugin.so" name="congestion_controller">
+    <plugin filename="libConveyorCongestionPlugin.so" name="congestion_controller">
       <congestion_sensor_topic>/ariac/congestion_sensor</congestion_sensor_topic>
       <conveyor_control_topic>/ariac/conveyor_enable</conveyor_control_topic>
       <waiting_box_topic>/ariac/waiting_shipping_box</waiting_box_topic>
