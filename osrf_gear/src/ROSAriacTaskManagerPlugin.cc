@@ -40,7 +40,6 @@
 #include "osrf_gear/ARIAC.hh"
 #include "osrf_gear/ROSAriacTaskManagerPlugin.hh"
 #include "osrf_gear/AriacScorer.h"
-#include "osrf_gear/ConveyorBeltControl.h"
 #include "osrf_gear/Shipment.h"
 #include "osrf_gear/Product.h"
 #include "osrf_gear/Order.h"
@@ -113,8 +112,23 @@ namespace gazebo
     /// \brief Publisher for enabling the product population on the conveyor.
     public: transport::PublisherPtr populatePub;
 
-    /// \brief Client for controlling the conveyor.
-    public: ros::ServiceClient conveyorControlClient;
+    /// \brief Publisher for enabling the conveyor.
+    public: transport::PublisherPtr conveyorEnablePub;
+
+    /// \brief Publisher for controlling the blackout of sensors.
+    public: transport::PublisherPtr sensorBlackoutControlPub;
+
+    /// \brief Duration at which to blackout sensors.
+    public: double sensorBlackoutDuration;
+
+    /// \brief Product count at which to blackout sensors.
+    public: int sensorBlackoutProductCount = 0;
+
+    /// \brief If sensor blackout is currently in progress.
+    public: bool sensorBlackoutInProgress = false;
+
+    /// \brief The start time of the sensor blackout.
+    public: common::Time sensorBlackoutStartTime;
 
     /// \brief Timer for regularly publishing state/score.
     public: ros::Timer statusPubTimer;
@@ -199,7 +213,7 @@ ROSAriacTaskManagerPlugin::~ROSAriacTaskManagerPlugin()
 void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
   sdf::ElementPtr _sdf)
 {
-  gzdbg << "ARIAC VERSION: 2.1.1\n";
+  gzdbg << "ARIAC VERSION: 2.1.2\n";
   auto competitionEnv = std::getenv("ARIAC_COMPETITION");
   this->dataPtr->competitionMode = competitionEnv != NULL;
   gzdbg << "ARIAC COMPETITION MODE: " << (this->dataPtr->competitionMode ? competitionEnv : "false") << std::endl;
@@ -209,11 +223,23 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
   this->dataPtr->world = _world;
   this->dataPtr->sdf = _sdf;
 
+  // Initialize Gazebo transport.
+  this->dataPtr->node = transport::NodePtr(new transport::Node());
+  this->dataPtr->node->Init();
+
   std::string robotNamespace = "";
   if (_sdf->HasElement("robot_namespace"))
   {
     robotNamespace = _sdf->GetElement(
       "robot_namespace")->Get<std::string>() + "/";
+  }
+
+  // Initialize ROS
+  this->dataPtr->rosnode.reset(new ros::NodeHandle(robotNamespace));
+
+  if(ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info))
+  {
+    ros::console::notifyLoggerLevelsChanged();
   }
 
   this->dataPtr->timeLimit = -1.0;
@@ -236,9 +262,9 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
   if (_sdf->HasElement("task_score_topic"))
     taskScoreTopic = _sdf->Get<std::string>("task_score_topic");
 
-  std::string conveyorControlTopic = "conveyor/control";
-  if (_sdf->HasElement("conveyor_control_topic"))
-    conveyorControlTopic = _sdf->Get<std::string>("conveyor_control_topic");
+  std::string conveyorEnableTopic = "conveyor/enable";
+  if (_sdf->HasElement("conveyor_enable_topic"))
+    conveyorEnableTopic = _sdf->Get<std::string>("conveyor_enable_topic");
 
   std::string populationActivateTopic = "populate_belt";
   if (_sdf->HasElement("population_activate_topic"))
@@ -416,12 +442,14 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
     }
   }
 
-  // Initialize ROS
-  this->dataPtr->rosnode.reset(new ros::NodeHandle(robotNamespace));
-
-  if(ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info))
+  if (_sdf->HasElement("sensor_blackout"))
   {
-    ros::console::notifyLoggerLevelsChanged();
+    auto sensorBlackoutElem = _sdf->GetElement("sensor_blackout");
+    std::string sensorEnableTopic = sensorBlackoutElem->Get<std::string>("topic");
+    this->dataPtr->sensorBlackoutProductCount = sensorBlackoutElem->Get<int>("product_count");
+    this->dataPtr->sensorBlackoutDuration = sensorBlackoutElem->Get<double>("duration");
+    this->dataPtr->sensorBlackoutControlPub = 
+      this->dataPtr->node->Advertise<msgs::GzString>(sensorEnableTopic);
   }
 
   // Publisher for announcing new orders.
@@ -457,19 +485,15 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
         &ROSAriacTaskManagerPlugin::HandleGetMaterialLocationsService, this);
   }
 
-  // Client for the conveyor control commands.
-  this->dataPtr->conveyorControlClient =
-    this->dataPtr->rosnode->serviceClient<osrf_gear::ConveyorBeltControl>(
-      conveyorControlTopic);
+  // Publisher for the conveyor enable topic
+  this->dataPtr->conveyorEnablePub =
+    this->dataPtr->node->Advertise<msgs::GzString>(conveyorEnableTopic);
 
   // Timer for regularly publishing state/score.
   this->dataPtr->statusPubTimer =
     this->dataPtr->rosnode->createTimer(ros::Duration(0.1),
       &ROSAriacTaskManagerPlugin::PublishStatus, this);
 
-  // Initialize Gazebo transport.
-  this->dataPtr->node = transport::NodePtr(new transport::Node());
-  this->dataPtr->node->Init();
   this->dataPtr->populatePub =
     this->dataPtr->node->Advertise<msgs::GzString>(populationActivateTopic);
 
@@ -522,7 +546,7 @@ void ROSAriacTaskManagerPlugin::OnUpdate()
     this->dataPtr->gameStartTime = currentSimTime;
     this->dataPtr->currentState = "go";
 
-    this->ControlConveyorBelt(0);
+    this->EnableConveyorBeltControl();
     this->PopulateConveyorBelt();
   }
   else if (this->dataPtr->currentState == "go")
@@ -530,6 +554,9 @@ void ROSAriacTaskManagerPlugin::OnUpdate()
 
     // Update the order manager.
     this->ProcessOrdersToAnnounce();
+
+    // Update the sensors if appropriate.
+    this->ProcessSensorBlackout();
 
     // Update the score.
     this->dataPtr->ariacScorer.Update(elapsedTime);
@@ -723,6 +750,44 @@ void ROSAriacTaskManagerPlugin::ProcessOrdersToAnnounce()
   }
 }
 
+
+/////////////////////////////////////////////////
+void ROSAriacTaskManagerPlugin::ProcessSensorBlackout()
+{
+  auto currentSimTime = this->dataPtr->world->GetSimTime();
+  if (this->dataPtr->sensorBlackoutProductCount > 0)
+  {
+    // Count total products in all boxes.
+    int totalProducts = 0;
+    for (const auto & shippingBox : this->dataPtr->ariacScorer.GetShippingBoxes())
+    {
+      totalProducts += shippingBox.currentShipment.products.size();
+    }
+    if (totalProducts >= this->dataPtr->sensorBlackoutProductCount)
+    {
+      gzdbg << "Triggering sensor blackout because " << totalProducts << " products detected." << std::endl;
+      gazebo::msgs::GzString activateMsg;
+      activateMsg.set_data("deactivate");
+      this->dataPtr->sensorBlackoutControlPub->Publish(activateMsg);
+      this->dataPtr->sensorBlackoutProductCount = -1;
+      this->dataPtr->sensorBlackoutStartTime = currentSimTime;
+      this->dataPtr->sensorBlackoutInProgress = true;
+    }
+  }
+  if (this->dataPtr->sensorBlackoutInProgress)
+  {
+    auto elapsedTime = (currentSimTime - this->dataPtr->sensorBlackoutStartTime).Double();
+    if (elapsedTime > this->dataPtr->sensorBlackoutDuration)
+    {
+      gzdbg << "Ending sensor blackout." << std::endl;
+      gazebo::msgs::GzString activateMsg;
+      activateMsg.set_data("activate");
+      this->dataPtr->sensorBlackoutControlPub->Publish(activateMsg);
+      this->dataPtr->sensorBlackoutInProgress = false;
+    }
+  }
+}
+
 /////////////////////////////////////////////////
 bool ROSAriacTaskManagerPlugin::HandleStartService(
   std_srvs::Trigger::Request & req,
@@ -825,24 +890,11 @@ bool ROSAriacTaskManagerPlugin::HandleGetMaterialLocationsService(
 }
 
 /////////////////////////////////////////////////
-void ROSAriacTaskManagerPlugin::ControlConveyorBelt(double power)
+void ROSAriacTaskManagerPlugin::EnableConveyorBeltControl()
 {
-  gzdbg << "Control conveyor belt called.\n";
-
-  if (!this->dataPtr->conveyorControlClient.exists())
-  {
-    this->dataPtr->conveyorControlClient.waitForExistence();
-  }
-
-  // Make a service call to set the velocity of the belt
-  osrf_gear::ConveyorBeltControl srv;
-  srv.request.power = power;
-  this->dataPtr->conveyorControlClient.call(srv);
-  if (!srv.response.success) {
-    std::string errStr = "Failed to control conveyor.";
-    gzerr << errStr << std::endl;
-    ROS_ERROR_STREAM(errStr);
-  }
+  gazebo::msgs::GzString msg;
+  msg.set_data("enabled");
+  this->dataPtr->conveyorEnablePub->Publish(msg);
 }
 
 /////////////////////////////////////////////////

@@ -24,6 +24,7 @@
           <type>shipping_box</type>
         </known_model_types>
         <anonymize_models>false</anonymize_models>
+        <activation_topic>/ariac/sensor_enable</activation_topic>
       </plugin>
       <link name="link">
         <gravity>false</gravity>
@@ -55,7 +56,6 @@
         </visual>
 
         <sensor name="logical_camera" type="logical_camera">
-
           <logical_camera>
             <near>0.2</near>
             <far>0.55</far>

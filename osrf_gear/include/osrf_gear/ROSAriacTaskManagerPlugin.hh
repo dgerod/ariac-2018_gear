@@ -122,8 +122,11 @@ namespace gazebo
     /// \brief Decide whether to announce a new order.
     protected: void ProcessOrdersToAnnounce();
 
-    /// \brief Set the velocity of the conveyor belt.
-    protected: void ControlConveyorBelt(double power);
+    /// \brief Enable control of the conveyor belt.
+    protected: void EnableConveyorBeltControl();
+
+    /// \brief Trigger/end the sensor blackout if appropriate.
+    protected: void ProcessSensorBlackout();
 
     /// \brief Publish competition status.
     protected: void PublishStatus(const ros::TimerEvent&);

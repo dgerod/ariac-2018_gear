@@ -23,6 +23,7 @@
 @[end for]@
         </known_model_names>
         <anonymize_models>true</anonymize_models>
+        <activation_topic>/ariac/sensor_enable</activation_topic>
       </plugin>
       <link name="link">
         <gravity>false</gravity>

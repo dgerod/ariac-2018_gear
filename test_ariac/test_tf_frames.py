@@ -28,7 +28,7 @@ class TfTester(ExampleNodeTester):
         self._test_faulty_products()
 
     def prepare_tf(self):
-        self.camera_above_box0 = 'logical_camera_1'
+        self.camera_above_box0 = 'logical_camera_above_box0'
         self.tfBuffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tfBuffer)
 

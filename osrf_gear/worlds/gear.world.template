@@ -274,6 +274,7 @@ expand_snippet('shipping_box.sdf.template')
       <start_competition_service_name>/ariac/start_competition</start_competition_service_name>
       <end_competition_service_name>/ariac/end_competition</end_competition_service_name>
       <population_activate_topic>/ariac/populate_belt</population_activate_topic>
+      <conveyor_enable_topic>/ariac/conveyor_enable</conveyor_enable_topic>
       <conveyor_control_topic>/ariac/conveyor/control</conveyor_control_topic>
       <submit_shipment_service_name>/ariac/submit_shipment</submit_shipment_service_name>
       <material_locations_service_name>/ariac/material_locations</material_locations_service_name>
@@ -319,6 +320,13 @@ if '_update' in order_name:
         </material>
 @[end for]@
       </material_locations>
+@[if sensor_blackout]@
+      <sensor_blackout>
+        <duration>@(sensor_blackout['duration'])</duration>
+        <product_count>@(sensor_blackout['product_count'])</product_count>
+        <topic>/ariac/sensor_enable</topic>
+      </sensor_blackout>
+@[end if]@
       <update_rate>10</update_rate>
 
     </plugin>
@@ -418,7 +426,7 @@ count[product.type] = id + 1
       If this detects a model, and the `drone_collection_zone` detects a box waiting,
       then this plugin will set the belt power to 0 and disable conveyor belt control.
       Control will be reenabled when the waiting box gets collected (power left at 0). -->
-    <plugin filename="libROSConveyorCongestionPlugin.so" name="congestion_controller">
+    <plugin filename="libConveyorCongestionPlugin.so" name="congestion_controller">
       <congestion_sensor_topic>/ariac/congestion_sensor</congestion_sensor_topic>
       <conveyor_control_topic>/ariac/conveyor_enable</conveyor_control_topic>
       <waiting_box_topic>/ariac/waiting_shipping_box</waiting_box_topic>

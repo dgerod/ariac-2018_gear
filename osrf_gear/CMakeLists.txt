@@ -112,6 +112,19 @@ install(TARGETS ${ros_vacuum_gripper_plugin_name}
   RUNTIME DESTINATION bin)
 
 
+# Create the libSensorBlackoutPlugin.so library.
+set(sensor_blackout_plugin_name SensorBlackoutPlugin)
+add_library(${sensor_blackout_plugin_name} src/SensorBlackoutPlugin.cc)
+target_link_libraries(${sensor_blackout_plugin_name}
+  ${GAZEBO_LIBRARIES}
+)
+install(TARGETS ${sensor_blackout_plugin_name}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+
 # Create the libToggleVisualPlugin.so library.
 set(toggle_visual_plugin_name ToggleVisualPlugin)
 add_library(${toggle_visual_plugin_name} src/ToggleVisualPlugin.cc)
@@ -167,16 +180,16 @@ install(TARGETS ${ros_conveyor_belt_plugin_name}
   RUNTIME DESTINATION bin
 )
 
-# Create the libROSConveyorCongestionPlugin.so library.
-set(ros_conveyor_congestion_plugin ROSConveyorCongestionPlugin)
-add_library(${ros_conveyor_congestion_plugin} src/ROSConveyorCongestionPlugin.cc)
-target_link_libraries(${ros_conveyor_congestion_plugin}
+# Create the libConveyorCongestionPlugin.so library.
+set(conveyor_congestion_plugin ConveyorCongestionPlugin)
+add_library(${conveyor_congestion_plugin} src/ConveyorCongestionPlugin.cc)
+target_link_libraries(${conveyor_congestion_plugin}
   ${GAZEBO_LIBRARIES}
 )
-add_dependencies(${ros_conveyor_congestion_plugin}
+add_dependencies(${conveyor_congestion_plugin}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
-install(TARGETS ${ros_conveyor_congestion_plugin}
+install(TARGETS ${conveyor_congestion_plugin}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -267,6 +280,23 @@ add_dependencies(${task_plugin_name}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
 )
 install(TARGETS ${task_plugin_name}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+# Create the libROSLaserPlugin.so library.
+set(ros_laser_plugin_name ROSLaserPlugin)
+add_library(${ros_laser_plugin_name} src/ROSLaserPlugin.cc)
+target_link_libraries(${ros_laser_plugin_name}
+  ${GAZEBO_LIBRARIES}
+  ${catkin_LIBRARIES}
+  RayPlugin
+)
+add_dependencies(${ros_laser_plugin_name}
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+)
+install(TARGETS ${ros_laser_plugin_name}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin

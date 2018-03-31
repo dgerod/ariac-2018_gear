@@ -567,6 +567,7 @@ def prepare_template_data(config_dict, args):
         'bin_height': bin_height,
         'world_dir': world_dir,
         'joint_limited_ur10': config_dict.pop('joint_limited_ur10', False),
+        'sensor_blackout': {},
     }
     # Process the options first as they may affect the processing of the rest
     options_dict = get_field_with_default(config_dict, 'options', {})
@@ -596,6 +597,8 @@ def prepare_template_data(config_dict, args):
             template_data['faulty_products'].update(create_faulty_products_info(value))
         elif key == 'orders':
             template_data['orders'].update(create_order_infos(value))
+        elif key == 'sensor_blackout':
+            template_data['sensor_blackout'].update(value)
         elif key == 'options':
             pass
         elif key == 'models_to_spawn':

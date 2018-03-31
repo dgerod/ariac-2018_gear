@@ -4,10 +4,22 @@
         <sensor name="@(name)" type="ray">
           <update_rate>10</update_rate>
           <pose>0.025 0 0 0 0 0</pose>
-          <plugin name="proximity_ray_plugin" filename="libROSProximityRayPlugin.so" >
+@[if name == 'congestion_sensor']@
+          <!-- publishes the state on a gazebo topic for internal use -->
+          <plugin name="proximity_ray_plugin" filename="libProximityRayPlugin.so" >
+            <output_state_topic>/ariac/congestion_sensor</output_state_topic>
+          </plugin>
+@[else]@
+          <!-- publishes the state on a ROS topic for use by users -->
+          <plugin name="ros_proximity_ray_plugin" filename="libROSProximityRayPlugin.so" >
             <robotNamespace>ariac</robotNamespace>
             <time_delay>0.05</time_delay><!-- this modifies the update rate of the ray sensor -->
+            <activation_topic>/ariac/sensor_enable</activation_topic>
           </plugin>
+          <plugin name="sensor_blackout_plugin" filename="libSensorBlackoutPlugin.so" >
+            <activation_topic>/ariac/sensor_enable</activation_topic>
+          </plugin>
+@[end if]@
           <ray>
             <range>
               <min>0.0</min>
