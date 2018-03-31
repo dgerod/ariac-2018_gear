@@ -1,5 +1,5 @@
 sensors:
-  logical_camera_1:
+  logical_camera_above_box0:
     type: logical_camera
     pose:
       xyz: [0.5, 0.77, 1.12]

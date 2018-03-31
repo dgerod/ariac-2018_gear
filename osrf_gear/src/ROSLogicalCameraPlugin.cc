@@ -170,8 +170,15 @@ void ROSLogicalCameraPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sd
           &ROSLogicalCameraPlugin::OnImage, this);
   gzdbg << "Subscribing to gazebo topic: " << this->sensor->Topic() << "\n";
 
-  this->imagePub = this->rosnode->advertise<osrf_gear::LogicalCameraImage>(imageTopic_ros, 1, true);
+  this->imagePub = this->rosnode->advertise<osrf_gear::LogicalCameraImage>(imageTopic_ros, 1, false);
   gzdbg << "Publishing to ROS topic: " << imagePub.getTopic() << "\n";
+
+  if (_sdf->HasElement("activation_topic"))
+  {
+    std::string activationTopic = _sdf->Get<std::string>("activation_topic");
+    this->activationSub = this->node->Subscribe(activationTopic,
+            &ROSLogicalCameraPlugin::OnActivationMsg, this);
+  }
 
  transformBroadcaster = boost::shared_ptr<tf::TransformBroadcaster>(new tf::TransformBroadcaster());
 }
@@ -203,6 +210,10 @@ void ROSLogicalCameraPlugin::FindLogicalCamera()
 /////////////////////////////////////////////////
 void ROSLogicalCameraPlugin::OnImage(ConstLogicalCameraImagePtr &_msg)
 {
+  if (!this->publishing)
+  {
+    return;
+  }
   osrf_gear::LogicalCameraImage imageMsg;
   math::Vector3 cameraPosition = math::Vector3(msgs::ConvertIgn(_msg->pose().position()));
   math::Quaternion cameraOrientation = math::Quaternion(
@@ -377,4 +388,21 @@ void ROSLogicalCameraPlugin::PublishTF(
   tf::Transform transform (qt, vt);
   transformBroadcaster->sendTransform(tf::StampedTransform(transform, currentTime, parentFrame, frame));
 
+}
+
+/////////////////////////////////////////////////
+void ROSLogicalCameraPlugin::OnActivationMsg(ConstGzStringPtr &_msg)
+{
+  if (_msg->data() == "activate")
+  {
+    this->publishing = true;
+  }
+  else if (_msg->data() == "deactivate")
+  {
+    this->publishing = false;
+  }
+  else
+  {
+    gzerr << "Unknown activation command [" << _msg->data() << "]" << std::endl;
+  }
 }

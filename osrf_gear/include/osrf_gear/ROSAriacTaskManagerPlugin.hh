@@ -125,6 +125,9 @@ namespace gazebo
     /// \brief Enable control of the conveyor belt.
     protected: void EnableConveyorBeltControl();
 
+    /// \brief Trigger/end the sensor blackout if appropriate.
+    protected: void ProcessSensorBlackout();
+
     /// \brief Publish competition status.
     protected: void PublishStatus(const ros::TimerEvent&);
 
