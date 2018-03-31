@@ -94,6 +94,7 @@ void ConveyorBeltPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     std::string enableTopic = _sdf->Get<std::string>("enable_topic");
     this->enabledSub =
       this->gzNode->Subscribe(enableTopic, &ConveyorBeltPlugin::OnEnabled, this);
+    this->enabled = false;
   }
 
   // Listen to the update event that is broadcasted every simulation iteration.

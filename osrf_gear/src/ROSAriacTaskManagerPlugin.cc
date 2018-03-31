@@ -40,7 +40,6 @@
 #include "osrf_gear/ARIAC.hh"
 #include "osrf_gear/ROSAriacTaskManagerPlugin.hh"
 #include "osrf_gear/AriacScorer.h"
-#include "osrf_gear/ConveyorBeltControl.h"
 #include "osrf_gear/Shipment.h"
 #include "osrf_gear/Product.h"
 #include "osrf_gear/Order.h"
@@ -113,8 +112,8 @@ namespace gazebo
     /// \brief Publisher for enabling the product population on the conveyor.
     public: transport::PublisherPtr populatePub;
 
-    /// \brief Client for controlling the conveyor.
-    public: ros::ServiceClient conveyorControlClient;
+    /// \brief Publisher for enabling the conveyor.
+    public: transport::PublisherPtr conveyorEnablePub;
 
     /// \brief Timer for regularly publishing state/score.
     public: ros::Timer statusPubTimer;
@@ -236,9 +235,9 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
   if (_sdf->HasElement("task_score_topic"))
     taskScoreTopic = _sdf->Get<std::string>("task_score_topic");
 
-  std::string conveyorControlTopic = "conveyor/control";
-  if (_sdf->HasElement("conveyor_control_topic"))
-    conveyorControlTopic = _sdf->Get<std::string>("conveyor_control_topic");
+  std::string conveyorEnableTopic = "conveyor/enable";
+  if (_sdf->HasElement("conveyor_enable_topic"))
+    conveyorEnableTopic = _sdf->Get<std::string>("conveyor_enable_topic");
 
   std::string populationActivateTopic = "populate_belt";
   if (_sdf->HasElement("population_activate_topic"))
@@ -457,10 +456,9 @@ void ROSAriacTaskManagerPlugin::Load(physics::WorldPtr _world,
         &ROSAriacTaskManagerPlugin::HandleGetMaterialLocationsService, this);
   }
 
-  // Client for the conveyor control commands.
-  this->dataPtr->conveyorControlClient =
-    this->dataPtr->rosnode->serviceClient<osrf_gear::ConveyorBeltControl>(
-      conveyorControlTopic);
+  // Publisher for the conveyor enable topic
+  this->dataPtr->conveyorEnablePub =
+    this->dataPtr->node->Advertise<msgs::GzString>(conveyorEnableTopic);
 
   // Timer for regularly publishing state/score.
   this->dataPtr->statusPubTimer =
@@ -522,7 +520,7 @@ void ROSAriacTaskManagerPlugin::OnUpdate()
     this->dataPtr->gameStartTime = currentSimTime;
     this->dataPtr->currentState = "go";
 
-    this->ControlConveyorBelt(0);
+    this->EnableConveyorBeltControl();
     this->PopulateConveyorBelt();
   }
   else if (this->dataPtr->currentState == "go")
@@ -825,24 +823,11 @@ bool ROSAriacTaskManagerPlugin::HandleGetMaterialLocationsService(
 }
 
 /////////////////////////////////////////////////
-void ROSAriacTaskManagerPlugin::ControlConveyorBelt(double power)
+void ROSAriacTaskManagerPlugin::EnableConveyorBeltControl()
 {
-  gzdbg << "Control conveyor belt called.\n";
-
-  if (!this->dataPtr->conveyorControlClient.exists())
-  {
-    this->dataPtr->conveyorControlClient.waitForExistence();
-  }
-
-  // Make a service call to set the velocity of the belt
-  osrf_gear::ConveyorBeltControl srv;
-  srv.request.power = power;
-  this->dataPtr->conveyorControlClient.call(srv);
-  if (!srv.response.success) {
-    std::string errStr = "Failed to control conveyor.";
-    gzerr << errStr << std::endl;
-    ROS_ERROR_STREAM(errStr);
-  }
+  gazebo::msgs::GzString msg;
+  msg.set_data("enabled");
+  this->dataPtr->conveyorEnablePub->Publish(msg);
 }
 
 /////////////////////////////////////////////////
