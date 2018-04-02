@@ -12,7 +12,7 @@ def expand_snippet(filename, data=locals()):
     <!-- Set the initial camera pose to be looking at the workspace. -->
     <gui>
       <camera name="user_camera">
-        <pose>7.75 -5.6 5.3 0 0.5 2.46</pose>
+        <pose>7.64 -6 4 0 0.34 2.5</pose>
       </camera>
     </gui>
 

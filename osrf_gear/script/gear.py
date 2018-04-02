@@ -118,7 +118,7 @@ default_belt_models = {
     'shipping_box': {
         12.0: {
             'pose': {
-                'xyz': [0.0, 0.0, 0.5],
+                'xyz': [0.0, 0.0, 0.2],
                 'rpy': [0.0, 0.0, 1.5708]
             }
         }
