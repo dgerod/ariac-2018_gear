@@ -128,7 +128,7 @@ namespace gazebo
 
     /// \brief Rate modifier of the populating: 1.0 will populate at the standard rate,
     /// other values will scale the populating frequency.
-    public: double rateModifier = 1.0;
+    public: double rateModifier;
 
     /// \brief Object names will be prefixed by plugin name if True.
     public: bool prefixObjectNames = true;
@@ -281,6 +281,11 @@ void PopulationPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
     this->dataPtr->rateModifierSub = this->dataPtr->node->Subscribe(
         _sdf->Get<std::string>("rate_modifier_topic"),
         &PopulationPlugin::OnRateModification, this);
+    this->dataPtr->rateModifier = 0.0;
+  }
+  else
+  {
+    this->dataPtr->rateModifier = 1.0;
   }
 
   this->dataPtr->connection = event::Events::ConnectWorldUpdateEnd(
