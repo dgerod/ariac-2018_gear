@@ -337,14 +337,22 @@ void PopulationPlugin::OnUpdate()
   this->Publish();
 
   if (!this->dataPtr->enabled)
+  {
+    this->dataPtr->lastUpdateTime = this->dataPtr->world->GetSimTime();
     return;
+  }
 
   if (this->dataPtr->objects.empty())
   {
     if (this->dataPtr->loopForever)
+    {
       this->Restart();
+    }
     else
+    {
+      this->dataPtr->lastUpdateTime = this->dataPtr->world->GetSimTime();
       return;
+    }
   }
 
   // Check whether spawn a new object from the list.
