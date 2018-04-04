@@ -4,7 +4,7 @@
       <!-- Fixed frame that can be used to refer to the belt's global pose -->
       <model name="conveyor_belt_fixed">
         <static>true</static>
-        <pose>1.16 4.2 0.35 0 0 -1.57079</pose>
+        <pose>1.15 4.2 0.35 0 0 -1.57079</pose>
         <link name="link">
           <pose>0 0 0 0 0 0</pose>
         </link>
