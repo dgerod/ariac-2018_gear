@@ -159,7 +159,7 @@ expand_snippet('laser_profiler.sdf.template')
     <!-- start with an extra box in the middle of the belt -->
 @{shipping_box_name = 'shipping_box_' + str(shipping_boxes_on_belt)}@
     <model name="@(shipping_box_name)">
-      <pose>@(1.16 + conveyor_offset[0]) 0.9 @(0.45 + conveyor_offset[2]) 0 0 0</pose>
+      <pose>@(1.15 + conveyor_offset[0]) 0.9 @(0.45 + conveyor_offset[2]) 0 0 0</pose>
 @{
 expand_snippet('shipping_box.sdf.template')
 }@
@@ -170,7 +170,7 @@ expand_snippet('shipping_box.sdf.template')
     <!-- start with a box on the belt -->
 @{shipping_box_name = 'shipping_box_' + str(shipping_boxes_on_belt)}@
     <model name="@(shipping_box_name)">
-      <pose>@(1.16 + conveyor_offset[0]) 4.0 @(0.9 + conveyor_offset[2]) 0 0 0</pose>
+      <pose>@(1.15 + conveyor_offset[0]) 4.0 @(0.9 + conveyor_offset[2]) 0 0 0</pose>
 @{
 expand_snippet('shipping_box.sdf.template')
 }@
