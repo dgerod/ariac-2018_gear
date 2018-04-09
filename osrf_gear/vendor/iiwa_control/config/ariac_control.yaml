@@ -22,16 +22,16 @@
       - iiwa_joint_6
       - iiwa_joint_7
     constraints:
-      goal_time: 0.6
-      stopped_velocity_tolerance: 0.05
-      linear_arm_actuator_joint: {trajectory: 0.1, goal: 0.1}
-      iiwa_joint_1: {trajectory: 0.1, goal: 0.1}
-      iiwa_joint_3: {trajectory: 0.1, goal: 0.1}
-      iiwa_joint_4: {trajectory: 0.1, goal: 0.1}
-      iiwa_joint_4: {trajectory: 0.1, goal: 0.1}
-      iiwa_joint_5: {trajectory: 0.1, goal: 0.1}
-      iiwa_joint_6: {trajectory: 0.1, goal: 0.1}
-      iiwa_joint_7: {trajectory: 0.1, goal: 0.1}
+      goal_time: 1.0
+      stopped_velocity_tolerance: 0.7
+      linear_arm_actuator_joint: {trajectory: 0.3, goal: 0.15}
+      iiwa_joint_1: {trajectory: 0.30, goal: 0.15}
+      iiwa_joint_2: {trajectory: 0.30, goal: 0.15}
+      iiwa_joint_3: {trajectory: 0.30, goal: 0.15}
+      iiwa_joint_4: {trajectory: 0.30, goal: 0.15}
+      iiwa_joint_5: {trajectory: 0.30, goal: 0.15}
+      iiwa_joint_6: {trajectory: 0.30, goal: 0.15}
+      iiwa_joint_7: {trajectory: 0.30, goal: 0.15}
       
     gains:
       linear_arm_actuator_joint: {p: 10000, d: 500, i: 0, i_clamp: 1}
